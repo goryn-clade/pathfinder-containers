@@ -1,0 +1,2 @@
+* * * * * cd /var/www/html/pathfinder;sudo -u nobody php index.php /cron >> /var/log/cron.log 2>&1
+

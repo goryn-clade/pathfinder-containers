@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    container_name: caddy
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - caddy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # this volume is needed to keep the certificates
+      # otherwise, new ones will be re-issued upon restart
+      - caddy_data:/data
+    labels:
+     caddy.email: carl.egal@gmail.com
+  pfdb:
+    image: bianjp/mariadb-alpine:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
+    container_name: "$CONTAINER_NAME-db"
+    networks:
+      pf:
+        aliases:
+          - "${CONTAINER_NAME}db"
+    volumes:
+     - db_data:/var/lib/mysql
+     - $path/pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+    restart: always
+  pf-redis:
+    image: redis:latest
+    container_name: "$CONTAINER_NAME-redis"
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    volumes:
+      - redis_data:/data
+    networks:
+      pf:
+        aliases:
+          - "$CONTAINER_NAME-redis"
+    logging:
+      driver: none
+    restart: always
+  pf-socket:
+    image: composer:latest
+    container_name: "$CONTAINER_NAME-socket"
+    command: ["sh","-c","composer install && php cmd.php --tcpHost 0.0.0.0"]
+    hostname: socket
+    volumes:
+      - ${path}/websocket:/app
+    networks:
+      pf:
+         aliases:
+           - "$CONTAINER_NAME-socket"
+    restart: always
+  pf:
+    container_name: ${CONTAINER_NAME}
+    hostname: "pathfinder"
+    build: '.'
+    env_file:
+    - .env
+    labels:
+      caddy: test.goryn.wtf
+      caddy.reverse_proxy: "{{upstreams 80}}"
+    networks:
+      - pf
+      - caddy
+#    ports:
+#      - 80:80
+#      - 8030:8030
+    healthcheck:
+      disable: true
+    volumes:
+      - ${path}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
+      - ${path}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
+      - ${path}/config/pathfinder/plugins.ini:/var/www/html/pathfinder/app/plugins.ini
+    depends_on:
+      - pfdb   
+      - pf-redis
+      - pf-socket
+    restart: always
+
+volumes:
+     data:
+     db_data:
+     redis_data:
+     caddy_data: {}
+networks:
+    pf:
+    caddy:
+
