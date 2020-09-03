@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+crontab /var/crontab.txt
 envsubst '$DOMAIN' </etc/nginx/sites_enabled/templateSite.conf >/etc/nginx/sites_enabled/site.conf
 envsubst '$CONTAINER_NAME' </etc/nginx/templateNginx.conf >/etc/nginx/nginx.conf
 envsubst  </var/www/html/pathfinder/app/templateEnvironment.ini >/var/www/html/pathfinder/app/environment.ini
