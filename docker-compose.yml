@@ -1,21 +1,6 @@
 version: "3.8"
 
 services:
-  caddy:
-    image: lucaslorentz/caddy-docker-proxy:ci-alpine
-    container_name: caddy
-    ports:
-      - 80:80
-      - 443:443
-    networks:
-      - caddy
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      # this volume is needed to keep the certificates
-      # otherwise, new ones will be re-issued upon restart
-      - caddy_data:/data
-    labels:
-     caddy.email: carl.egal@gmail.com
   pfdb:
     image: bianjp/mariadb-alpine:latest
     environment:
@@ -62,7 +47,7 @@ services:
     env_file:
     - .env
     labels:
-      caddy: test.goryn.wtf
+      caddy: map.goryn.wtf
       caddy.reverse_proxy: "{{upstreams 80}}"
     networks:
       - pf
@@ -83,10 +68,8 @@ services:
     restart: always
 
 volumes:
-     data:
      db_data:
      redis_data:
-     caddy_data: {}
 networks:
     pf:
     caddy:
