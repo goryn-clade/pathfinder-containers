@@ -56,7 +56,7 @@ services:
     volumes:
       - ${path}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
       - ${path}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
-      - ${path}/config/pathfinder/plugins.ini:/var/www/html/pathfinder/app/plugins.ini
+      - ${path}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
     depends_on:
       - pfdb   
       - pf-redis
