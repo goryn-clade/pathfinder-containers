@@ -46,17 +46,21 @@ services:
     build: '.'
     env_file:
     - .env
+    labels:
+      caddy: map.goryn.wtf
+      caddy.reverse_proxy: "{{upstreams 80}}"
     networks:
       - pf
-      - web
-    ports:
-      - 80:80
+      - caddy
+#    ports:
+#      - 80:80
+#      - 8030:8030
     healthcheck:
       disable: true
     volumes:
       - ${path}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
       - ${path}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
-      - ${path}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ${path}/config/pathfinder/plugins.ini:/var/www/html/pathfinder/app/plugins.ini
     depends_on:
       - pfdb   
       - pf-redis
@@ -64,10 +68,8 @@ services:
     restart: always
 
 volumes:
-     data:
      db_data:
      redis_data:
 networks:
     pf:
-    web:
-       external: true
+    caddy:
