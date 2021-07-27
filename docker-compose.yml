@@ -46,15 +46,15 @@ services:
     build: '.'
     env_file:
     - .env
-    labels:
-      caddy: map.goryn.wtf
-      caddy.reverse_proxy: "{{upstreams 80}}"
+    # labels:
+    #   caddy: map.goryn.wtf
+    #   caddy.reverse_proxy: "{{upstreams 80}}"
     networks:
       - pf
-      - caddy
-#    ports:
-#      - 80:80
-#      - 8030:8030
+      # - caddy
+    ports:
+     - 80:80
+     - 8030:8030
     healthcheck:
       disable: true
     volumes:
@@ -72,4 +72,3 @@ volumes:
      redis_data:
 networks:
     pf:
-    caddy:

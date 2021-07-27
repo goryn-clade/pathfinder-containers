@@ -8,6 +8,7 @@ RUN apk update \
 
 COPY pathfinder /app
 WORKDIR /app
+
 RUN composer install
 
 #FROM trafex/alpine-nginx-php7:latest
@@ -23,6 +24,12 @@ COPY static/nginx/site.conf  /etc/nginx/sites_enabled/templateSite.conf
 # Configure PHP-FPM
 COPY static/php/fpm-pool.conf /etc/php7/php-fpm.d/zzz_custom.conf
 #COPY static/php/php.ini /etc/php7/conf.d/zzz_custom.ini
+
+# DEBUG
+RUN apk add php7-xdebug --repository http://dl-3.alpinelinux.org/alpine/edge/testing/
+COPY static/php/xdebug.ini /etc/php7/conf.d/xdebug.ini
+COPY static/php/error_reporting.ini /etc/php7/conf.d/error_reporting.ini
+RUN echo "zend_extension=/usr/lib/php7/modules/xdebug.so" >> /etc/php7/php.ini
 
 COPY static/php/php.ini /etc/zzz_custom.ini
 # configure cron
