@@ -29,7 +29,7 @@ services:
       driver: none
     restart: always
   pf-socket:
-    image: composer:latest
+    image: composer:composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675
     container_name: "$CONTAINER_NAME-socket"
     command: ["sh","-c","composer install && php cmd.php --tcpHost 0.0.0.0"]
     hostname: socket
