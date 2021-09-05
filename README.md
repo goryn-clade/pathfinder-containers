@@ -69,12 +69,13 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     
 1. **Build & Run it**
     ```shell
-    docker network create web && docker-compose up -- build
+    docker network create web && docker-compose up --build
     ```
 
 1. **Open the http://< your-domain >/setup page.**
-   * Your username is pf and password is the password you set in APP_PASSWORD.
-   * Click on create database for eve_universe and pathfinder. And click on setup tables && fix column/keys.
+   * Your username is `pf` and password is the password you set in `APP_PASSWORD` in the *.env* file.
+   * Find the database section of the setup page, for both "pf" and "eve_universe" databases click the **"create database"** button. 
+   * Once the page has reloaded, click the **"setup tables"**, and then **"fix columns/keys"**.
 </br></br>
 
 1. **Go back to your console and insert the eve universe dump with this command:**
@@ -82,7 +83,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     docker-compose exec pfdb /bin/sh -c "unzip -p eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe";
 
 1. **When everthing works, configure Traefik correctly for production**
-    * Remove the beta CA server lines (#87 - #90) from `docker-compose.yml`. 
+    * Remove the beta CA server lines [(#87 - #90)](https://github.com/goryn-clade/pathfinder-containers/blob/master/docker-compose.yml#L87-L90) from `docker-compose.yml`. 
     * Delete the `letsencrypt/acme.json` configuration file so Let's Encrypt will get a new certificate.</br></br>
 
 
