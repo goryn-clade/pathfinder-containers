@@ -42,7 +42,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 
 1. **Edit the *.env* file and make sure every config option has an entry.**
     ```shell
-    PATH=""               # The path of the cloned repo 
+    path=""               # The path of the cloned repo 
     CONTAINER_NAME="pf"   # docker container name prefix
     DOMAIN=""             # The domain you will be using
     APP_PASSWORD=""       # Password for /setup
