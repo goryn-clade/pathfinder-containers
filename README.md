@@ -37,7 +37,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
   
 1. **Clone the repo**
     ```shell
-    git clone --recurse-submodules  git@github.com:goryn-clade/pathfinder-containers.git
+    git clone --recurse-submodules  https://github.com/goryn-clade/pathfinder-containers.git
     ```
 
 1. **Create a *.env* file (copy .env.example) and make sure every config option has an entry.**
