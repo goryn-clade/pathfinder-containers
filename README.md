@@ -40,7 +40,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     git clone --recurse-submodules  git@github.com:goryn-clade/pathfinder-containers.git
     ```
 
-1. **Edit the *.env* file and make sure every config option has an entry.**
+1. **Create a *.env* file (copy .env.example) and make sure every config option has an entry.**
     ```shell
     path=""               # The path of the cloned repo 
     CONTAINER_NAME="pf"   # docker container name prefix
@@ -55,7 +55,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 
     Recommended options to change:
     * `[PATHFINDER]`
-        * `NAME`- the name tab title when viewing your Pathfinder
+        * `NAME`- the tab title when viewing your Pathfinder
     * `[PATHFINDER.LOGIN]`
         * `COOKIE_EXPIRE` - expire age (in days) for login cookies. [read more](https://github.com/exodus4d/pathfinder/issues/138#issuecomment-216036606)
         * `SESSION_SHARING` - Share maps between logged in characters in the same browser session. [read more](https://github.com/goryn-clade/pathfinder/releases/tag/v2.1.1)
@@ -69,7 +69,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     
 1. **Build & Run it**
     ```shell
-    docker network create web && docker-compose up --build
+    docker network create web && docker-compose up -d --build
     ```
 
 1. **Open the http://< your-domain >/setup page.**
