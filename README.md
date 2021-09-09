@@ -85,7 +85,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 1. **When everthing works, configure Traefik correctly for production**
     * Remove the beta CA server lines [(#87 - #90)](https://github.com/goryn-clade/pathfinder-containers/blob/master/docker-compose.yml#L87-L90) from `docker-compose.yml`. 
     * Delete the `./letsencrypt/acme.json` configuration file so Let's Encrypt will get a new certificate.</br></br>
-    * If you are not connectin as root user to your host you may need to edit file permissions. Docker-engine creates the `letsencrypt` director as root user, which means that you would need to prefix `sudo` on any future docker commands (`sudo docker-compose up` etc). To avoid doing this you can take ownership of the letsencrypt directory by running `sudo chown -R $USER ./letsencrypt`.
+    * If you are not the root user on your host you may need to edit file permissions. Docker-engine creates the `letsencrypt` director as root user, which means that you would need to prefix `sudo` on any future docker commands (`sudo docker-compose up` etc). To avoid doing this you can take ownership of the letsencrypt directory by running `sudo chown -R $USER ./letsencrypt`.
 
 
 > Hint: If you need to make changes, perform your edits first, then do `docker-compose down` to bring down the project, and then `docker-compose up --build -d` to rebuild the containers and run them again.
