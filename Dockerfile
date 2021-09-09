@@ -34,7 +34,6 @@ COPY  --chown=nobody --from=build /app  pathfinder
 RUN chmod 0766 pathfinder/logs pathfinder/tmp/ && rm index.php && touch /etc/nginx/.setup_pass &&  chmod +x /entrypoint.sh 
 COPY static/pathfinder/routes.ini /var/www/html/pathfinder/app/
 COPY static/pathfinder/environment.ini /var/www/html/pathfinder/app/templateEnvironment.ini
-COPY static/pathfinder/Sso.php /var/www/html/pathfinder/vendor/exodus4d/pathfinder_esi/app/Client/Ccp/Sso/Sso.php
 
 WORKDIR /var/www/html
 EXPOSE 80

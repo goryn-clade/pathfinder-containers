@@ -70,7 +70,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 1. **Build & Run it**
     ```shell
     docker network create web && docker-compose up --build
-    ```
+    ```    
 
 1. **Open the http://< your-domain >/setup page.**
    * Your username is `pf` and password is the password you set in `APP_PASSWORD` in the *.env* file.
@@ -84,10 +84,11 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 
 1. **When everthing works, configure Traefik correctly for production**
     * Remove the beta CA server lines [(#87 - #90)](https://github.com/goryn-clade/pathfinder-containers/blob/master/docker-compose.yml#L87-L90) from `docker-compose.yml`. 
-    * Delete the `letsencrypt/acme.json` configuration file so Let's Encrypt will get a new certificate.</br></br>
+    * Delete the `./letsencrypt/acme.json` configuration file so Let's Encrypt will get a new certificate.</br></br>
+    * If you are not connectin as root user to your host you may need to edit file permissions. Docker-engine creates the `letsencrypt` director as root user, which means that you would need to prefix `sudo` on any future docker commands (`sudo docker-compose up` etc). To avoid doing this you can take ownership of the letsencrypt directory by running `sudo chown -R $USER ./letsencrypt`.
 
 
-    > Hint: If you need to make changes, perform your edits first, then do `docker-compose down` to bring down the project, and then `docker-compose up --build -d` to rebuild the containers and run them again.
+> Hint: If you need to make changes, perform your edits first, then do `docker-compose down` to bring down the project, and then `docker-compose up --build -d` to rebuild the containers and run them again.
 
 </br>
 
@@ -131,6 +132,7 @@ It's best to create a new SSO application for development work, so that you can 
 *  [exodus4d](https://github.com/exodus4d/) for pathfinder
 * [techfreak](https://gitlab.com/techfreak/pathfinder-container) for the original Pathfinder-container project
 * [johnschultz](https://gitlab.com/johnschultz/pathfinder-container/) for improvements to the traefik config
+* [tyrheimdaleve](https://github.com/TyrHeimdalEVE/pathfinder_esi) for maintaining the pathfinder_esi dependency
 
 ## Authors
 * techfreak
