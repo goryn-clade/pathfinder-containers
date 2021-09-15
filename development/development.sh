@@ -9,6 +9,8 @@ mv ./static/pathfinder/environment.ini ./static/pathfinder/environment.productio
 cp ./development/docker-compose.development.yml ./docker-compose.yml
 cp ./development/Dockerfile.development ./Dockerfile
 cp ./development/environment.development.ini ./static/pathfinder/environment.ini
+cp ./development/php.development.ini ./static/php/php.ini
+cp ./development/xdebug.ini ./static/php/xdebug.ini
 
 # set up launch file for vscode
 mkdir -p .vscode && cp ./development/launch.json ./.vscode/launch.json
