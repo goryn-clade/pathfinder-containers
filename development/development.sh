@@ -4,6 +4,7 @@
 mv ./docker-compose.yml ./docker-compose.production.yml
 mv ./Dockerfile ./Dockerfile.production
 mv ./static/pathfinder/environment.ini ./static/pathfinder/environment.production.ini
+mv ./static/php/php.ini ./static/php/php.production.ini
 
 # copy development versions 
 cp ./development/docker-compose.development.yml ./docker-compose.yml
