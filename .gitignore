@@ -1,3 +1,5 @@
 .env
 .vscode
 letsencrypt
+*.production*
+static/php/xdebug.ini
