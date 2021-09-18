@@ -9,7 +9,7 @@ RUN apk update \
 COPY pathfinder /app
 WORKDIR /app
 
-RUN composer self-update 1.6.3
+RUN composer self-update 2.1.8
 RUN composer install
 
 FROM trafex/alpine-nginx-php7:ba1dd422
