@@ -12,7 +12,7 @@ services:
           - "${CONTAINER_NAME}db"
     volumes:
      - db_data:/var/lib/mysql
-     - $path/pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+     - $PROJECT_ROOT/pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
     restart: always
   pf-redis:
     image: redis:6.2.5-alpine3.14
@@ -34,7 +34,7 @@ services:
     command: ["sh","-c","composer install && php cmd.php --tcpHost 0.0.0.0"]
     hostname: socket
     volumes:
-      - ${path}/websocket:/app
+      - ${PROJECT_ROOT}/websocket:/app
     networks:
       pf:
          aliases:
@@ -64,9 +64,9 @@ services:
     healthcheck:
       disable: true
     volumes:
-      - ${path}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
-      - ${path}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
-      - ${path}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ${PROJECT_ROOT}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
+      - ${PROJECT_ROOT}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
+      - ${PROJECT_ROOT}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
     depends_on:
       - pfdb
       - pf-redis
@@ -84,17 +84,17 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
       # Remove below line when ready for production
       - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.letsencrypt.acme.email=MYEMAIL@someemailprobablygmail.com"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${path}/letsencrypt:/letsencrypt"
+      - "${PROJECT_ROOT}/letsencrypt:/letsencrypt"
     networks:
       - web
     restart: always
