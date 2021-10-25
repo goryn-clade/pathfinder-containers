@@ -16,7 +16,9 @@ FROM trafex/alpine-nginx-php7:ba1dd422
 RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-fileinfo shadow gettext bash apache2-utils
 
 COPY static/nginx/nginx.conf /etc/nginx/templateNginx.conf
-COPY static/nginx/site.conf  /etc/nginx/sites_enabled/templateSite.conf
+# we need to create sites_enabled directory in order for entrypoint.sh being able to copy file after envsubst
+RUN mkdir -p /etc/nginx/sites_enabled/
+COPY static/nginx/site.conf  /etc/nginx/templateSite.conf
 
 # Configure PHP-FPM
 COPY static/php/fpm-pool.conf /etc/php7/php-fpm.d/zzz_custom.conf
