@@ -1,4 +1,4 @@
-FROM php:7.2.5-fpm-alpine3.7 as build
+FROM php:7.2.11-fpm-alpine3.7 as build
 
 RUN apk update \
     && apk add --no-cache libpng-dev  zeromq-dev git \
@@ -23,12 +23,6 @@ COPY static/nginx/site.conf  /etc/nginx/templateSite.conf
 # Configure PHP-FPM
 COPY static/php/fpm-pool.conf /etc/php7/php-fpm.d/zzz_custom.conf
 
-# DEBUG
-RUN apk add php7-xdebug --repository http://dl-3.alpinelinux.org/alpine/edge/testing/
-COPY static/php/xdebug.ini /etc/php7/conf.d/xdebug.ini
-COPY static/php/error_reporting.ini /etc/php7/conf.d/error_reporting.ini
-RUN echo "zend_extension=/usr/lib/php7/modules/xdebug.so" >> /etc/php7/php.ini
-
 COPY static/php/php.ini /etc/zzz_custom.ini
 # configure cron
 COPY static/crontab.txt /var/crontab.txt
@@ -38,7 +32,6 @@ COPY static/entrypoint.sh   /
 
 WORKDIR /var/www/html
 COPY  --chown=nobody --from=build /app  pathfinder
-
 
 RUN chmod 0766 pathfinder/logs pathfinder/tmp/ && rm index.php && touch /etc/nginx/.setup_pass &&  chmod +x /entrypoint.sh 
 COPY static/pathfinder/routes.ini /var/www/html/pathfinder/app/
