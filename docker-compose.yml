@@ -1,22 +1,23 @@
 version: "3.8"
 
 services:
-  pfdb:
+  pf-db:
     image: bianjp/mariadb-alpine:latest
     environment:
-      MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
-    container_name: "$CONTAINER_NAME-db"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD}"
+    container_name: "${CONTAINER_NAME}-db"
     networks:
       pf:
         aliases:
-          - "${CONTAINER_NAME}db"
+          - "${CONTAINER_NAME}-db"
     volumes:
      - db_data:/var/lib/mysql
-     - $PROJECT_ROOT/pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+     - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
     restart: always
+
   pf-redis:
     image: redis:6.2.5-alpine3.14
-    container_name: "$CONTAINER_NAME-redis"
+    container_name: "{$CONTAINER_NAME}-redis"
     command: ["redis-server", "--appendonly", "yes"]
     hostname: redis
     volumes:
@@ -24,24 +25,26 @@ services:
     networks:
       pf:
         aliases:
-          - "$CONTAINER_NAME-redis"
+          - "${CONTAINER_NAME}-redis"
     logging:
       driver: none
     restart: always
+
   pf-socket:
     image: composer:composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675
-    container_name: "$CONTAINER_NAME-socket"
+    container_name: "${CONTAINER_NAME}-socket"
     command: ["sh","-c","composer install && php cmd.php --tcpHost 0.0.0.0"]
     hostname: socket
     volumes:
-      - ${PROJECT_ROOT}/websocket:/app
+      - ./websocket:/app
     networks:
       pf:
          aliases:
-           - "$CONTAINER_NAME-socket"
+           - "${CONTAINER_NAME}-socket"
     restart: always
+
   pf:
-    container_name: ${CONTAINER_NAME}
+    container_name: "${CONTAINER_NAME}"
     hostname: "pathfinder"
     build: '.'
     env_file:
@@ -55,7 +58,7 @@ services:
       - "traefik.http.routers.pf-secure.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.pf-secure.entrypoints=websecure"
       - "traefik.http.routers.pf-secure.tls=true"
-      - "traefik.http.routers.pf-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.pf-secure.tls.certresolver=lets-encrypt"
       - "traefik.http.middlewares.redirecthttps.redirectscheme.scheme=https"
       - "traefik.http.routers.pf.middlewares=redirecthttps"
     networks:
@@ -64,14 +67,15 @@ services:
     healthcheck:
       disable: true
     volumes:
-      - ${PROJECT_ROOT}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
-      - ${PROJECT_ROOT}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
-      - ${PROJECT_ROOT}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ./config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
+      - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
+      - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
     depends_on:
-      - pfdb
+      - pf-db
       - pf-redis
       - pf-socket
     restart: always
+
   traefik:
     image: "traefik:v2.3"
     container_name: "traefik"
@@ -93,8 +97,8 @@ services:
       - "443:443"
       - "8080:8080"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${PROJECT_ROOT}/letsencrypt:/letsencrypt"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
     networks:
       - web
     restart: always
@@ -105,5 +109,6 @@ volumes:
      redis_data:
 networks:
     pf:
+      external: false
     web:
-       external: true
+      external: true
