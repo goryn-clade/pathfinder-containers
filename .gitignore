@@ -3,4 +3,3 @@
 letsencrypt
 *.production*
 static/php/xdebug.ini
-logs/*
