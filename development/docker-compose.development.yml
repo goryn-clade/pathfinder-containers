@@ -35,6 +35,8 @@ services:
     hostname: socket
     volumes:
       - ${PROJECT_ROOT}/websocket:/app
+      - ${PROJECT_ROOT}/logs:/var/www/html/pathfinder/history/map
+      - ${PROJECT_ROOT}/static/socket/logrotate:/etc/logrotate.d/pathfinder
     networks:
       pf:
          aliases:
