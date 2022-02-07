@@ -4,5 +4,4 @@
 	rotate 14
 	compress
 	notifempty
-	endscript
 }
