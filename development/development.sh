@@ -17,5 +17,6 @@ cp ./development/xdebug.ini ./static/php/xdebug.ini
 mkdir -p .vscode && cp ./development/launch.json ./.vscode/launch.json
 
 # seed .env file with dev presets
-echo "path=\"$(pwd)\"" > ./.env
+echo "PROJECT_ROOT=\"$(pwd)\"" > ./.env
 cat ./development/.env.development >> ./.env
+echo "Remember to set your CCP SSO Client and Secret keys"
