@@ -1,0 +1,7 @@
+/var/www/html/pathfinder/history/map/*.log {
+	daily
+	missingok
+	rotate 14
+	compress
+	notifempty
+}
