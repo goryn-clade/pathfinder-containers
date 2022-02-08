@@ -55,8 +55,8 @@ services:
       - "traefik.http.routers.pf.entrypoints=web"
       - "traefik.http.routers.pf-secure.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.pf-secure.entrypoints=websecure"
+      - "traefik.http.routers.pf-secure.tls=true"
       - "traefik.http.routers.pf-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.pf-secure.tls=true"      
       - "traefik.http.middlewares.redirecthttps.redirectscheme.scheme=https"
       - "traefik.http.routers.pf.middlewares=redirecthttps"
     networks:
