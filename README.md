@@ -124,7 +124,7 @@ Development configs and docker files can be quickly restored using:
 chmod +x ./development/development.sh && ./development/development.sh
 ```
 
-This creates a partial `.env` file, but you will need to add your CCP SSO client and keys manually.
+This creates a partial `.env` file, but you will need to add your CCP SSO client and keys manually, if you want to copy development files without overwriting your .env file add the flag `--noenv` when running the script.
 
 It's best to create a new SSO application for development work, so that you can set the callback url to `https://localhost/sso/callbackAuthorization`.
 
