@@ -1,4 +1,4 @@
-FROM php:7.2.5-fpm-alpine3.7 as build
+FROM php:7.2.11-fpm-alpine3.7 as build
 
 RUN apk update \
     && apk add --no-cache libpng-dev  zeromq-dev git \
@@ -40,7 +40,6 @@ COPY static/entrypoint.sh   /
 
 WORKDIR /var/www/html
 COPY  --chown=nobody --from=build /app  pathfinder
-
 
 RUN chmod 0766 pathfinder/logs pathfinder/tmp/ && rm index.php && touch /etc/nginx/.setup_pass &&  chmod +x /entrypoint.sh 
 COPY static/pathfinder/routes.ini /var/www/html/pathfinder/app/
