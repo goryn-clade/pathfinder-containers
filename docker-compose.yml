@@ -72,7 +72,7 @@ services:
       - pf-redis
       - pf-socket
     ports:
-      - "57080:80"
+      - "57080:443"
     restart: always
   traefik:
     image: "traefik:v2.3"
