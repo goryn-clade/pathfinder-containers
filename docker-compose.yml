@@ -89,9 +89,9 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.letsencrypt.acme.email=MYEMAIL@someemailprobablygmail.com"
     ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
+      - "57080:80"
+      - "57443:443"
+      - "57808:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "${PROJECT_ROOT}/letsencrypt:/letsencrypt"
