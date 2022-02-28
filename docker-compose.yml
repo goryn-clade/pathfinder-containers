@@ -46,21 +46,8 @@ services:
     build: '.'
     env_file:
     - .env
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=web"
-      - "traefik.http.services.pf.loadbalancer.server.port=80"
-      - "traefik.http.routers.pf.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.pf.entrypoints=web"
-      - "traefik.http.routers.pf-secure.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.pf-secure.entrypoints=websecure"
-      - "traefik.http.routers.pf-secure.tls=true"
-      - "traefik.http.routers.pf-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.redirecthttps.redirectscheme.scheme=https"
-      - "traefik.http.routers.pf.middlewares=redirecthttps"
     networks:
       - pf
-      - web
     healthcheck:
       disable: true
     volumes:
@@ -72,40 +59,11 @@ services:
       - pf-redis
       - pf-socket
     ports:
-      - "57080:80"
+      - "${CONTAINER_PORT_PF}:80"
     restart: always
-  traefik:
-    image: "traefik:v2.3"
-    container_name: "traefik"
-    command:
-      - "--log.level=ERROR"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      # Remove below line when ready for production
-      - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.letsencrypt.acme.email=MYEMAIL@someemailprobablygmail.com"
-    ports:
-      - "56080:80"
-      - "56443:443"
-      - "56808:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${PROJECT_ROOT}/letsencrypt:/letsencrypt"
-    networks:
-      - web
-    restart: always
-
 volumes:
      data:
      db_data:
      redis_data:
 networks:
     pf:
-    web:
-       external: true

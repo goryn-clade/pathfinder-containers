@@ -1,6 +1,6 @@
 [submodule "pathfinder"]
 	path = pathfinder
-	url = https://github.com/goryn-clade/pathfinder
+	url = https://github.com/jrothfuchs/pathfinder
 [submodule "websocket"]
 	path = websocket
 	url = https://github.com/goryn-clade/pathfinder_websocket
