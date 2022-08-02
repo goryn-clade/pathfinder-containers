@@ -5,18 +5,16 @@ services:
     image: bianjp/mariadb-alpine:latest
     environment:
       MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
-    container_name: "$CONTAINER_NAME-db"
     networks:
       pf:
         aliases:
-          - "${CONTAINER_NAME}db"
+          - "$MYSQL_HOST"
     volumes:
      - db_data:/var/lib/mysql
      - $PROJECT_ROOT/pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
     restart: always
   pf-redis:
     image: redis:6.2.5-alpine3.14
-    container_name: "$CONTAINER_NAME-redis"
     command: ["redis-server", "--appendonly", "yes"]
     hostname: redis
     volumes:
@@ -24,26 +22,26 @@ services:
     networks:
       pf:
         aliases:
-          - "$CONTAINER_NAME-redis"
+          - "$REDIS_HOST"
     logging:
       driver: none
     restart: always
   pf-socket:
-    image: composer:composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675
-    container_name: "$CONTAINER_NAME-socket"
-    command: ["sh","-c","composer install && php cmd.php --tcpHost 0.0.0.0"]
+    build:
+      context: '.'
+      dockerfile: '$PROJECT_ROOT/pf-websocket.Dockerfile'
+    command: ["--tcpHost", "0.0.0.0"]
     hostname: socket
-    volumes:
-      - ${PROJECT_ROOT}/websocket:/app
     networks:
       pf:
          aliases:
-           - "$CONTAINER_NAME-socket"
+           - "$PATHFINDER_SOCKET_HOST"
     restart: always
   pf:
-    container_name: ${CONTAINER_NAME}
     hostname: "pathfinder"
-    build: '.'
+    build:
+      context: '.'
+      dockerfile: '$PROJECT_ROOT//pathfinder.Dockerfile'
     env_file:
     - .env
     labels:
