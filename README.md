@@ -148,3 +148,8 @@ It's best to create a new SSO application for development work, so that you can 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
+
+
+### Infrastructure model
+
+![Infrastructure model](.infragenie/infrastructure_model.png)
