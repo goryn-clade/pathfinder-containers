@@ -46,15 +46,31 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 
 1. **Create a *.env* file (copy .env.example) and make sure every config option has an entry.**
     ```shell
-    PROJECT_ROOT=""       # The path of the cloned repo 
+    PROJECT_ROOT=""       # The path of the cloned repo
     CONTAINER_NAME="pf"   # docker container name prefix
     DOMAIN=""             # The domain you will be using
     APP_PASSWORD=""       # Password for /setup
-    MYSQL_PASSWORD=""     # Mysql Password
+    MYSQL_HOST="mariadb"  # mysql host
+    MYSQL_PORT="3306"     # default mysql port
+    MYSQL_USER="root"     # mysql root user
+    MYSQL_PASSWORD=""     # mysql Password
     CCP_SSO_CLIENT_ID=""  # Use the SSO tokens created in step 1
-    CCP_SSO_SECRET_KEY="" 
+    CCP_SSO_SECRET_KEY=""
     CCP_ESI_SCOPES="esi-location.read_online.v1,esi-location.read_location.v1,esi-location.read_ship_type.v1,esi-ui.write_waypoint.v1,esi-ui.open_window.v1,esi-universe.read_structures.v1,esi-corporations.read_corporation_membership.v1,esi-clones.read_clones.v1,esi-characters.read_corporation_roles.v1"
-
+    MYSQL_PF_DB_NAME="pathfinder" # mysql pathfinder table name
+    MYSQL_UNIVERSE_DB_NAME="eve_universe"
+    MYSQL_CCP_DB_NAME="eve_lifeblood_min"
+    REDIS_HOST="redis"    # redis host
+    REDIS_PORT="6379"     # default redis port
+    PATHFINDER_SOCKET_HOST="pathfinder-socket" # domain of the websocket container, relative to the main pf container
+    PATHFINDER_SOCKET_PORT="5555"              # default tcp socket port
+    SMTP_HOST=""
+    SMTP_PORT=""
+    SMTP_SCHEME=""
+    SMTP_USER=""
+    SMTP_PASS=""
+    SMTP_FROM=""
+    SMTP_ERROR=""
 > The `PROJECT_ROOT` key is the *absolute* path to the project directory, ie if you have clone it to /app/pathfinder-containers, this is the value you should enter. If you're unsure of the absolute path, you can use the command `pwd` to get the full absolute path of the current directory.
 
 1. **Edit the *config/pathfinder/pathfinder.ini*** to your liking
