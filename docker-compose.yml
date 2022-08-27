@@ -35,6 +35,7 @@ services:
     hostname: socket
     volumes:
       - ${PROJECT_ROOT}/websocket:/app
+      - ${PROJECT_ROOT}/logs:/var/www/html/pathfinder/history/map
     networks:
       pf:
          aliases:
@@ -67,6 +68,7 @@ services:
       - ${PROJECT_ROOT}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
       - ${PROJECT_ROOT}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
       - ${PROJECT_ROOT}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ${PROJECT_ROOT}/logs:/var/www/html/pathfinder/history/map
     depends_on:
       - pfdb
       - pf-redis

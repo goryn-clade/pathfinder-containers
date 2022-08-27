@@ -13,11 +13,14 @@ RUN composer self-update 2.1.8
 RUN composer install
 
 FROM trafex/alpine-nginx-php7:ba1dd422
-RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-fileinfo shadow gettext bash apache2-utils
+
+RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-fileinfo shadow gettext bash apache2-utils logrotate
+
 # symlink nginx logs to stdout/stderr for supervisord
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
  && ln -sf /dev/stderr /var/log/nginx/error.log
 
+COPY static/logrotate/pathfinder /etc/logrotate.d/pathfinder
 COPY static/nginx/nginx.conf /etc/nginx/templateNginx.conf
 # we need to create sites_enabled directory in order for entrypoint.sh being able to copy file after envsubst
 RUN mkdir -p /etc/nginx/sites_enabled/
