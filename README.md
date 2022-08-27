@@ -36,6 +36,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
       * `esi-corporations.read_corporation_membership.v1`
       * `esi-clones.read_clones.v1`
       * `esi-characters.read_corporation_roles.v1`
+      * `esi-search.search_structures.v1`
     * Set your "CALLBACK URL" to `https://[YOUR_DOMAIN]/sso/callbackAuthorization`</br></br>
   
   
