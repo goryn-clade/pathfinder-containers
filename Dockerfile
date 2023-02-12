@@ -14,7 +14,7 @@ RUN composer install
 
 FROM trafex/alpine-nginx-php7:ba1dd422
 
-RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-fileinfo shadow gettext bash apache2-utils logrotate
+RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-fileinfo php7-event shadow gettext bash apache2-utils logrotate
 
 # symlink nginx logs to stdout/stderr for supervisord
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
