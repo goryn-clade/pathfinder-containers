@@ -15,7 +15,7 @@ RUN composer self-update 2.1.8
 RUN composer install
 
 FROM trafex/alpine-nginx-php7:ba1dd422
-RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-fileinfo shadow gettext bash apache2-utils
+RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-fileinfo php7-event shadow gettext bash apache2-utils
 
 COPY static/nginx/nginx.conf /etc/nginx/templateNginx.conf
 # we need to create sites_enabled directory in order for entrypoint.sh being able to copy file after envsubst
