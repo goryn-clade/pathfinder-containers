@@ -7,7 +7,7 @@ mv ./static/php/php.ini ./static/php/php.production.ini
 
 # copy development versions 
 cp ./development/docker-compose.development.yml ./docker-compose.yml
-cp ./development/pathfinder.Dockerfile.development ./Dockerfile
+cp ./development/pathfinder.Dockerfile.development ./pathfiner.Dockerfile
 cp ./development/environment.development.ini ./static/pathfinder/environment.ini
 cp ./development/php.development.ini ./static/php/php.ini
 cp ./development/xdebug.ini ./static/php/xdebug.ini
