@@ -95,3 +95,4 @@ volumes:
 networks:
     pf:
     web:
+      external: true
