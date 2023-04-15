@@ -11,7 +11,7 @@ services:
           - "$MYSQL_HOST"
     volumes:
      - db_data:/var/lib/mysql
-     - $PROJECT_ROOT/pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+     - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
     restart: always
   pf-redis:
     image: redis:6.2.5-alpine3.14
@@ -27,9 +27,7 @@ services:
       driver: none
     restart: always
   pf-socket:
-    build:
-      context: '.'
-      dockerfile: '$PROJECT_ROOT/pf-websocket.Dockerfile'
+    image: ghcr.io/goryn-clade/pf-websocket:latest
     command: ["--tcpHost", "0.0.0.0"]
     hostname: socket
     networks:
@@ -39,9 +37,7 @@ services:
     restart: always
   pf:
     hostname: "pathfinder"
-    build:
-      context: '.'
-      dockerfile: '$PROJECT_ROOT//pathfinder.Dockerfile'
+    image: ghcr.io/goryn-clade/pathfinder:latest
     env_file:
     - .env
     labels:
@@ -62,10 +58,10 @@ services:
     healthcheck:
       disable: true
     volumes:
-      - ${PROJECT_ROOT}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
-      - ${PROJECT_ROOT}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
-      - ${PROJECT_ROOT}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
-      - ${PROJECT_ROOT}/logs:/var/www/html/pathfinder/history/map
+      - ./config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
+      - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
+      - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ./logs:/var/www/html/pathfinder/history/map
     depends_on:
       - pfdb
       - pf-redis
@@ -93,7 +89,7 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${PROJECT_ROOT}/letsencrypt:/letsencrypt"
+      - "./letsencrypt:/letsencrypt"
     networks:
       - web
     restart: always
@@ -105,4 +101,3 @@ volumes:
 networks:
     pf:
     web:
-       external: true

@@ -5,18 +5,16 @@ services:
     image: bianjp/mariadb-alpine:latest
     environment:
       MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
-    container_name: "$CONTAINER_NAME-db"
     networks:
       pf:
         aliases:
-          - "${CONTAINER_NAME}db"
+          - "$MYSQL_HOST"
     volumes:
      - db_data:/var/lib/mysql
      - $PROJECT_ROOT/pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
     restart: always
   pf-redis:
     image: redis:6.2.5-alpine3.14
-    container_name: "$CONTAINER_NAME-redis"
     command: ["redis-server", "--appendonly", "yes"]
     hostname: redis
     volumes:
@@ -24,25 +22,20 @@ services:
     networks:
       pf:
         aliases:
-          - "$CONTAINER_NAME-redis"
+          - "$REDIS_HOST"
     logging:
       driver: none
     restart: always
   pf-socket:
-    image: composer:composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675
-    container_name: "$CONTAINER_NAME-socket"
-    command: ["sh","-c","composer install && php cmd.php --tcpHost 0.0.0.0"]
+    image: ghcr.io/goryn-clade/pf-websocket:latest
+    command: ["--tcpHost", "0.0.0.0"]
     hostname: socket
-    volumes:
-      - ${PROJECT_ROOT}/websocket:/app
-      - ${PROJECT_ROOT}/logs:/var/www/html/pathfinder/history/map
     networks:
       pf:
          aliases:
-           - "$CONTAINER_NAME-socket"
+          - "$PATHFINDER_SOCKET_HOST"
     restart: always
   pf:
-    container_name: ${CONTAINER_NAME}
     hostname: "pathfinder"
     build: '.'
     env_file:
@@ -64,10 +57,10 @@ services:
     healthcheck:
       disable: true
     volumes:
-      - ${PROJECT_ROOT}/config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
-      - ${PROJECT_ROOT}/config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
-      - ${PROJECT_ROOT}/config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
-      - ${PROJECT_ROOT}/logs:/var/www/html/pathfinder/history/map
+      - ./config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
+      - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
+      - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ./logs:/var/www/html/pathfinder/history/map
     depends_on:
       - pfdb
       - pf-redis
@@ -100,4 +93,3 @@ volumes:
 networks:
     pf:
     web:
-       external: true
