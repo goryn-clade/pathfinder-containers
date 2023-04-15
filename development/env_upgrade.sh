@@ -15,6 +15,7 @@ fi
 
 
 # insert new lines
+echo "" >> .env
 echo "LE_EMAIL=\"\"" >> .env
 echo "MYSQL_HOST=\"mariadb\"" >> .env
 echo "MYSQL_PORT=\"3306\"" >> .env
