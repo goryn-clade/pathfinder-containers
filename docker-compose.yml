@@ -10,8 +10,10 @@ services:
         aliases:
           - "$MYSQL_HOST"
     volumes:
-     - db_data:/var/lib/mysql
-     - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+      - db_data:/var/lib/mysql
+      - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     restart: always
   pf-redis:
     image: redis:6.2.5-alpine3.14
@@ -19,6 +21,8 @@ services:
     container_name: redis
     volumes:
       - redis_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     networks:
       pf:
         aliases:
@@ -34,6 +38,9 @@ services:
       pf:
          aliases:
            - "$PATHFINDER_SOCKET_HOST"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     restart: always
   pf:
     container_name: pathfinder
@@ -62,6 +69,8 @@ services:
       - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
       - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
       - ./logs:/var/www/html/pathfinder/history/map
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - pfdb
       - pf-redis
@@ -88,8 +97,10 @@ services:
       - "443:443"
       - "8080:8080"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - web
     restart: always
