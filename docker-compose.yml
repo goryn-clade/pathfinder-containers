@@ -16,7 +16,7 @@ services:
   pf-redis:
     image: redis:6.2.5-alpine3.14
     command: ["redis-server", "--appendonly", "yes"]
-    hostname: redis
+    container_name: redis
     volumes:
       - redis_data:/data
     networks:
@@ -29,14 +29,14 @@ services:
   pf-socket:
     image: ghcr.io/goryn-clade/pf-websocket:latest
     command: ["--tcpHost", "0.0.0.0"]
-    hostname: socket
+    container_name: socket
     networks:
       pf:
          aliases:
            - "$PATHFINDER_SOCKET_HOST"
     restart: always
   pf:
-    hostname: pathfinder
+    container_name: pathfinder
     image: ghcr.io/goryn-clade/pathfinder:latest
     env_file:
       - .env
