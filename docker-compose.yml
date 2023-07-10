@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 services:
   pfdb:
@@ -36,10 +36,10 @@ services:
            - "$PATHFINDER_SOCKET_HOST"
     restart: always
   pf:
-    hostname: "pathfinder"
+    hostname: pathfinder
     image: ghcr.io/goryn-clade/pathfinder:latest
     env_file:
-    - .env
+      - .env
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
@@ -68,8 +68,8 @@ services:
       - pf-socket
     restart: always
   traefik:
-    image: "traefik:v2.3"
-    container_name: "traefik"
+    image: traefik:v2.3
+    container_name: traefik
     command:
       - "--log.level=ERROR"
       - "--api.insecure=true"
@@ -95,7 +95,6 @@ services:
     restart: always
 
 volumes:
-     data:
      db_data:
      redis_data:
 networks:
