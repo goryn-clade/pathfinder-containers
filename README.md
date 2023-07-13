@@ -92,7 +92,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     
 1. **Build & Run it**
     ```shell
-    docker network create web && docker-compose up -d --build
+    docker network create web && docker-compose up -d
     ```
 
 1. **Open the http://< your-domain >/setup page.**
