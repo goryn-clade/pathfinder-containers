@@ -30,6 +30,9 @@ services:
     image: ghcr.io/goryn-clade/pf-websocket:latest
     command: ["--tcpHost", "0.0.0.0"]
     hostname: socket
+    volumes:
+      #- ./websocket:/app 
+      - ./logs:/var/www/html/pathfinder/history/map
     networks:
       pf:
          aliases:
