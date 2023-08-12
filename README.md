@@ -106,7 +106,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     docker-compose exec pfdb /bin/sh -c "unzip -p eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe";
 
 1. **When everthing works, configure Traefik correctly for production**
-    * Remove the staging CA server line [(#89)](https://github.com/goryn-clade/pathfinder-containers/blob/master/docker-compose.yml#L89) from `docker-compose.yml`. 
+    * Remove the staging CA server line [(#84)](https://github.com/goryn-clade/pathfinder-containers/blob/master/docker-compose.yml#L84) from `docker-compose.yml`. 
     * Delete the `./letsencrypt/acme.json` configuration file so Let's Encrypt will get a new certificate.</br></br>
     * If you are not the root user on your host you may need to edit file permissions. Docker-engine creates the `letsencrypt` director as root user, which means that you would need to prefix `sudo` on any future docker commands (`sudo docker-compose up` etc). To avoid doing this you can take ownership of the letsencrypt directory by running `sudo chown -R $USER ./letsencrypt`.
 
