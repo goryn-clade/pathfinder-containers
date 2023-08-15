@@ -14,11 +14,16 @@ WORKDIR /app
 RUN composer self-update 2.5.8
 RUN composer install
 
-FROM alpine:3.15
-USER root
-RUN apk update && apk add --no-cache php7 php7-fpm php7-opcache php7-mysqli php7-json php7-openssl php7-curl \
-    php7-zlib php7-xml php7-phar php7-intl php7-dom php7-xmlreader php7-ctype php7-session \
-    php7-mbstring php7-gd nginx supervisor curl busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql \
+FROM alpine:3.12
+
+# Add application
+RUN mkdir -p /var/www/html
+
+HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1/fpm-ping
+
+RUN apk update && apk add --no-cache php7 php7-fpm php7-mysqli php7-json php7-openssl php7-curl \
+    php7-zlib php7-xml php7-phar php7-intl php7-dom php7-xmlreader php7-ctype \
+    php7-mbstring php7-gd nginx supervisor curl busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql php7-openssl \
     php7-fileinfo php7-event shadow gettext bash apache2-utils logrotate ca-certificates
 
 # fix expired DST Cert
@@ -44,7 +49,7 @@ COPY static/crontab.txt /var/crontab.txt
 # Configure supervisord
 COPY static/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY static/entrypoint.sh   /
-RUN mkdir -p /var/www/html
+
 WORKDIR /var/www/html
 COPY  --chown=nobody --from=build /app  pathfinder
 
