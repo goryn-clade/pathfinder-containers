@@ -37,7 +37,7 @@ services:
     restart: always
   pf:
     hostname: "pathfinder"
-    image: ghcr.io/westtom/pathfinder:latest
+    image: westtom/pathfinder:latest
     env_file:
     - .env
     labels:
