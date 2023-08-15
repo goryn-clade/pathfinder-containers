@@ -14,7 +14,7 @@ services:
      - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
     restart: always
   pf-redis:
-    image: redis:6.2.5-alpine3.14
+    image: redis:6.2.13-alpine3.18
     command: ["redis-server", "--appendonly", "yes"]
     hostname: redis
     volumes:
@@ -37,7 +37,7 @@ services:
     restart: always
   pf:
     hostname: "pathfinder"
-    image: ghcr.io/goryn-clade/pathfinder:latest
+    image: ghcr.io/westtom/pathfinder:latest
     env_file:
     - .env
     labels:
@@ -68,7 +68,7 @@ services:
       - pf-socket
     restart: always
   traefik:
-    image: "traefik:v2.3"
+    image: "traefik:v2.10.4"
     container_name: "traefik"
     command:
       - "--log.level=ERROR"

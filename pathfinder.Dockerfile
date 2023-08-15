@@ -1,5 +1,5 @@
-FROM php:7.2.11-fpm-alpine3.7 as build
-
+FROM php:7.2.33-fpm-alpine as build
+USER root
 RUN apk update \
     && apk add --no-cache libpng-dev  zeromq-dev git \
     $PHPIZE_DEPS \
@@ -11,12 +11,14 @@ RUN apk update \
 COPY pathfinder /app
 WORKDIR /app
 
-RUN composer self-update 2.1.8
+RUN composer self-update 2.5.8
 RUN composer install
 
-FROM trafex/alpine-nginx-php7:ba1dd422
-
-RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql \
+FROM alpine:3.15
+USER root
+RUN apk update && apk add --no-cache php7 php7-fpm php7-opcache php7-mysqli php7-json php7-openssl php7-curl \
+    php7-zlib php7-xml php7-phar php7-intl php7-dom php7-xmlreader php7-ctype php7-session \
+    php7-mbstring php7-gd nginx supervisor curl busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql \
     php7-fileinfo php7-event shadow gettext bash apache2-utils logrotate ca-certificates
 
 # fix expired DST Cert
@@ -42,11 +44,11 @@ COPY static/crontab.txt /var/crontab.txt
 # Configure supervisord
 COPY static/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY static/entrypoint.sh   /
-
+RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
 COPY  --chown=nobody --from=build /app  pathfinder
 
-RUN chmod 0766 pathfinder/logs pathfinder/tmp/ && rm index.php && touch /etc/nginx/.setup_pass &&  chmod +x /entrypoint.sh
+RUN chmod 0766 pathfinder/logs pathfinder/tmp/  && touch /etc/nginx/.setup_pass &&  chmod +x /entrypoint.sh
 COPY static/pathfinder/routes.ini /var/www/html/pathfinder/app/
 COPY static/pathfinder/environment.ini /var/www/html/pathfinder/app/templateEnvironment.ini
 
