@@ -2,7 +2,8 @@ version: "3.8"
 
 services:
   pfdb:
-    image: bianjp/mariadb-alpine:latest
+    image: westtom/mariadb-alpine:latest
+    container_name: mariadb
     environment:
       MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
     networks:
