@@ -40,7 +40,7 @@ services:
     restart: always
   pf:
     container_name: "pathfinder"
-    image: westtom/pathfinder:latest
+    image: ghcr.io/goryn-clade/pathfinder:latest
     env_file:
     - .env
     labels:
