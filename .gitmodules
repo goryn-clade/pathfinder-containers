@@ -3,4 +3,4 @@
 	url = https://github.com/tomaswest/pathfinder
 [submodule "websocket"]
 	path = websocket
-	url = https://github.com/goryn-clade/pathfinder_websocket
+	url = https://github.com/tomaswest/pathfinder_websocket
