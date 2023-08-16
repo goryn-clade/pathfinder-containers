@@ -2,10 +2,12 @@ version: "3.8"
 
 services:
   pfdb:
-    image: westtom/mariadb-alpine:latest
+    image: mariadb:latest
     container_name: mariadb
     environment:
-      MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
+      MARIADB_ROOT_PASSWORD: $MYSQL_PASSWORD
+      MARIADB_AUTO_UPGRADE: "1"
+      MARIADB_INITDB_SKIP_TZINFO: "1"
     networks:
       pf:
         aliases:
