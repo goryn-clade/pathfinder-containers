@@ -39,8 +39,10 @@ services:
          aliases:
            - "$PATHFINDER_SOCKET_HOST"
     volumes:
+      - ./logs:/var/www/html/pathfinder/history/map
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+
     restart: always
   pf:
     container_name: pathfinder
