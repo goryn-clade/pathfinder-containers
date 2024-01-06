@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 services:
   pfdb:
@@ -10,15 +10,19 @@ services:
         aliases:
           - "$MYSQL_HOST"
     volumes:
-     - db_data:/var/lib/mysql
-     - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+      - db_data:/var/lib/mysql
+      - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     restart: always
   pf-redis:
     image: redis:6.2.5-alpine3.14
     command: ["redis-server", "--appendonly", "yes"]
-    hostname: redis
+    container_name: redis
     volumes:
       - redis_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     networks:
       pf:
         aliases:
@@ -29,17 +33,20 @@ services:
   pf-socket:
     image: ghcr.io/goryn-clade/pf-websocket:latest
     command: ["--tcpHost", "0.0.0.0"]
-    hostname: socket
+    container_name: socket
     networks:
       pf:
          aliases:
            - "$PATHFINDER_SOCKET_HOST"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     restart: always
   pf:
-    hostname: "pathfinder"
+    container_name: pathfinder
     image: ghcr.io/goryn-clade/pathfinder:latest
     env_file:
-    - .env
+      - .env
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
@@ -62,14 +69,16 @@ services:
       - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
       - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
       - ./logs:/var/www/html/pathfinder/history/map
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - pfdb
       - pf-redis
       - pf-socket
     restart: always
   traefik:
-    image: "traefik:v2.3"
-    container_name: "traefik"
+    image: traefik:v2.3
+    container_name: traefik
     command:
       - "--log.level=ERROR"
       - "--api.insecure=true"
@@ -88,14 +97,15 @@ services:
       - "443:443"
       - "8080:8080"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - web
     restart: always
 
 volumes:
-     data:
      db_data:
      redis_data:
 networks:
