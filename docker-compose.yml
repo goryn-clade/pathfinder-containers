@@ -37,16 +37,17 @@ services:
     networks:
       pf:
          aliases:
-           - "$PATHFINDER_SOCKET_HOST"
+          - "$PATHFINDER_SOCKET_HOST"
     volumes:
       - ./logs:/var/www/html/pathfinder/history/map
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-
     restart: always
   pf:
     container_name: pathfinder
-    image: ghcr.io/goryn-clade/pathfinder:latest
+    build:
+      context: '.'
+      dockerfile: pathfinder.Dockerfile
     env_file:
       - .env
     labels:
@@ -58,7 +59,6 @@ services:
       - "traefik.http.routers.pf-secure.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.pf-secure.entrypoints=websecure"
       - "traefik.http.routers.pf-secure.tls=true"
-      - "traefik.http.routers.pf-secure.tls.certresolver=letsencrypt"
       - "traefik.http.middlewares.redirecthttps.redirectscheme.scheme=https"
       - "traefik.http.routers.pf.middlewares=redirecthttps"
     networks:
@@ -88,19 +88,12 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      # Remove below line when ready for production
-      - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # Remove this line only
-      - "--certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}"
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
