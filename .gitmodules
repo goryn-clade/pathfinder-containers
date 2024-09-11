@@ -4,3 +4,6 @@
 [submodule "websocket"]
 	path = websocket
 	url = https://github.com/goryn-clade/pathfinder_websocket
+[submodule "docker"
+	path = "docker"
+	url = "https://github.com/docker/docker-install"
