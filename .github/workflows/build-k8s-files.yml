@@ -1,6 +1,9 @@
 
 name: Build Kubernetes Files
 on:
+    push:
+        branches:
+        - master
     pull_request:
         branches:
         - master
@@ -22,14 +25,14 @@ jobs:
             chmod 644 /etc/apt/sources.list.d/kubernetes.list 
             apt-get update
             apt-get install -y kubectl
-            kubectl --version
+            kubectl version
         - name: Get Kompose
           run: |
             curl -L https://github.com/kubernetes/kompose/releases/download/v1.34.0/kompose-linux-amd64 -o kompose
             chmod +x kompose
             mv ./kompose /usr/local/bin/kompose
             chmod +x /usr/local/bin/kompose
-            kompose -v
+            kompose version
         - name: Convert Docker Compose
           run: |
             echo "Make sure conversion "
