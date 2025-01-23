@@ -1,0 +1,43 @@
+
+name: Build Kubernetes Files
+on:
+    pull_request:
+        branches:
+        - master
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+        - uses: actions/checkout@v4
+        - name: Setup K8s
+          run: |
+            apt-get update
+            apt-get install -y apt-transport-https ca-certificates curl gnupg
+            curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+            chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+            echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
+            chmod 644 /etc/apt/sources.list.d/kubernetes.list 
+            apt-get update
+            apt-get install -y kubectl
+            kubectl --version
+        - name: Get Kompose
+          run: |
+            curl -L https://github.com/kubernetes/kompose/releases/download/v1.34.0/kompose-linux-amd64 -o kompose
+            chmod +x kompose
+            mv ./kompose /usr/local/bin/kompose
+            chmod +x /usr/local/bin/kompose
+            kompose -v
+        - name: Convert Docker Compose
+          run: |
+            echo "Make sure conversion "
+            mkdir -p k8s-deployment
+            kompose -f docker-compose.yml convert -o k8s-deployment
+        - name: Persist Changes in the repo
+          run: |
+            git config --global user.name 'fallenreaper'
+            git config --global user.email 'fallenreaper@users.noreply.github.com'
+            git commit -am "Automated K8S Files"
+            git push
