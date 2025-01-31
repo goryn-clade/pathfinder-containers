@@ -28,7 +28,9 @@ services:
         aliases:
           - "$REDIS_HOST"
     logging:
-      driver: none
+      driver: json-file
+      options: "5m"
+      max-file: "3"
     restart: always
   pf-socket:
     image: ghcr.io/goryn-clade/pf-websocket:latest
