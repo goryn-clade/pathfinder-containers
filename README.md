@@ -72,6 +72,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     SMTP_PASS=""
     SMTP_FROM=""
     SMTP_ERROR=""
+    LE_EMAIL="your-email@example.com" #Add your email address for notifications if the SSL cert renewal fails.
 > The `PROJECT_ROOT` key is the *absolute* path to the project directory, ie if you have clone it to /app/pathfinder-containers, this is the value you should enter. If you're unsure of the absolute path, you can use the command `pwd` to get the full absolute path of the current directory.
 
 1. **Edit the *config/pathfinder/pathfinder.ini*** to your liking
