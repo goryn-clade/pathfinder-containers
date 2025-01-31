@@ -13,7 +13,6 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 
 **Prerequisites**:
 * [docker](https://docs.docker.com/)
-* [docker-compose](https://docs.docker.com/)
 
 > **Note**: The Docker-compose file uses Compose v3.8, so requires Docker Engine 19.03.0+
 
@@ -93,7 +92,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
     
 1. **Build & Run it**
     ```shell
-    docker network create web && docker-compose up -d
+    docker network create web && docker compose up -d
     ```
 
 1. **Open the http://< your-domain >/setup page.**
@@ -104,15 +103,15 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 
 1. **Go back to your console and insert the eve universe dump with this command:**
     ```shell
-    docker-compose exec pfdb /bin/sh -c "unzip -p eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe";
+    docker compose exec pfdb /bin/sh -c "unzip -p eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe";
 
 1. **When everything works, configure Traefik correctly for production**
     * Remove the staging CA server line  from `docker-compose.yml`from the `command` block of the traefik service definition. 
     * Delete the `./letsencrypt/acme.json` configuration file so Let's Encrypt will get a new certificate.</br></br>
-    * If you are not the root user on your host you may need to edit file permissions. Docker-engine creates the `letsencrypt` director as root user, which means that you would need to prefix `sudo` on any future docker commands (`sudo docker-compose up` etc). To avoid doing this you can take ownership of the letsencrypt directory by running `sudo chown -R $USER ./letsencrypt`.
+    * If you are not the root user on your host you may need to edit file permissions. Docker-engine creates the `letsencrypt` director as root user, which means that you would need to prefix `sudo` on any future docker commands (`sudo docker compose up` etc). To avoid doing this you can take ownership of the letsencrypt directory by running `sudo chown -R $USER ./letsencrypt`.
 
 
-> Hint: If you need to make changes, perform your edits first, then do `docker-compose down` to bring down the project, and then `docker-compose up --build -d` to rebuild the containers and run them again.
+> Hint: If you need to make changes, perform your edits first, then do `docker compose down` to bring down the project, and then `docker compose up --build -d` to rebuild the containers and run them again.
 
 </br>
 
