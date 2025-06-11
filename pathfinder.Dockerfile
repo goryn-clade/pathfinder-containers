@@ -4,7 +4,7 @@ RUN apk update \
     && apk add --no-cache libpng-dev  zeromq-dev git \
     $PHPIZE_DEPS \
     && docker-php-ext-install gd && docker-php-ext-install pdo_mysql && \
-    pecl install redis && docker-php-ext-enable redis && \
+    pecl install redis-5.3.1 && docker-php-ext-enable redis && \
     pecl install channel://pecl.php.net/zmq-1.1.3 && docker-php-ext-enable zmq && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -21,7 +21,7 @@ RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-
 
 # fix expired DST Cert
 RUN sed -i '/^mozilla\/DST_Root_CA_X3.crt$/ s/^/!/' /etc/ca-certificates.conf \
-    && update-ca-certificates 
+    && update-ca-certificates
 
 # symlink nginx logs to stdout/stderr for supervisord
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
