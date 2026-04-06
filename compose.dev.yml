@@ -1,6 +1,6 @@
 services:
   pf-db:
-    image: bianjp/mariadb-alpine:latest
+    image: mariadb:10.11
     environment:
       MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
     volumes:
