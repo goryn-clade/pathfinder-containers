@@ -11,8 +11,8 @@ services:
     restart: always
 
   pf-redis:
-    image: redis:7-alpine
-    command: ["redis-server", "--appendonly", "yes"]
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
       - /etc/timezone:/etc/timezone:ro
