@@ -60,7 +60,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     depends_on:
-      - pfdb
+      - pf-db
       - pf-redis
       - pf-socket
     restart: always
