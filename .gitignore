@@ -4,3 +4,4 @@ letsencrypt
 *.production*
 static/php/xdebug.ini
 Dockerfile
+PLAN.md
