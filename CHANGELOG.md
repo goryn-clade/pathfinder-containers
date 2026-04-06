@@ -2,6 +2,92 @@
 
 ## Unreleased
 
+---
+
+### Phase 2 — PHP 8 Upgrade
+
+#### pathfinder-containers
+
+**Dockerfile (`pathfinder.Dockerfile`)**
+- Build stage: `php:7.2.34-fpm-alpine3.12` → `php:8.2-fpm-alpine`
+- Runtime stage: `trafex/alpine-nginx-php7` → `trafex/php-nginx:3.6.0` (PHP 8.3, pinned)
+- Removed ZMQ extension (`zeromq-dev`, `pecl install zmq`) — not used anywhere in the codebase
+- Removed `redis-5.3.7` version pin — unpinned `pecl install redis` works on PHP 8.2
+- All PHP package references updated `php7-*` → `php83-*`
+- Removed expired DST Root CA X3 workaround (no longer needed)
+- Fixed `as` → `AS` in `FROM ... AS build` (Dockerfile best practice)
+- Merged consecutive `RUN` layers in the runtime stage into one
+
+**Static config**
+- `static/supervisord.conf`: `php-fpm7 -F` → `php-fpm83 -F`
+- `static/entrypoint.sh`: `/etc/php7/conf.d/` → `/etc/php83/conf.d/`
+- `static/php/fpm-pool.conf`: Added `listen = 127.0.0.1:9000` — `trafex/php-nginx` defaults to a Unix socket but nginx expects TCP 9000
+
+**Infrastructure**
+- `compose.yml`, `compose.dev.yml`: Replaced abandoned `bianjp/mariadb-alpine:latest` (last updated 2019, exits immediately) with `mariadb:10.11` (official, LTS until 2028)
+- `compose.yml`, `compose.dev.yml`: Replaced `redis:7-alpine` with `valkey/valkey:8-alpine` — Valkey is the Linux Foundation fork of Redis maintained after Redis 7.4's license change to RSALv2/SSPL; wire-compatible drop-in replacement; `redis-server` → `valkey-server`
+- Added `compose.dev.yml`: standalone development compose file — no Traefik, `pf` exposed directly on port 80, uses local `build:` instead of registry image
+- `compose.yml`: Fixed `depends_on` typo (`pfdb` → `pf-db`)
+- `.env.example`: Updated `PATHFINDER_SOCKET_HOST` from `pathfinder-socket` → `pf-socket` to match service name
+- `static/pathfinder/environment.ini`, `.env.example`: Removed SMTP configuration vars (email logging deprecated — see pathfinder changes below)
+
+---
+
+#### pathfinder (submodule) — v3-phase-2
+
+**Dependencies (`composer.json`)**
+- PHP constraint: `>=7.2` → `>=8.2`
+- `bcosca/fatfree-core`: `3.7.*` → `3.8.*` — 3.7.x uses `$GLOBALS += [...]` which is fatal in PHP 8.2; 3.8.x fixes this
+- `goryn-clade/pathfinder_esi`: `2.1.4` → `3.0.1`
+- `cache/void-adapter`: `1.0.*` → `^1.1` — 1.0.x requires PHP ^5.6||^7.0
+- `firebase/php-jwt`: kept at `^6`; added `config.audit.ignore` for advisory PKSA-y2cr-5h3j-g3ys (all v6.x affected, no v7 available)
+- Removed `swiftmailer/swiftmailer` (abandoned; see email logging removal below)
+
+**Email logging removed**
+- `app/Lib/Logging/AbstractLog.php`: Removed `getHandlerParamsMail()` method and `case 'mail'` from `getHandlerParams()`
+- `app/Lib/Monolog.php`: Removed `'mail'` entries from `FORMATTER` and `HANDLER` constants (`SwiftMailerHandler`, `MailFormatter`)
+
+**PHP 8.2 compatibility — controllers**
+- `app/Controller/AppController.php`: Initialize `tplCharacterId = null` in `beforeroute()` — only set by `MapController` when authenticated; undefined variable is fatal warning in PHP 8 when F3's error handler is active
+- `app/Controller/AppController.php`: Initialize `SESSION.SSO.ERROR = null` in `beforeroute()` if not already set — accessing a null array offset (`$SESSION['SSO']['ERROR']`) is a warning in PHP 8
+- `app/Controller/Controller.php`: In the error handler path (4xx/5xx), set safe defaults for `tplBodyClass`, `tplJsView`, `tplCharacterId` if not already defined — error paths skip `AppController::beforeroute()`
+
+**PHP 8.2 compatibility — templates**
+- `public/templates/view/login.html`: Added `<set registrationStatusButton="" />` and `<set registrationStatusTitle="" />` defaults before the conditional block — previously only set when registration was disabled, leaving variables undefined when enabled
+- `public/templates/modules/lazy_image.html`: Added defaults for `size` (`@size ?? 160`), `srcWebp` (`""`), `src` (`@src ?? ""`), `alt` (`@alt ?? ""`) — these are only set inside conditional blocks; accessing undefined template variables compiles to undefined PHP variables which warn in PHP 8
+
+---
+
+#### pathfinder_esi — v3.0.0 → v3.0.1
+
+**Dependencies (`composer.json`)**
+- PHP constraint: `>=7.1` → `>=8.2`
+- `guzzlehttp/guzzle`: `^6.0` → `^7.0`
+- `caseyamcl/guzzle_retry_middleware`: `^2.3` → `^2.9`
+- `cache/void-adapter`: `1.0.*` → `^1.1`
+
+**Guzzle 6 → 7 migration**
+- `app/Lib/Middleware/GuzzleCacheMiddleware.php`:
+  - `\GuzzleHttp\Psr7\parse_header()` → `\GuzzleHttp\Psr7\Header::parse()`
+  - `\GuzzleHttp\Psr7\stream_for()` → `\GuzzleHttp\Psr7\Utils::streamFor()`
+  - `\GuzzleHttp\Promise\inspect_all()` → `\GuzzleHttp\Promise\Utils::inspectAll()`
+- `app/Lib/Middleware/Cache/CacheEntry.php`:
+  - `\GuzzleHttp\Psr7\parse_header()` → `\GuzzleHttp\Psr7\Header::parse()` (2 occurrences)
+  - `\GuzzleHttp\Psr7\stream_for()` → `\GuzzleHttp\Psr7\Utils::streamFor()`
+- `app/Lib/Middleware/Cache/Strategy/PrivateCacheStrategy.php`:
+  - `\GuzzleHttp\Psr7\parse_header()` → `\GuzzleHttp\Psr7\Header::parse()` (4 occurrences)
+- `app/Lib/Stream/JsonStream.php`:
+  - `\GuzzleHttp\json_decode()` → `\GuzzleHttp\Utils::jsonDecode()`
+- `app/Lib/WebClient.php`:
+  - `\GuzzleHttp\Psr7\stream_for(\GuzzleHttp\json_encode(...))` → `\GuzzleHttp\Psr7\Utils::streamFor(\GuzzleHttp\Utils::jsonEncode(...))`
+
+**`caseyamcl/guzzle_retry_middleware` v2.13 breaking change**
+- `app/Lib/Middleware/GuzzleRetryMiddleware.php`: `__construct()` was made `final` in v2.13; refactored to override `factory()` static method instead, injecting `on_retry_callback` at factory time; `retryCallback()` and `getLogMessage()` converted to static methods (`makeRetryCallback()`, `buildLogMessage()`)
+
+---
+
+### Phase 1 — v3.0.0
+
 ### Infrastructure
 - Added `docker-compose.override.yml` for local development: disables Traefik (assigned to `disabled` profile), exposes port 80 directly on localhost, builds `pf` from local Dockerfile instead of pulling image
 - Fixed `docker-compose.yml`: `pf-redis` logging options was a string instead of a mapping; corrected to `max-size: "5m"` / `max-file: "3"`
