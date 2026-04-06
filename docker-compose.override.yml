@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  pf-redis:
+    logging:
+      driver: none
+
+  pf:
+    image: ""
+    build:
+      context: '.'
+      dockerfile: pathfinder.Dockerfile
+    labels: []
+    ports:
+      - "80:80"
+    networks:
+      - pf
+
+  traefik:
+    profiles:
+      - disabled
