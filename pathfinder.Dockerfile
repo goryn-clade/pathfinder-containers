@@ -4,15 +4,16 @@ RUN apk update \
     && apk add --no-cache libpng-dev  zeromq-dev git \
     $PHPIZE_DEPS \
     && docker-php-ext-install gd && docker-php-ext-install pdo_mysql && \
-    pecl install redis && docker-php-ext-enable redis && \
-    pecl install channel://pecl.php.net/zmq-1.1.3 && docker-php-ext-enable zmq && \
+    pecl channel-update pecl.php.net && \
+    pecl install redis-5.3.7 && docker-php-ext-enable redis && \
+    pecl install zmq-1.1.3 && docker-php-ext-enable zmq && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 COPY pathfinder /app
 WORKDIR /app
 
 RUN composer self-update 2.1.8
-RUN composer install
+RUN composer update --no-dev --optimize-autoloader
 
 FROM trafex/alpine-nginx-php7:ba1dd422
 
