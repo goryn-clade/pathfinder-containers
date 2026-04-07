@@ -56,6 +56,20 @@
 - `public/templates/view/login.html`: Added `<set registrationStatusButton="" />` and `<set registrationStatusTitle="" />` defaults before the conditional block — previously only set when registration was disabled, leaving variables undefined when enabled
 - `public/templates/modules/lazy_image.html`: Added defaults for `size` (`@size ?? 160`), `srcWebp` (`""`), `src` (`@src ?? ""`), `alt` (`@alt ?? ""`) — these are only set inside conditional blocks; accessing undefined template variables compiles to undefined PHP variables which warn in PHP 8
 
+**PHP 8.2 compatibility — static analysis (PHPStan level 8)**
+- Added comprehensive `@property` PHPDoc declarations to `app/Model/AbstractModel.php` covering 39 common ORM properties (e.g., `$_id`, `$name`, `$typeId`, `$characterId`, `$mapId`, `$systemId`, etc.) — resolves ~576 of 642 "undefined property" PHPStan errors
+- Fixed 147+ malformed `@var` PHPDoc comments across 50 files: corrected format from `@var $var Type` (invalid) to `@var Type $var` (valid)
+- Added 23+ null checks across controllers to guard method calls on nullable model objects returned by factory methods (`getCharacter()`, `getUser()`, `getCorporation()`, `getAlliance()`, `getDB()`, etc.)
+- Fixed 6 "Cannot call method" errors in `AbstractModel.php`: added null checks for `getTableModifier()` calls and DateTime validation
+- Fixed 5 remaining "Cannot call method" errors in Model classes: CharacterModel, CronModel, UserModel, StructureModel with DateTime/model object null checks
+- Changed `AbstractModel::getNew()` return type from `?self` to `self` — method always returns instance or throws exception, never null
+
+**Remaining PHP 8 static analysis issues (PHPStan level 8)**
+- 7 "Cannot call method on nullable" errors remaining (mostly edge cases in Rest/Log.php, Rest/Map.php, User.php where assignments in conditionals still register as nullable)
+- ~1,000 "Class not found" errors for Fat-Free Framework classes (`Base`, `Template`, `Log`, etc.) — would require stubs or F3 type definitions
+- ~300+ "missing return type" errors across Model/Controller methods
+- ~200+ "missing iterable value type" errors (array properties without generic type parameters)
+
 ---
 
 #### pathfinder (submodule) — additional fixes
