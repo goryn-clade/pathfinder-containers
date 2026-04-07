@@ -58,7 +58,14 @@
 
 ---
 
-#### pathfinder_esi — v3.0.0 → v3.0.1
+#### pathfinder (submodule) — additional fixes
+
+**PHP 8 compatibility — DB layer**
+- `app/Lib/Db/Pool.php`: `pushError()` accessed `$this->errors[$alias]` before the key existed — changed to `!isset(...) || !is_array(...)` to avoid PHP 8 undefined array key warning
+
+---
+
+#### pathfinder_esi — v3.0.0 → v3.0.2
 
 **Dependencies (`composer.json`)**
 - PHP constraint: `>=7.1` → `>=8.2`
@@ -83,6 +90,12 @@
 
 **`caseyamcl/guzzle_retry_middleware` v2.13 breaking change**
 - `app/Lib/Middleware/GuzzleRetryMiddleware.php`: `__construct()` was made `final` in v2.13; refactored to override `factory()` static method instead, injecting `on_retry_callback` at factory time; `retryCallback()` and `getLogMessage()` converted to static methods (`makeRetryCallback()`, `buildLogMessage()`)
+
+**PSR-7 v2 return type incompatibility (v3.0.2)**
+- `app/Lib/Stream/JsonStreamInterface.php`, `app/Lib/Stream/JsonStream.php`: `getContents()` returns decoded JSON (`mixed`), but PSR-7 v2 (shipped with Guzzle 7) declares `StreamInterface::getContents(): string` — PHP 8.3 treats this as a fatal incompatibility; added `#[\ReturnTypeWillChange]` to both the interface and implementation
+
+**PHP 8 undefined array key warnings (v3.0.2)**
+- `app/Lib/Middleware/GuzzleLogMiddleware.php`: `mergeOptions()` accessed `$options['log_on_status']` and `$options['log_off_status']` directly — added `?? []` null-coalescing to both
 
 ---
 
