@@ -5,3 +5,10 @@ letsencrypt
 static/php/xdebug.ini
 Dockerfile
 PLAN.md
+composer.json
+composer.lock
+phpstan.neon
+phpstan-report.txt
+rector.php
+rector-report.txt
+vendor/
