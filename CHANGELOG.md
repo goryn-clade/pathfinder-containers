@@ -65,7 +65,7 @@
 
 ---
 
-#### pathfinder_esi — v3.0.0 → v3.0.3
+#### pathfinder_esi — v3.0.0 → v3.0.4
 
 **Dependencies (`composer.json`)**
 - PHP constraint: `>=7.1` → `>=8.2`
@@ -94,6 +94,12 @@
 **PSR-7 v2 return type incompatibility (v3.0.2 → v3.0.3)**
 - `app/Lib/Stream/JsonStream.php`: `getContents()` returns decoded JSON (`mixed`), but PSR-7 v2 (shipped with Guzzle 7) declares `StreamInterface::getContents(): string` — PHP 8.3 treats this as a fatal incompatibility; added `#[\ReturnTypeWillChange]` to the class implementation
 - `app/Lib/Stream/JsonStreamInterface.php`: **removed** the `getContents()` re-declaration entirely (v3.0.3) — `#[\ReturnTypeWillChange]` only suppresses the fatal on concrete class method implementations, not on interface method re-declarations; re-declaring `getContents()` without a return type in a child interface causes a PHP 8.3 fatal compile error regardless of the attribute; leaving the declaration absent lets `JsonStream::getContents()` satisfy PSR-7 v2 via the attribute alone
+
+**PSR-7 v2 `getContents()` fatal — correct fix (v3.0.4)**
+- `app/Lib/Stream/JsonStream.php`: `getContents()` override with `mixed` return is incompatible with `StreamInterface::getContents(): string` in PSR-7 v2; `#[\ReturnTypeWillChange]` only suppresses this for PHP's own built-in interfaces, not userland ones — replaced with two methods: `getContents(): string` (raw, PSR-7 compliant) and `decode(): mixed` (JSON-decoded result)
+- `app/Lib/Stream/JsonStreamInterface.php`: added `decode(): mixed` declaration; removed explanatory comment from v3.0.3 that is now superseded
+- `app/Lib/Middleware/GuzzleLogMiddleware.php`: updated `getErrorMessageFromResponseBody()` to call `->decode()` instead of `->getContents()` on `JsonStream`/`JsonStreamInterface` instances
+- `app/Client/AbstractApi.php`: updated both `send()` and `sendBatch()` body content extraction to call `->decode()` when body `instanceof JsonStreamInterface`, otherwise `->getContents()`
 
 **PHP 8 undefined array key warnings (v3.0.2)**
 - `app/Lib/Middleware/GuzzleLogMiddleware.php`: `mergeOptions()` accessed `$options['log_on_status']` and `$options['log_off_status']` directly — added `?? []` null-coalescing to both
