@@ -63,12 +63,19 @@
 - Fixed 6 "Cannot call method" errors in `AbstractModel.php`: added null checks for `getTableModifier()` calls and DateTime validation
 - Fixed 5 remaining "Cannot call method" errors in Model classes: CharacterModel, CronModel, UserModel, StructureModel with DateTime/model object null checks
 - Changed `AbstractModel::getNew()` return type from `?self` to `self` — method always returns instance or throws exception, never null
+- Added 54+ missing parameter type hints (5.5% of 970 total):
+  - `AbstractModel`: 17 parameters (validateField, validate_notDry, validate_notEmpty, updateCacheData, clearCache, getByForeignKey, relFindOne, relFind, event hooks, getFormattedColumn, exportData, importStaticData, toArray, setCacheValue, indexExists, setMultiColumnIndex)
+  - `MapModel`: 8+ parameters (setData, slack methods, event hooks, setAccess, compareAccess, clearAccess, getAllCharacters, getCharactersData, getAll)
+  - `Route.php`: 10+ parameters (setDynamicJumpData, updateJumpData, filterJumpData, getSystemInfoBySystemId, graph_find_path, searchRoute, searchRouteCustom, searchRouteESI)
+  - `CharacterModel`: 11 parameters (setter methods, event hooks, updateLog, updateLogHistoryEntry, mergeSessionCharacterData, getAll)
+  - `SystemModel`: 8 parameters (setData, set_status, set_position, event hooks, sendRallyPoke)
 
 **Remaining PHP 8 static analysis issues (PHPStan level 8)**
 - 7 "Cannot call method on nullable" errors remaining (mostly edge cases in Rest/Log.php, Rest/Map.php, User.php where assignments in conditionals still register as nullable)
+- ~916 "missing parameter type" errors remaining (mostly in vendor code, other Model/Controller files)
 - ~1,000 "Class not found" errors for Fat-Free Framework classes (`Base`, `Template`, `Log`, etc.) — would require stubs or F3 type definitions
-- ~300+ "missing return type" errors across Model/Controller methods
-- ~200+ "missing iterable value type" errors (array properties without generic type parameters)
+- ~626 "missing return type" errors across Model/Controller methods
+- ~729 "missing iterable value type" errors (array properties/parameters without generic type parameters)
 
 ---
 
