@@ -63,13 +63,14 @@
 - Fixed 6 "Cannot call method" errors in `AbstractModel.php`: added null checks for `getTableModifier()` calls and DateTime validation
 - Fixed 5 remaining "Cannot call method" errors in Model classes: CharacterModel, CronModel, UserModel, StructureModel with DateTime/model object null checks
 - Changed `AbstractModel::getNew()` return type from `?self` to `self` — method always returns instance or throws exception, never null
-- Added 88+ missing parameter type hints (9.1% of 970 total):
+- Added 101+ missing parameter type hints (10.4% of 970 total):
   - Phase 1: `AbstractModel` (17), `MapModel` (8+), `Route.php` (10+), `CharacterModel` (11), `SystemModel` (8), `ConnectionModel` (7), `SystemSignatureModel` (7), `AbstractWebhookHandler` (11), `CorporationModel` (7), `Util.php` (7)
-  - Phase 2: `TypeModel` (5), `AbstractUniverseModel` (6), `PriorityCacheStore` (3), `Controller` (4), `CharacterLogModel` (3), `SystemModel` (Universe, 4), `Config` (3), `Api/Rest/System` (3), `Api/Rest/Map` (3)
+  - Phase 2a: `TypeModel` (5), `AbstractUniverseModel` (6), `PriorityCacheStore` (3), `Controller` (4), `CharacterLogModel` (3), `SystemModel` (Universe, 4), `Config` (3), `Api/Rest/System` (3), `Api/Rest/Map` (3)
+  - Phase 2b: `Api/Rest/Route` (7), `Pathfinder/SystemModel` (2), `ConnectionModel` (3 — setEndpointData generic type added)
 
 **Remaining PHP 8 static analysis issues (PHPStan level 8)**
 - 7 "Cannot call method on nullable" errors remaining (mostly edge cases in Rest/Log.php, Rest/Map.php, User.php where assignments in conditionals still register as nullable)
-- ~882 "missing parameter type" errors remaining (88+ fixed in phase 1-2, mostly in vendor code and additional Model/Controller files)
+- ~869 "missing parameter type" errors remaining (101+ fixed in phase 1-2a-2b, mostly in vendor code and additional Model/Controller files)
 - ~1,000 "Class not found" errors for Fat-Free Framework classes (`Base`, `Template`, `Log`, etc.) — would require stubs or F3 type definitions
 - ~626 "missing return type" errors across Model/Controller methods
 - ~729 "missing iterable value type" errors (array properties/parameters without generic type parameters)
