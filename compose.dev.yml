@@ -26,7 +26,9 @@ services:
     restart: always
 
   pf-socket:
-    image: ghcr.io/goryn-clade/pf-websocket:latest
+    build:
+      context: .
+      dockerfile: pf-websocket.Dockerfile
     command: ["--tcpHost", "0.0.0.0"]
     volumes:
       - ./logs:/var/www/html/pathfinder/history/map
