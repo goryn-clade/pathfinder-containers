@@ -151,6 +151,20 @@ It's best to create a new SSO application for development work, so that you can 
 
 </br>
 
+## Static analysis
+
+Run from `pathfinder-containers/`:
+
+```shell
+vendor/bin/phpcs --standard=.phpcs.xml        # PHPCompatibility (PHP 8.2 target)
+vendor/bin/phpstan analyse --memory-limit=1G  # Level 8 + deprecation rules
+vendor/bin/rector process --dry-run           # PHP 8.2 upgrade sets (preview only)
+```
+
+PHPStan uses a baseline (`phpstan-baseline.neon`) to freeze pre-existing level-8 debt. The baseline should only shrink — never expand it. Fix compat-critical errors first (grep for `ctype_digit`, `deprecated`, `undefined array key`), then tackle level-8 debt opportunistically.
+
+---
+
 ## Acknowledgments
 *  [exodus4d](https://github.com/exodus4d/) for pathfinder
 * [techfreak](https://gitlab.com/techfreak/pathfinder-container) for the original Pathfinder-container project
