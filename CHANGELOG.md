@@ -125,6 +125,53 @@
 
 ---
 
+### Phase 3 — PHP 8.2 Static Analysis
+
+#### pathfinder-containers
+
+**Tooling**
+- Added `squizlabs/php_codesniffer` + `phpcompatibility/php-compatibility` to Composer dev deps — purpose-built cross-version compat checker
+- Added `.phpcs.xml` — PHPCompatibility ruleset targeting PHP 8.2, scanning `pathfinder/app` and `websocket/app`, excluding vendor/tmp; `phpcs` exits 0 (0 errors, 1 benign warning about a PHP 7.4 method signature change in phpcompatibility itself)
+- Updated `rector.php` — activated `withPhpVersion(PHP_82)`, `withPhpSets(php82: true)` across both app paths; previously had all coverage levels at 0 / no target
+- Added `phpstan-baseline.neon` (tracked) — 2481 pre-existing level-8 errors baselined to separate compat hits from debt; started at ~4015 before this phase's fixes
+- Added `phpstan-bootstrap.php` (tracked, not active) — kept for reference; `scanFiles` approach replaced `bootstrapFiles` to avoid F3's AutoloadSourceLocator crash
+- Added `PHP8_STATIC_ANALYSIS.md` — 7-phase execution runbook with STOP checkpoints and exact commands
+- Updated `phpstan.neon` — wired in baseline, switched from `bootstrapFiles` to `scanFiles` for F3/Monolog/Ratchet vendor files (avoids react/promise `case x;` syntax causing F3 to throw a fatal via `set_error_handler`)
+
+**Dockerfile fix**
+- `pathfinder.Dockerfile`: Added post-composer `sed` to initialize `$fieldsCache = []` in f3-cortex's class declaration — `array_key_exists($key, null)` is TypeError in PHP 8 but returned false silently in PHP 7; fixes `/setup` 500 on `CronModel->getData()`
+
+#### pathfinder (submodule)
+
+**Rector PHP 8.2 rewrites (91 files, 406 insertions, 580 deletions)**
+- String class name literals → `::class` constants in all ORM `fieldConf` relation arrays (`belongs-to-one`, `has-many`)
+- Closures → arrow functions throughout Controllers and Lib/
+- Switch → match expressions where branches fall through cleanly
+- Constructor property promotion on value-object / non-ORM classes
+- `$this->client::class` in `AbstractClient::__call()` (new class-on-expression syntax)
+
+**Implicit nullable parameter fixes**
+- `MapModel::save(?CharacterModel $characterModel = null)` — added `?` prefix
+- `AbstractMapTrackingModel::save(?CharacterModel $characterModel = null)` — added `?` prefix
+- `Config::inDownTimeRange(?\DateTime $dateCheck = null)` — added `?` prefix
+- `AbstractLog::addHandler(string, ?string, ?\stdClass)` — added `?` prefix on optional params
+- `LogInterface::addHandler(string, ?string, ?\stdClass)` — matching interface declaration
+
+**PHP 8 compatibility fixes**
+- `Config::parseSocketUrl()`: added `is_string($socketUrl)` guard before `parse_url()` calls
+- `Setup::getSessionConfig()`: added `is_string($sessionSavePath)` guard before `parse_url()` call
+- `Sso::getCcpJwkData()`: added missing `return []` in failure branch (PHPStan dead-code hit)
+- `AbstractWebhookHandler`: removed dead `CURLOPT_SAFE_UPLOAD` block (constant removed in PHP 8.0)
+- `ReverseSplFileObject`: added explicit return types on all 5 `Iterator` methods (`rewind(): void`, `current(): string`, `key(): int`, `next(): void`, `valid(): bool`) — PHP 8.1 `method.tentativeReturnType` rule
+
+#### websocket (submodule)
+
+- `composer.json`: `"php-64bit": ">=7.1"` → `">=8.2"`
+- `Payload::jsonSerialize(): mixed` — added return type for PHP 8.1 `JsonSerializable` covariance
+- Rector PHP 8.2 rewrites (5 files): constructor promotion on `Store`, `TcpSocket`; arrow functions in `MapUpdate`, `LogFileHandler`, `AbstractMessageComponent`
+
+---
+
 ### Phase 1 — v3.0.0
 
 ### Infrastructure
