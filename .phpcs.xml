@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ruleset name="pf-php8-compat">
+  <description>PHP 8.2 compatibility sweep for pathfinder + websocket</description>
+  <file>pathfinder/app</file>
+  <file>websocket/app</file>
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/tmp/*</exclude-pattern>
+  <config name="testVersion" value="8.2-"/>
+  <rule ref="PHPCompatibility"/>
+  <arg name="colors"/>
+  <arg value="sp"/>
+</ruleset>
