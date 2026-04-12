@@ -12,7 +12,10 @@ COPY pathfinder /app
 WORKDIR /app
 
 RUN composer self-update && \
-    composer update --no-dev --optimize-autoloader
+    composer update --no-dev --optimize-autoloader && \
+    # PHP 8 compat: $fieldsCache declared but not initialized in cortex — array_key_exists(null) is TypeError in PHP 8
+    # TODO: remove once upstream fix lands in ikkez/f3-cortex dev-master
+    sed -i 's/\$fieldsCache,\(.*relation field cache\)/\$fieldsCache = [],\1/' vendor/ikkez/f3-cortex/lib/db/cortex.php
 
 FROM trafex/php-nginx:3.6.0
 
