@@ -172,6 +172,47 @@
 
 ---
 
+### Phase 4 — Runtime smoke-test fixes (PHP 8 / browser testing)
+
+#### pathfinder-containers
+
+**Dockerfile (`pathfinder.Dockerfile`)**
+- Added `sed` patch for `pathfinder_esi/app/Client/Ccp/Sso/Sso.php`: `if(!$body->error)` → `if(!($body->error ?? null))` — `$body` is null on network error; PHP 8 E_WARNING on null property access is fatal via F3
+- Added `sed` patch for `pathfinder_esi/app/Client/EveScout/EveScout.php`: `if(!$body->error)` → `if(!isset($body->error))` — EVE Scout API v2 returns a JSON array on success; PHP 8 rejects property access on arrays
+
+**Static config**
+- `static/php/php.ini`: Added `session.gc_maxlifetime = 86400` and `session.cookie_lifetime = 86400` — default 1440s (24 min) was expiring sessions, causing 403 on idle
+- `static/pathfinder/environment.ini`: `DEBUG = 0` → `DEBUG = 3` — enables full stack traces in dev
+
+**Dependencies**
+- `pathfinder/composer.json`: Re-added explicit `"bcosca/fatfree-core": "3.9.*"` — was dropped during PHP 8 upgrade; 3.9.2 is already installed transitively but pinning prevents uncontrolled upgrades
+
+#### pathfinder (submodule)
+
+**PHP 8 compatibility — controllers**
+- `app/Controller/AccessController.php`: Added `is_object($character)` guard in debug logging block — `$character` is null in "NO SESSION FOUND" path; accessing `->name` on null is fatal
+- `app/Controller/Api/Map.php`: `$systemData['mapId']` → `$systemData['mapId'] ?? 0` (line 707); added `?? []` / `?? false` guards on all keys in `updateUserData` system data block
+- `app/Controller/Api/Rest/Map.php`: `$compare['old']` / `$compare['new']` → `?? []` — `compareAccess()` returns only `['new' => ...]` when no existing records exist
+- `app/Controller/Api/Rest/System.php`: `$requestData['isCcpId']` → `?? false` — optional GET param
+- `app/Controller/Api/Statistic.php`: `$postData['period/typeId/year/week']` → `?? ''` / `?? 0` guards on all optional POST params
+- `app/Controller/Api/Rest/AbstractEveScoutController.php`: Added null guard after `getSystemData()` — returns null when system not in universe DB; throws `RuntimeException` caught by existing try/catch
+
+**PHP 8 compatibility — route search (`app/Controller/Api/Rest/Route.php`)**
+- `filterData` keys `stargates/jumpbridges/wormholes/…/excludeTypes/endpointsBubble` — all optional; added `?? false/''/ []` guards
+- `array_walk` callback `&$key` → `$key` — PHP 8 rejects by-reference key parameter
+- `getRouteCacheKey()`: was passed string `$systemFrom`/`$systemTo` (names) where `int` expected; corrected to pass `$systemFromId`/`$systemToId`
+- Cache key `implode`: `$keyParts` can contain `excludeTypes` array; replaced with `array_map(fn($v) => is_array($v) ? implode(',', $v) : (string)$v, $keyParts)`
+- `$this->jumpArray[$systemId]` before key initialised → `$this->jumpArray[$systemId] ?? null` in `is_array()` check
+- Thera jump data missing `regionId`/`constellationId`/`trueSec` fields: added `?? 0` / `?? 0.0` defaults in `updateJumpData()`
+- `jumpNodes` key missing from dynamic jump data entry initialisation — added `'jumpNodes' => []`
+
+**PHP 8 compatibility — models**
+- `app/Model/Pathfinder/SystemModel.php`: `strtotime($this->rallyUpdated)` → ternary guard (field is nullable)
+- `app/Model/Pathfinder/ConnectionModel.php`: `strtotime($this->eolUpdated)` → ternary guard (field is nullable)
+- `app/Model/Pathfinder/MapModel.php`: `$config->slackWebHookURL` / `$config->slackChannel` → `?? null` guards — config object properties absent when webhook not configured
+
+---
+
 ### Phase 1 — v3.0.0
 
 ### Infrastructure
