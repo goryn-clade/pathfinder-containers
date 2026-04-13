@@ -15,7 +15,18 @@ RUN composer self-update && \
     composer update --no-dev --optimize-autoloader && \
     # PHP 8 compat: $fieldsCache declared but not initialized in cortex — array_key_exists(null) is TypeError in PHP 8
     # TODO: remove once upstream fix lands in ikkez/f3-cortex dev-master
-    sed -i 's/\$fieldsCache,\(.*relation field cache\)/\$fieldsCache = [],\1/' vendor/ikkez/f3-cortex/lib/db/cortex.php
+    sed -i 's/\$fieldsCache,\(.*relation field cache\)/\$fieldsCache = [],\1/' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
+    # PHP 8 compat: F3 Base::config() captures TTL as string via regex; php-redis 6.x rejects non-int/float EXPIRY
+    sed -i 's/list(\$rval,\$ttl)=\$tmp;/list($rval,$ttl)=$tmp; $ttl=(int)$ttl;/' vendor/bcosca/fatfree-core/base.php && \
+    # PHP 8 compat: cast $ttl to int at all Redis-write paths in Cache::set()
+    sed -i 's/\$ttl=\$cached\[1\];/$ttl=(int)$cached[1];/' vendor/bcosca/fatfree-core/base.php && \
+    # PHP 8 / php-redis 6 compat: route TTL from ini comma-split arrives as ' 0' (truthy string but int value 0)
+    # Redis rejects ['ex'=>0]. Guard with (int)$ttl>0 so zero/negative TTLs produce [] (no expiry) instead.
+    sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php && \
+    # PHP 8 compat: pathfinder_esi Sso.php accesses $body->error on stdClass that may not have the property
+    sed -i 's/if(!\$body->error){/if(!($body->error ?? null)){/' vendor/goryn-clade/pathfinder_esi/app/Client/Ccp/Sso/Sso.php && \
+    # PHP 8 compat: EveScout API returns JSON array on success so $body is array not object; isset() is safe on both
+    sed -i 's/if(!\$body->error){/if(!isset(\$body->error)){/' vendor/goryn-clade/pathfinder_esi/app/Client/EveScout/EveScout.php
 
 FROM trafex/php-nginx:3.6.0
 

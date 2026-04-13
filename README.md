@@ -103,7 +103,7 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 
 1. **Go back to your console and insert the eve universe dump with this command:**
     ```shell
-    docker compose exec pfdb /bin/sh -c "unzip -p eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe";
+    docker compose exec pf-db /bin/sh -c "unzip -p eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe";
 
 1. **When everything works, configure Traefik correctly for production**
     * Remove the staging CA server line  from `docker-compose.yml`from the `command` block of the traefik service definition. 
@@ -146,23 +146,6 @@ This creates a partial `.env` file, but you will need to add your CCP SSO client
 It's best to create a new SSO application for development work, so that you can set the callback url to `https://localhost/sso/callbackAuthorization`.
 
 </br>
-
----
-
-</br>
-
-## Static analysis
-
-Run from `pathfinder-containers/`:
-
-```shell
-vendor/bin/phpcs --standard=.phpcs.xml        # PHPCompatibility (PHP 8.2 target)
-vendor/bin/phpstan analyse --memory-limit=1G  # Level 8 + deprecation rules
-vendor/bin/rector process --dry-run           # PHP 8.2 upgrade sets (preview only)
-```
-
-PHPStan uses a baseline (`phpstan-baseline.neon`) to freeze pre-existing level-8 debt. The baseline should only shrink — never expand it. Fix compat-critical errors first (grep for `ctype_digit`, `deprecated`, `undefined array key`), then tackle level-8 debt opportunistically.
-
 ---
 
 ## Acknowledgments
