@@ -22,11 +22,7 @@ RUN composer self-update && \
     sed -i 's/\$ttl=\$cached\[1\];/$ttl=(int)$cached[1];/' vendor/bcosca/fatfree-core/base.php && \
     # PHP 8 / php-redis 6 compat: route TTL from ini comma-split arrives as ' 0' (truthy string but int value 0)
     # Redis rejects ['ex'=>0]. Guard with (int)$ttl>0 so zero/negative TTLs produce [] (no expiry) instead.
-    sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php && \
-    # PHP 8 compat: pathfinder_esi Sso.php accesses $body->error on stdClass that may not have the property
-    sed -i 's/if(!\$body->error){/if(!($body->error ?? null)){/' vendor/goryn-clade/pathfinder_esi/app/Client/Ccp/Sso/Sso.php && \
-    # PHP 8 compat: EveScout API returns JSON array on success so $body is array not object; isset() is safe on both
-    sed -i 's/if(!\$body->error){/if(!isset(\$body->error)){/' vendor/goryn-clade/pathfinder_esi/app/Client/EveScout/EveScout.php
+    sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php
 
 FROM trafex/php-nginx:3.6.0
 
