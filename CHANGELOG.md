@@ -4,6 +4,18 @@
 
 ---
 
+### Fixes and features
+
+#### pathfinder_esi — v3.0.7
+
+- Removed `getStatusRequest()` and `meta.status` spec entry — `https://esi.evetech.net/status.json` no longer exists; CCP removed per-route health reporting
+
+#### pathfinder (submodule)
+
+- `app/Controller/Controller.php` (`getEveServerStatus`): removed `getStatus` ESI call — always errored (404), preventing caching and returning errors on every login page load; ESI API panel now shows static OK/green
+
+---
+
 ### Phase 2 — PHP 8 Upgrade
 
 #### pathfinder-containers
