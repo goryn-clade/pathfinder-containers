@@ -27,13 +27,6 @@ echo "REDIS_HOST=\"redis\"" >> .env
 echo "REDIS_PORT=\"6379\"" >> .env
 echo "PATHFINDER_SOCKET_HOST=\"pathfinder-socket\"" >> .env
 echo "PATHFINDER_SOCKET_PORT=\"5555\"" >> .env
-echo "SMTP_HOST=\"\"" >> .env
-echo "SMTP_PORT=\"\"" >> .env
-echo "SMTP_SCHEME=\"\"" >> .env
-echo "SMTP_USER=\"\"" >> .env
-echo "SMTP_PASS=\"\"" >> .env
-echo "SMTP_FROM=\"\"" >> .env
-echo "SMTP_ERROR=\"\"" >> .env
 
 # sort new file alphabetically into .new file
 cat .env | sort > ./.env.new

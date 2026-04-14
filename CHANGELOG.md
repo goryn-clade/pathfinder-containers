@@ -6,13 +6,21 @@
 
 ### Fixes and features
 
-#### pathfinder_esi — v3.0.7
+#### pathfinder_esi — v3.0.7 → v3.0.12
 
-- Removed `getStatusRequest()` and `meta.status` spec entry — `https://esi.evetech.net/status.json` no longer exists; CCP removed per-route health reporting
+- v3.0.7: Removed `getStatusRequest()` and `meta.status` spec entry — `https://esi.evetech.net/status.json` no longer exists; CCP removed per-route health reporting
+- v3.0.8–v3.0.12: Fixed PHP 8 `$body->error` access across all 39 ESI response handlers in `Esi.php` — PHP 8 warns on property access on non-objects (arrays return E_WARNING) and on missing properties on stdClass (E_WARNING); guarded with `is_object($body) && ($body->error ?? null)` pattern; also guarded bare `= $body->error` assignments with `?? null`
 
 #### pathfinder (submodule)
 
-- `app/Controller/Controller.php` (`getEveServerStatus`): removed `getStatus` ESI call — always errored (404), preventing caching and returning errors on every login page load; ESI API panel now shows static OK/green
+- `app/Controller/Controller.php` (`getEveServerStatus`): removed `getStatus` ESI call — always errored (404); ESI API panel now shows static OK/green
+- `js/app/ui/dialog/map_settings.js`: new map tab now appears immediately after creation — PUT success handler injects map into `currentMapData` cache and calls `updateMapModule` when no tab exists yet
+- `js/app/ui/dialog/map_settings.js`: map deletion now removes the tab immediately — DELETE success handler calls `deleteCurrentMapData` + `updateMapModule`
+- `js/app/module_map.js`: fixed `updateMapModule` tab removal check — `Array.find` returns `undefined` (not `false`) for missing maps; `!== false` check was keeping deleted tabs; changed to truthiness check so both `undefined` and `false` trigger tab removal
+- `js/app/setup.js`: fixed WebSocket health check showing "CONNECTION FAILED" after a successful connection — `onclose` always fires after `onmessage` and was unconditionally overwriting the status; added `connected` flag set on valid response, `onclose` now skips the failure update when already connected
+- `app/Controller/Setup.php`: removed SMTP_* vars from `$environmentVars` — email logging was removed in Phase 2; entries were showing as blank/missing in Settings > Configuration
+- `app/Controller/Setup.php`: added Docker environment detection (`/.dockerenv`); Server > Environment variables panel now shows a "Container environment detected" banner and marks all build tool checks as "not required" / green when running in a container
+- Removed swiftmailer entirely: `Config::getSMTPConfig()`, `isValidSMTPConfig()`, `getNotificationMail()` removed from `Config.php`; `isMailSendEnabled()` / `getSMTPConfig()` removed from `MapModel`, `UserModel`; mail poke block removed from `SystemModel`; `sendDeleteMail()` / `afterEraseEvent` mail call removed from `UserModel`; `send_rally_mail_enabled` label removed from `Setup.php`; `swiftmailer/swiftmailer` removed from `composer-dev.json`; SMTP_* vars removed from `app/environment.ini`, `development/environment.development.ini`, `development/env_upgrade.sh`
 
 ---
 
