@@ -1,0 +1,102 @@
+services:
+  pf-db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+  pf-redis:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "/etc/redis/redis.conf"]
+    volumes:
+      - redis_data:/data
+      - ./static/redis/redis.conf:/etc/redis/redis.conf:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    restart: always
+
+  pf-socket:
+    build:
+      context: .
+      dockerfile: pf-websocket.Dockerfile
+    command: ["--tcpHost", "0.0.0.0"]
+    volumes:
+      - ./logs:/var/www/html/pathfinder/history/map
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+  pf:
+    container_name: pathfinder
+    build:
+      context: '.'
+      dockerfile: pathfinder.Dockerfile
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.pf.loadbalancer.server.port=80"
+      - "traefik.http.routers.pf.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.pf.entrypoints=web"
+      - "traefik.http.routers.pf.middlewares=redirecthttps"
+      - "traefik.http.routers.pf-secure.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.pf-secure.entrypoints=websecure"
+      - "traefik.http.routers.pf-secure.tls=true"
+      - "traefik.http.routers.pf-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.redirecthttps.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirecthttps.redirectscheme.permanent=true"
+    healthcheck:
+      disable: true
+    volumes:
+      - ./config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
+      - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
+      - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ./logs:/var/www/html/pathfinder/history/map
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - pf-db
+      - pf-redis
+      - pf-socket
+    restart: always
+
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    command:
+      - "--log.level=INFO"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+volumes:
+  db_data:
+  redis_data:
