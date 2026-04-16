@@ -13,6 +13,39 @@
 
 #### pathfinder (submodule)
 
+**PHP 8 undefined array key fixes — live testing (browser smoke tests)**
+
+F3 escalates all PHP NOTICEs to HTTP 500. The fixes below were discovered via live browser testing and resolve undefined array key warnings that are fatal under PHP 8.
+
+- `app/Model/Pathfinder/CharacterModel.php`: `isOnline()` — `$onlineData['online']` → `?? false`; `updateLog()` — `$additionalOptions['markUpdated']` → `?? false`; `addLogHistoryEntry()` — `$historyLog['system']['id']` and `$historyLogPrev['system']['id/name/alias']` all guarded with `?? null`
+- `app/Controller/Api/Map.php` (`updateMapByCharacter`): `$newSystemPositions['defaults']` and `['location']` → `?? []`
+- `app/Model/Pathfinder/ConnectionModel.php`: `getData()` and `beforeInsertEvent()` — `json_decode($this->get('type', true) ?? 'null')` to guard null passed to `json_decode`; `set_endpoints()` — `$endpointsData['source']` and `['target']` → `?? []`; `setEndpointData()` — `$endpointData['types']` → `?? []`
+- `app/Model/Pathfinder/SystemSignatureModel.php` (`set_connectionId`): widened type declaration to `ConnectionModel|int|null` — nullable connection passed from `ConnectionModel::setEndpointData()`
+- `app/Controller/Api/Rest/Connection.php`: `$addData`/`$filterData` top-level keys → `?? []`; `scope`, `type`, `disableAutoScope` option keys guarded
+- `app/Controller/Api/Rest/System.php`: `$systemData['statusId']` → `?? 0`
+- `app/Controller/Api/Rest/Signature.php`: `deleteOld`, `deleteConnection` (×2) → `?? false`
+- `app/Controller/Api/Rest/SignatureHistory.php`: `stamp` → `?? ''`
+- `app/Controller/Api/Rest/Structure.php`: `$requestData['id']` → `?? 0`; `$structureData['name']` → `?? ''`; `$structureData['systemId']` → `?? 0`
+- `app/Controller/Api/Rest/SystemGraph.php`: `$requestData['systemIds']` → `?? []`
+- `app/Controller/Api/Rest/Log.php`: `$requestData['connectionId']` → `?? 0`
+- `app/Controller/Api/Rest/Map.php`: `mapCharacters`, `mapCorporations`, `mapAlliances` keys → `?? []`
+- `app/Controller/Api/Rest/SystemSearch.php`: `$requestData['page']` → `?? 1`
+- `app/Controller/Api/Rest/AbstractEveScoutController.php`: `wh_exits_outward` → `?? false`; `wh_type` → `?? ''` (×2); `estimatedEol` → `?? 0`; `jumpMass` → `?? ''`; `eveScoutSignature['name']` → `(?? null) ?: null` (×2)
+- `app/Controller/Api/Rest/Route.php`: `$routeData['wormholesTurnur']` → `?? false` in `post()` filter passthrough
+- `app/Controller/Api/System.php`: `$destData` → `?? []`; `clearOtherWaypoints`/`first` → `?? false`; `$response['error']` → `?? ''`; `$rallyData['systemId']` → `?? 0`; rally poke flags → `?? '0'`; `$rallyData['message']` → `?? ''`
+- `app/Controller/Api/User.php`: `$data['cookie']` → `?? ''`; `$data['deleteCookie']` → `?? false`; `$data['targetId']` → `?? 0`; `$response['error']` → `?? ''`
+- `app/Controller/Api/Setup.php` (`buildIndex`/`clearIndex`): `type`, `countAll`, `count`, `offset` keys → `?? ''/0`
+- `app/Controller/Api/GitHub.php`: `$release['name']` → `?? ''`; `$release['body']` → `?? ''`
+- `app/Cron/CcpSystemsUpdate.php`: `$params['offset']` / `['length']` → `?? 0`
+- `app/Cron/Universe.php`: `$params['type']` → `?? ''`; `$params['offset']` / `['length']` → `?? 0`
+
+**Feature: Turnur connections in route search**
+
+- `app/Controller/Api/Rest/Route.php`: `setTheraJumpData()` was including all EVE Scout connections without filtering; refactored into shared `buildEveScoutJumpData(int $hubSystemId, string $cacheKey): array` that filters by source/target system ID; `setTheraJumpData()` now delegates to it with `THERA_SYSTEM_ID = 31000005`; added `setTurnurJumpData()` using same helper with `TURNUR_SYSTEM_ID = 30002086`; both called in `searchRouteCustom()` and `searchRouteESI()`; added `wormholesTurnur` to `post()` filter passthrough
+- `public/templates/dialog/route.html`: added Turnur checkbox (`#form_connections_turnur`, `name="wormholesTurnur"`) alongside Thera checkbox
+- `public/templates/dialog/route_settings.html`: added Turnur checkbox and `$(document).ready` initialisation from `routeSettings.wormholesTurnur`
+- `js/app/ui/module/system_route.js`: added `wormholesTurnur` to rowData fallback, routeData passthrough, routeSettingsData parsing, and routeDialogData parsing; Turnur checkbox enabled/disabled and checked/unchecked in `setDialogObserver()` alongside Thera
+
 - `app/Controller/Controller.php` (`getEveServerStatus`): removed `getStatus` ESI call — always errored (404); ESI API panel now shows static OK/green
 - `js/app/ui/dialog/map_settings.js`: new map tab now appears immediately after creation — PUT success handler injects map into `currentMapData` cache and calls `updateMapModule` when no tab exists yet
 - `js/app/ui/dialog/map_settings.js`: map deletion now removes the tab immediately — DELETE success handler calls `deleteCurrentMapData` + `updateMapModule`
