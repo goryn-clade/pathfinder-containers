@@ -46,6 +46,21 @@ F3 escalates all PHP NOTICEs to HTTP 500. The fixes below were discovered via li
 - `public/templates/dialog/route_settings.html`: added Turnur checkbox and `$(document).ready` initialisation from `routeSettings.wormholesTurnur`
 - `js/app/ui/module/system_route.js`: added `wormholesTurnur` to rowData fallback, routeData passthrough, routeSettingsData parsing, and routeDialogData parsing; Turnur checkbox enabled/disabled and checked/unchecked in `setDialogObserver()` alongside Thera
 
+**Feature: Migrate killstream from deprecated WebSocket to R2Z2 HTTP polling API**
+
+The zKillboard WebSocket (`wss://zkillboard.com/websocket/`) was shut down. The live killstream now uses the R2Z2 HTTP polling API (`r2z2.zkillboard.com/ephemeral/`).
+
+- `app/pathfinder.ini` / `config/pathfinder/pathfinder.ini`: added `ZKILLBOARD_R2Z2 = https://r2z2.zkillboard.com/ephemeral` config key
+- `app/Controller/Api/Killboard.php` (new): PHP proxy controller to work around CORS restrictions on R2Z2; `sequence()` proxies `/sequence.json` with 5s F3 cache; `r2z2()` proxies `/{sequenceId}.json`, returning 204 (not 404) for not-yet-available sequences to suppress log noise
+- `static/nginx/site.conf`: added `location ^~ /api/Killboard/r2z2/` block with `access_log off` to suppress high-frequency polling requests from nginx access logs
+- `app/Model/Pathfinder/UserModel.php`: fixed three PHP 8 undefined array key errors in `getSessionCharacter()` — `$currentSessionUser['ID']` → `?? null`; `$sessionCharacters[0]` → `reset($sessionCharacters)`; `$data['ID']` → `?? 0`
+- `js/app/ui/module/system_killboard.js`: replaced `initWebSocket()` with R2Z2 poller — `initPoller()`, `pollNext()`, `stopPoller()`, `adaptR2z2Response()`; one static poller shared across all module instances; 6s back-off on 204 (no kill yet); stale-sequence resync after 5 consecutive 204s; tab-visibility pause with deduplicated `visibilitychange` listener; `pollInFlight` guard prevents concurrent fetches; `adaptR2z2Response()` flattens R2Z2's `{esi, zkb}` envelope to the flat format `cacheWsResponse()` and `onWsMessage()` expect
+- `js/app/ui/module/system_killboard.js`: removed `/npc/0/` filter from historical kills REST API URL — NPC kills now included in both historical and live streams
+- `js/app/ui/module/system_killboard.js`: added "NPC kills" checkbox to stream filter options panel; defaults to enabled; `filterKillmailByStreams()` extended to accept `zkbData` and gate on `zkbData.npc`; same filter applied to historical kills in `showKills()` before the ESI fetch
+- `js/app/ui/module/system_killboard.js`: NPC attacker portrait now shows EVE default portrait (`characters/1/portrait`) instead of broken `src="#"` when `character_id` is 0
+- `js/app/ui/module/system_killboard.js`: live stream kills from systems not on any map (e.g. 'all' stream) now show the system name — `onWsMessage()` is async and falls back to an ESI `/universe/systems/{id}/` lookup with permanent in-memory cache when `MapUtil.getSystemData()` returns nothing
+- `js/app/worker/map.js`: guarded both `socket.send()` call sites with `if(socket)` null check — prevents crash when a `ws:send` or `sw:closePort` message arrives after the map WebSocket has closed and reset to null
+
 - `app/Controller/Controller.php` (`getEveServerStatus`): removed `getStatus` ESI call — always errored (404); ESI API panel now shows static OK/green
 - `js/app/ui/dialog/map_settings.js`: new map tab now appears immediately after creation — PUT success handler injects map into `currentMapData` cache and calls `updateMapModule` when no tab exists yet
 - `js/app/ui/dialog/map_settings.js`: map deletion now removes the tab immediately — DELETE success handler calls `deleteCurrentMapData` + `updateMapModule`
