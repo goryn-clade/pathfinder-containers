@@ -60,6 +60,7 @@ The zKillboard WebSocket (`wss://zkillboard.com/websocket/`) was shut down. The 
 - `js/app/ui/module/system_killboard.js`: NPC attacker portrait now shows EVE default portrait (`characters/1/portrait`) instead of broken `src="#"` when `character_id` is 0
 - `js/app/ui/module/system_killboard.js`: live stream kills from systems not on any map (e.g. 'all' stream) now show the system name — `onWsMessage()` is async and falls back to an ESI `/universe/systems/{id}/` lookup with permanent in-memory cache when `MapUtil.getSystemData()` returns nothing
 - `js/app/worker/map.js`: guarded both `socket.send()` call sites with `if(socket)` null check — prevents crash when a `ws:send` or `sw:closePort` message arrives after the map WebSocket has closed and reset to null
+- `websocket/cmd.php`: debug level 2 (default) now excludes `E_DEPRECATED` alongside `E_NOTICE` — suppresses constant Ratchet 0.4.3 dynamic property warnings on PHP 8.2 (`httpHeadersReceived`, `httpRequest`, `WebSocket`, `resourceId`, `remoteAddress` on `React\Socket\Connection`)
 
 - `app/Controller/Controller.php` (`getEveServerStatus`): removed `getStatus` ESI call — always errored (404); ESI API panel now shows static OK/green
 - `js/app/ui/dialog/map_settings.js`: new map tab now appears immediately after creation — PUT success handler injects map into `currentMapData` cache and calls `updateMapModule` when no tab exists yet
