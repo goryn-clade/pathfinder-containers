@@ -6,6 +6,40 @@
 
 ### Fixes and features
 
+#### pathfinder-containers
+
+**Traefik v3.6.1**
+- `compose.yml`, `compose.test.yml`: Bumped Traefik `v3.6` → `v3.6.1` — required for Docker API version auto-negotiation
+- `compose.yml`, `compose.test.yml`: Dropped exposed port `8080` (dashboard) — not needed on internet-facing hosts; removed `--api.insecure=true` flag
+- `compose.yml`, `compose.test.yml`: Removed redundant per-router HTTP→HTTPS redirect middleware labels — entrypoint-level redirect (`redirections.entryPoint`) already handles it; adopted unquoted label style
+
+#### pathfinder (submodule)
+
+**Feature: Unknown system node placeholder**
+
+Maps with "Allow Unknown systems" enabled can now add placeholder nodes for unscanned wormhole destinations before jumping through. Addresses [#188](https://github.com/goryn-clade/pathfinder/issues/188) and [#159](https://github.com/goryn-clade/pathfinder/issues/159).
+
+- `app/Model/Pathfinder/SystemModel.php`: `systemId` made nullable; new `securityClass` VARCHAR field added (Cortex auto-migrates); `validate_systemId()` accepts null; `getStaticSystemData()` returns a synthesised stub (`name='???'`, `security=securityClass`) when `systemId` is null — single chokepoint for all ESI call paths; `getStructuresData()` returns `[]` for unknown systems; `getData()` exposes `isUnknown` and `securityClass`
+- `app/Model/Pathfinder/MapModel.php`: New `allowUnknownSystems` DT_BOOL field (default 0); `getData()` includes it; `getNewSystem()` signature changed to `?int $systemId, ?string $securityClass = null` — skips `getSystemByCCPId()` for null; user position tracking skips null systemId comparison
+- `app/Model/Pathfinder/ConnectionModel.php`: `setAutoScopeAndType()` skips `searchRoute()` when either endpoint's `systemId` is null — unknown systems default to `wh` scope
+- `app/Controller/Api/Rest/System.php`: `put()` handles null `systemId`; requires `securityClass` in payload and `allowUnknownSystems === true` on the map — otherwise returns empty response
+- `app/Controller/Api/Map.php`: All three `searchRoute()` call sites guarded — skip route calculation when either systemId is null
+- `js/app/module_map.js`: `pf:renderSystemModules` calls `removeModules()` instead of `renderModules()` when `data.payload.isUnknown` — suppresses all scope modules (signatures, info, killboard, intel, route, graph); `pf:updateSystemModules` returns early for unknown systems
+- `js/app/map/map.js`: Unknown nodes render with grey `pf-system-sec-unknown-placeholder` badge (showing security class) and `???` name; `parseInt(data.systemId)` replaced with null-safe equivalent in two locations; "Set destination" context menu action skipped for unknown systems
+- `js/app/map/system.js`: "Unknown" checkbox added to add-system dialog (only visible when `allowUnknownSystems` enabled); toggles between CCP system select and security class picker; region label suppressed for unknown systems in `getHeadInfoElement()`
+- `js/app/ui/dialog/map_settings.js`: `allowUnknownSystems` checkbox wired alongside `trackAbyssalJumps`
+- `public/templates/dialog/map.html`: "Allow Unknown systems" checkbox added to map settings
+- `public/templates/dialog/system.html`: "Unknown" toggle and security class `<select>` (C1–C6, C12, C13, C17, H, L, 0.0, T) added
+- `sass/layout/_main.scss`: `.pf-system-sec-unknown-placeholder { color: $gray-light }` added (distinct from `.pf-system-sec-unknown` which is indigo for C13/shattered)
+
+**Feature: Themes — extended coverage**
+- `sass/_themes.scss`: Map canvas background (`pf-map-tab-content-area-map`, `.pf-map`) now themed in both light and high-contrast modes via `--pf-map-bg`; system nodes (`pf-system`, `pf-system-head-name`, `pf-system-head-expand`, `pf-system-body`) themed via `--pf-system-bg/border/text`; DataTables rows themed via `--pf-table-row` / `--pf-table-row-alt` (covers both Bootstrap `.table-striped` and DataTables own stripe/hover)
+
+**Fix: README typo**
+- `README.md`: Corrected `goryn-clayde` → `goryn-clade` in issue tracker link
+
+---
+
 #### pathfinder_esi — v3.0.7 → v3.0.12
 
 - v3.0.7: Removed `getStatusRequest()` and `meta.status` spec entry — `https://esi.evetech.net/status.json` no longer exists; CCP removed per-route health reporting
