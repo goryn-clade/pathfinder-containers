@@ -1,5 +1,37 @@
 # TODO
 
+## Enhancement: Move deployment-specific config from pathfinder.ini to .env
+
+`config/pathfinder/pathfinder.ini` currently holds deployment-specific values that have to be hand-edited per installation and are easy to accidentally commit to the repo (the SUPER admin character ID already is). These should be driven by `.env` so operators only need to edit one file.
+
+### Approach
+
+Convert `config/pathfinder/pathfinder.ini` to a template (`pathfinder.ini.template`) and run `envsubst` in the container entrypoint (same pattern nginx already uses). The template ships with `${VAR}` placeholders; at startup the real values are substituted from env. The `.ini.template` is committed; the rendered `.ini` is gitignored.
+
+### Variables to extract
+
+| .env key | pathfinder.ini location | Notes |
+|---|---|---|
+| `PF_SUPER_ADMIN_ID` | `[PATHFINDER.ROLES] CHARACTER.0.ID` | CCP character ID of SUPER admin — currently committed in plain text |
+| `PF_INSTALL_NAME` | `[PATHFINDER] NAME` | e.g. `"Goryn Clade Pathfinder"` |
+| `PF_LOGIN_WHITELIST_CORP` | `[PATHFINDER.LOGIN] CORPORATION` | Comma-separated corp IDs |
+| `PF_LOGIN_WHITELIST_ALLIANCE` | `[PATHFINDER.LOGIN] ALLIANCE` | Comma-separated alliance IDs |
+| `PF_LOGIN_WHITELIST_CHAR` | `[PATHFINDER.LOGIN] CHARACTER` | Comma-separated character IDs |
+| `PF_REGISTRATION_STATUS` | `[PATHFINDER.REGISTRATION] STATUS` | `0` or `1` |
+
+### Files to change
+
+- `config/pathfinder/pathfinder.ini` → rename to `pathfinder.ini.template`, replace values with `${...}` placeholders
+- `.env.example` → add the new keys with empty/example defaults
+- Container entrypoint or `Dockerfile` → add `envsubst < pathfinder.ini.template > pathfinder.ini` step before app starts
+- `.gitignore` → add `config/pathfinder/pathfinder.ini` (rendered output)
+
+### Out of scope
+
+Static tuning values (timers, cache TTLs, map limits, API URLs) stay in the ini — they're not secrets and don't change between deployments.
+
+---
+
 ## Feature: Update Static Data
 Update Static data with things such as: 
 - New names for drifter wormholes: 31000004 is now Conflux Eyrie, for example
