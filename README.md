@@ -5,6 +5,19 @@
 
 A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfinder-container/) docker-compose solution for Pathfinder that is designed to work with Goryn Clade's [Pathfinder](https://github.com/goryn-clade/pathfinder/) fork, using [Traefik](https://traefik.io/) as a reverse proxy to expose the docker container.
 
+## Pathfinder v3.0 Breaking Changes:
+
+To Do
+
+* List of changes
+    * Redis => Valkey
+    * MariaDB image update
+    * naming schema pfdb => pf-db
+* Upgrade guide
+    * db export/import
+
+
+
 1. [Installation](#installation)
 1. [Using Traefik](#using-traefik)
 1. [Development](#development)
@@ -12,11 +25,8 @@ A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfi
 ## Installation
 
 **Prerequisites**:
-* [docker](https://docs.docker.com/)
-
-> **Note**: The Docker-compose file uses Compose v3.8, so requires Docker Engine 19.03.0+
-
-</br>
+* [Docker Engine](https://docs.docker.com/)
+* [Docker Compose]()
 
 
 1. **Create an API-Key**
