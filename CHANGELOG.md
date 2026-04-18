@@ -37,6 +37,12 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 **Feature: Themes — extended coverage**
 - `sass/_themes.scss`: Map canvas background (`pf-map-tab-content-area-map`, `.pf-map`) now themed in both light and high-contrast modes via `--pf-map-bg`; system nodes (`pf-system`, `pf-system-head-name`, `pf-system-head-expand`, `pf-system-body`) themed via `--pf-system-bg/border/text`; DataTables rows themed via `--pf-table-row` / `--pf-table-row-alt` (covers both Bootstrap `.table-striped` and DataTables own stripe/hover)
 
+**Enhancement: Account settings simplification**
+- `app/Model/Pathfinder/UserModel.php`: Removed `email` field and `validate_email()` — email column stays in DB but is no longer read or written
+- `app/Controller/Api/User.php`: Removed captcha requirement from `saveAccount()` — username now saves directly on submit; captcha still required for account deletion
+- `public/templates/dialog/settings.html`: Removed email display/edit rows and captcha image/input from the Account tab
+- `js/app/ui/dialog/account_settings.js`: Removed captcha config, `show.bs.modal` captcha init, and captcha refresh calls from save/error handlers
+
 **Fix: README typo**
 - `README.md`: Corrected `goryn-clayde` → `goryn-clade` in issue tracker link
 
