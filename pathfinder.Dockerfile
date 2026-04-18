@@ -56,6 +56,8 @@ COPY  --chown=nobody --from=build /app  pathfinder
 RUN chmod 0766 pathfinder/logs pathfinder/tmp/ && rm -f index.php && touch /etc/nginx/.setup_pass && chmod +x /entrypoint.sh
 COPY static/pathfinder/routes.ini /var/www/html/pathfinder/app/
 COPY static/pathfinder/environment.ini /var/www/html/pathfinder/app/templateEnvironment.ini
+COPY static/pathfinder/config.ini /var/www/html/pathfinder/app/templateConfig.ini
+COPY static/pathfinder/pathfinder.ini /var/www/html/pathfinder/app/templatePathfinder.ini
 
 WORKDIR /var/www/html
 EXPOSE 80
