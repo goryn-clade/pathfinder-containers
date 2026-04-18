@@ -37,6 +37,11 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 **Feature: Themes — extended coverage**
 - `sass/_themes.scss`: Map canvas background (`pf-map-tab-content-area-map`, `.pf-map`) now themed in both light and high-contrast modes via `--pf-map-bg`; system nodes (`pf-system`, `pf-system-head-name`, `pf-system-head-expand`, `pf-system-body`) themed via `--pf-system-bg/border/text`; DataTables rows themed via `--pf-table-row` / `--pf-table-row-alt` (covers both Bootstrap `.table-striped` and DataTables own stripe/hover)
 
+**Feature: Alliance map enhancements**
+- `app/Controller/Admin.php`: `initMaps()` now queries `AllianceMapModel` for SUPER admins and shows alliance maps in `/admin/maps` grouped by alliance name; empty-state notification updated to cover both map types
+- `app/Controller/Api/Rest/Map.php`: Alliance map deletion now restricted to SUPER role — any other character gets a 401; mirrors the existing `map_delete` right check for corporation maps
+- `public/templates/admin/maps.html`: Added "Alliance maps" section below corp maps table, rendered only when alliance maps exist
+
 **Enhancement: Account settings simplification**
 - `app/Model/Pathfinder/UserModel.php`: Removed `email` field and `validate_email()` — email column stays in DB but is no longer read or written
 - `app/Controller/Api/User.php`: Removed captcha requirement from `saveAccount()` — username now saves directly on submit; captcha still required for account deletion
