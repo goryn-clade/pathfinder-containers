@@ -4,9 +4,21 @@
 
 `config/pathfinder/pathfinder.ini` currently holds deployment-specific values that have to be hand-edited per installation and are easy to accidentally commit to the repo (the SUPER admin character ID already is). These should be driven by `.env` so operators only need to edit one file.
 
+### How envsubst already works in this repo
+
+`environment.ini` is already fully templated:
+- `static/pathfinder/environment.ini` — uses `$VAR` placeholders, baked into image as `templateEnvironment.ini`
+- `config/pathfinder/config.ini` — mounted as `templateConfig.ini`
+- `static/entrypoint.sh` runs `envsubst < templateEnvironment.ini > environment.ini` and `envsubst < templateConfig.ini > config.ini` at startup
+
+`pathfinder.ini` is the odd one out — it is mounted directly (no template step) and has no `$VAR` placeholders.
+
 ### Approach
 
-Convert `config/pathfinder/pathfinder.ini` to a template (`pathfinder.ini.template`) and run `envsubst` in the container entrypoint (same pattern nginx already uses). The template ships with `${VAR}` placeholders; at startup the real values are substituted from env. The `.ini.template` is committed; the rendered `.ini` is gitignored.
+1. Add `$VAR` placeholders to `config/pathfinder/pathfinder.ini` for the variables below
+2. Change the volume mount in `compose.yml` and `compose.test.yml` from `pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini` to `pathfinder.ini:/var/www/html/pathfinder/app/templatePathfinder.ini`
+3. Add one line to `static/entrypoint.sh`: `envsubst </var/www/html/pathfinder/app/templatePathfinder.ini >/var/www/html/pathfinder/app/pathfinder.ini`
+4. Add the new keys to `.env.example`
 
 ### Variables to extract
 
@@ -19,16 +31,9 @@ Convert `config/pathfinder/pathfinder.ini` to a template (`pathfinder.ini.templa
 | `PF_LOGIN_WHITELIST_CHAR` | `[PATHFINDER.LOGIN] CHARACTER` | Comma-separated character IDs |
 | `PF_REGISTRATION_STATUS` | `[PATHFINDER.REGISTRATION] STATUS` | `0` or `1` |
 
-### Files to change
-
-- `config/pathfinder/pathfinder.ini` → rename to `pathfinder.ini.template`, replace values with `${...}` placeholders
-- `.env.example` → add the new keys with empty/example defaults
-- Container entrypoint or `Dockerfile` → add `envsubst < pathfinder.ini.template > pathfinder.ini` step before app starts
-- `.gitignore` → add `config/pathfinder/pathfinder.ini` (rendered output)
-
 ### Out of scope
 
-Static tuning values (timers, cache TTLs, map limits, API URLs) stay in the ini — they're not secrets and don't change between deployments.
+Static tuning values (timers, cache TTLs, map limits, API URLs) stay hardcoded in the ini — they're not secrets and don't change between deployments. `environment.ini` is already fully templated and needs no changes.
 
 ---
 
@@ -43,8 +48,8 @@ Update Static data with things such as:
 
 
 ---
-## Enhancement: maintainer info
-Check the claude generated text on /login
+## Enhancement: Login page info
+We should have a toggle for whether the "about" info should be displayed on the login page or not. 
 
 ### Readme
 - Updates to pathfinder-containers readme
