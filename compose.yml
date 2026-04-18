@@ -50,7 +50,7 @@ services:
       disable: true
     volumes:
       - ./config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
-      - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
+      - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/templatePathfinder.ini
       - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
       - ./logs:/var/www/html/pathfinder/history/map
       - /etc/timezone:/etc/timezone:ro
