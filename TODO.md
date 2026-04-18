@@ -1,65 +1,19 @@
 # TODO
 
-## Enhancement: Move deployment-specific config from pathfinder.ini to .env
-
-`config/pathfinder/pathfinder.ini` currently holds deployment-specific values that have to be hand-edited per installation and are easy to accidentally commit to the repo (the SUPER admin character ID already is). These should be driven by `.env` so operators only need to edit one file.
-
-### How envsubst already works in this repo
-
-`environment.ini` is already fully templated:
-- `static/pathfinder/environment.ini` — uses `$VAR` placeholders, baked into image as `templateEnvironment.ini`
-- `config/pathfinder/config.ini` — mounted as `templateConfig.ini`
-- `static/entrypoint.sh` runs `envsubst < templateEnvironment.ini > environment.ini` and `envsubst < templateConfig.ini > config.ini` at startup
-
-`pathfinder.ini` is the odd one out — it is mounted directly (no template step) and has no `$VAR` placeholders.
-
-### Approach
-
-1. Add `$VAR` placeholders to `config/pathfinder/pathfinder.ini` for the variables below
-2. Change the volume mount in `compose.yml` and `compose.test.yml` from `pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini` to `pathfinder.ini:/var/www/html/pathfinder/app/templatePathfinder.ini`
-3. Add one line to `static/entrypoint.sh`: `envsubst </var/www/html/pathfinder/app/templatePathfinder.ini >/var/www/html/pathfinder/app/pathfinder.ini`
-4. Add the new keys to `.env.example`
-
-### Variables to extract
-
-| .env key | pathfinder.ini location | Notes |
-|---|---|---|
-| `PF_SUPER_ADMIN_ID` | `[PATHFINDER.ROLES] CHARACTER.0.ID` | CCP character ID of SUPER admin — currently committed in plain text |
-| `PF_INSTALL_NAME` | `[PATHFINDER] NAME` | e.g. `"Goryn Clade Pathfinder"` |
-| `PF_LOGIN_WHITELIST_CORP` | `[PATHFINDER.LOGIN] CORPORATION` | Comma-separated corp IDs |
-| `PF_LOGIN_WHITELIST_ALLIANCE` | `[PATHFINDER.LOGIN] ALLIANCE` | Comma-separated alliance IDs |
-| `PF_LOGIN_WHITELIST_CHAR` | `[PATHFINDER.LOGIN] CHARACTER` | Comma-separated character IDs |
-| `PF_REGISTRATION_STATUS` | `[PATHFINDER.REGISTRATION] STATUS` | `0` or `1` |
-
-### Out of scope
-
-Static tuning values (timers, cache TTLs, map limits, API URLs) stay hardcoded in the ini — they're not secrets and don't change between deployments. `environment.ini` is already fully templated and needs no changes.
-
----
 
 ## Feature: Update Static Data
-Update Static data with things such as: 
-- New names for drifter wormholes: 31000004 is now Conflux Eyrie, for example
-- New Ships
-- https://github.com/goryn-clade/pathfinder/issues/186 to adjust M001/L005 lifespan
-- check J377 exists
-- https://github.com/goryn-clade/pathfinder/issues/177 update statics for drifter wormholes
-- 
 
+Verified against SDE 2025-07-07 TRANQUILITY (in-container SQL diff, April 2026):
 
----
-## Enhancement: Login page info
-We should have a toggle for whether the "about" info should be displayed on the login page or not. 
+- ✅ **M001/L005 lifespan** — Fixed. Was 960 min (16h), SDE says 270 min (4.5h). Applied via `export/sql/wormhole_lifespan_fix.sql`. Closes [#186](https://github.com/goryn-clade/pathfinder/issues/186).
+- ✅ **New ships** — None missing. eve_universe already has all published ship types from SDE.
+- ✅ **New wormhole types** — None missing.
+- ✅ **J377** — Does not exist in SDE. Not a real system; remove from tracking.
+- **Drifter WH renames** — SDE still uses J-codes for 31000000-range systems (e.g. 31000004 = J200727, not "Conflux Eyrie"). These names are not in the official SDE and require a manual check against anoik.is or dotlan. See [#177](https://github.com/goryn-clade/pathfinder/issues/177).
+- **Drifter WH statics** — `export/csv/system_static.csv` is sourced from anoik.is, not the SDE. Requires manual update from anoik.is. See [#177](https://github.com/goryn-clade/pathfinder/issues/177).
 
-### Readme
-- Updates to pathfinder-containers readme
-  - any prerequisites for docker/docker-compose versions
-  - document breaking changes in compose file
-  - document upgrade from old to new compose solution
-- Updates to pathfinder readme
-  - Update with v3 breaking changes, additions, fixes
-  - remove file structure, why do we have this?
-  - update contributors
+## Readme updates 
+- Review Claude changes to Readmes
 
 ---
 
