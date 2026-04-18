@@ -44,17 +44,12 @@ services:
     env_file:
       - .env
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.pf.loadbalancer.server.port=80"
-      - "traefik.http.routers.pf.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.pf.entrypoints=web"
-      - "traefik.http.routers.pf.middlewares=redirecthttps"
-      - "traefik.http.routers.pf-secure.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.pf-secure.entrypoints=websecure"
-      - "traefik.http.routers.pf-secure.tls=true"
-      - "traefik.http.routers.pf-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.redirecthttps.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.redirecthttps.redirectscheme.permanent=true"
+      - traefik.enable=true
+      - traefik.http.services.pf.loadbalancer.server.port=80
+      - traefik.http.routers.pf-secure.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.pf-secure.entrypoints=websecure
+      - traefik.http.routers.pf-secure.tls=true
+      - traefik.http.routers.pf-secure.tls.certresolver=letsencrypt
     healthcheck:
       disable: true
     volumes:
@@ -71,11 +66,10 @@ services:
     restart: always
 
   traefik:
-    image: traefik:v3.6
+    image: traefik:v3.6.1
     container_name: traefik
     command:
       - "--log.level=INFO"
-      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -89,7 +83,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/letsencrypt
