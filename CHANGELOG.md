@@ -8,12 +8,24 @@
 
 #### pathfinder-containers
 
+**Deployment simplification — bake ini files into image**
+- `static/pathfinder/config.ini`, `static/pathfinder/pathfinder.ini`: Moved from `config/pathfinder/` into `static/pathfinder/` — now `COPY`'d into the image at build time alongside `environment.ini`
+- `pathfinder.Dockerfile`: Added `COPY` lines for `templateConfig.ini` and `templatePathfinder.ini`
+- `compose.yml`, `compose.test.yml`: Removed volume mounts for `config.ini` and `pathfinder.ini` — only `plugin.ini` remains mounted at runtime
+- `.env.example`: Added `SERVER_NAME` with explanation (used as cache key seed and ESI User-Agent); all deployment-specific variables are now documented
+- All deployment-specific values in `pathfinder.ini` (`PF_INSTALL_NAME`, `PF_REGISTRATION_STATUS`, `PF_SUPER_ADMIN_ID`, `PF_LOGIN_WHITELIST_*`) and `environment.ini` (`PF_DEBUG`) are now supplied via `.env` only — operators no longer need to edit any ini files
+
 **Traefik v3.6.1**
 - `compose.yml`, `compose.test.yml`: Bumped Traefik `v3.6` → `v3.6.1` — required for Docker API version auto-negotiation
 - `compose.yml`, `compose.test.yml`: Dropped exposed port `8080` (dashboard) — not needed on internet-facing hosts; removed `--api.insecure=true` flag
 - `compose.yml`, `compose.test.yml`: Removed redundant per-router HTTP→HTTPS redirect middleware labels — entrypoint-level redirect (`redirections.entryPoint`) already handles it; adopted unquoted label style
 
 #### pathfinder (submodule)
+
+**Static data: wormhole lifetime and attribute fixes**
+- `export/sql/wormhole_lifespan_fix.sql`: Expanded to cover all identified issues — frigate WHs (A009/C008/E004/G008/Q003/Z006/M001/L005) corrected from 16h → 4.5h; Pochven exits (R081/U372/X450) corrected from 16h → 12h; C729 variant 56562 corrected (lifetime + mass values); missing attributes inserted for J377, J492, I078, L687, O546, F216 (56543). Confirmed against SDE 2025-07-07 and jambeeno.com/holes.
+- `export/csv/wormhole.csv`: Added C729, F216, I078, J377, J492, L687, O546, R081, U372, X450.
+- `export/sql/eve_universe.sql.zip`: Refreshed from running database with all fixes applied.
 
 **Feature: Unknown system node placeholder**
 

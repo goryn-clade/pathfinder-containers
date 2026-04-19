@@ -1,16 +1,22 @@
 # TODO
 
 
-## Feature: Update Static Data
+## Feature: Update Static Data ✅
 
-Verified against SDE 2025-07-07 TRANQUILITY (in-container SQL diff, April 2026):
+Verified against SDE 2025-07-07 TRANQUILITY and jambeeno.com/holes (April 2026):
 
-- ✅ **M001/L005 lifespan** — Fixed. Was 960 min (16h), SDE says 270 min (4.5h). Applied via `export/sql/wormhole_lifespan_fix.sql`. Closes [#186](https://github.com/goryn-clade/pathfinder/issues/186).
-- ✅ **New ships** — None missing. eve_universe already has all published ship types from SDE.
-- ✅ **New wormhole types** — None missing.
-- ✅ **J377** — Does not exist in SDE. Not a real system; remove from tracking.
-- **Drifter WH renames** — SDE still uses J-codes for 31000000-range systems (e.g. 31000004 = J200727, not "Conflux Eyrie"). These names are not in the official SDE and require a manual check against anoik.is or dotlan. See [#177](https://github.com/goryn-clade/pathfinder/issues/177).
+- ✅ **M001/L005 lifespan** — Fixed. Was 960 min (16h), now 270 min (4.5h).
+- ✅ **Frigate WH lifetimes** — Fixed. A009, C008, E004, G008, Q003, Z006 were 960 min (16h), now 270 min (4.5h).
+- ✅ **Pochven exit WH lifetimes** — Fixed. R081, U372, X450 were 960 min (16h), now 720 min (12h).
+- ✅ **C729 buggy variant** — Fixed typeId 56562: was 270 min / 100 Mg / 62 Mg-jump; now 720 min / 1000 Mg / 410 Mg-jump (matches all other C729 variants).
+- ✅ **Missing WH attributes** — Inserted J377 (73749), J492 (87827), I078 (92287), L687 (92288), O546 (92289), F216 (56543) with correct physics attributes.
+- ✅ **wormhole.csv** — Added C729, F216, I078, J377, J492, L687, O546, R081, U372, X450.
+- ✅ **New ships** — None missing. eve_universe has all published ship types from SDE.
+- ✅ **eve_universe.sql.zip** — Refreshed from running database (828+ types, all fixes applied).
+- ✅ **J377** — Is a wormhole type (typeId 73749), not a solar system; attributes inserted.
+- **Drifter WH renames** — SDE still uses J-codes for 31000000-range systems (e.g. 31000004 = J200727, not "Conflux Eyrie"). Requires manual check against anoik.is or dotlan. See [#177](https://github.com/goryn-clade/pathfinder/issues/177).
 - **Drifter WH statics** — `export/csv/system_static.csv` is sourced from anoik.is, not the SDE. Requires manual update from anoik.is. See [#177](https://github.com/goryn-clade/pathfinder/issues/177).
+- **J377/J492 statics** — These KSL wormhole statics need verification against anoik.is.
 
 ## Readme updates 
 - Review Claude changes to Readmes
