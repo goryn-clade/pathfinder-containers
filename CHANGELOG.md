@@ -55,6 +55,17 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 - `public/templates/admin/maps.html`: Added "Alliance maps" section below corp maps table, rendered only when alliance maps exist
 - `public/templates/admin/notification.html`: Guard `@notification->title` access with a null check — prevents PHP 8 NOTICE when no notification is set
 
+**Feature: Drifter hole wormhole sig types and auto-alias**
+- `js/app/conf/signature_type.js`: Added `drifterWH` wormhole group (Z647/D382/O477/Y683/N062/R474 — C1–C6) to all five drifter hole classes (C14–C18); previously only combat sites were defined
+- `app/Model/Pathfinder/SystemModel.php`: `afterInsertEvent()` now auto-sets the alias for the five drifter hole systems on first add to a map (31000001 → Sentinel MZ, 31000002 → Liberated Barbican, 31000003 → Sanctified Vidette, 31000004 → Conflux Eyrie, 31000006 → Azdaja Redoubt)
+
+**Feature: Native Discord embeds**
+- `app/Lib/Logging/Handler/AbstractWebhookHandler.php`: Added `getPostData()` override hook; added `getAttachmentColorInt()` helper; added cURL error/timeout logging to `write()`; removed unused `$response` variable
+- `app/Lib/Logging/Handler/DiscordMapWebhookHandler.php`: Full rewrite — native Discord `embeds` payload with author avatar, colour-coded title, code-block description, and optional extra fields; bypasses Slack compat path entirely
+- `app/Lib/Logging/Handler/DiscordRallyWebhookHandler.php`: Full rewrite — native Discord embed with System/Region/Security/Wormhole/Effect/TrueSec/Alias/Description/Map Link fields; removes the erroneous `Markdown\n` prefix bug
+- `app/Model/Pathfinder/MapModel.php`: `getDiscordWebHookConfig()` — removed `/slack` suffix from webhook URL (was routing through Slack compat endpoint)
+- `public/templates/dialog/system_rally.html`: Removed mail poke checkbox and status indicator (SMTP removed in Phase 2)
+
 **Enhancement: Maintainer info update**
 - `public/templates/dialog/credit.html`: Removed URL row (`pathfinder-w.space`), Media row (YouTube), donation heading, Patreon/PayPal buttons, and "By Exodus 4D" attribution; updated Repository link to `goryn-clade/pathfinder`; License row retained
 - `public/templates/view/login.html`: Replaced personal "About Me" content with community-focused text pointing to the goryn-clade repo; updated footer copyright to "Goryn Clade"; removed YouTube from footer social links; updated all `exodus4d/pathfinder` issue tracker links to `goryn-clade/pathfinder`; cleaned up first-person FAQ answers
