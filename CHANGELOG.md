@@ -55,6 +55,12 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 - `public/templates/admin/maps.html`: Added "Alliance maps" section below corp maps table, rendered only when alliance maps exist
 - `public/templates/admin/notification.html`: Guard `@notification->title` access with a null check — prevents PHP 8 NOTICE when no notification is set
 
+**Fix: 504 gateway timeout causes logout instead of retry**
+- `static/nginx/site.conf`: `fastcgi_read_timeout` reduced from 600s to 40s for all PHP; `/setup` location block retains the 600s override for long-running `buildIndex` operations
+- `static/php/fpm-pool.conf`: Added `request_terminate_timeout = 35s` (was erroneously placed in `php.ini` where it is silently ignored as a PHP-FPM pool directive)
+- `static/php/php.ini`: Removed misplaced `request_terminate_timeout`; added `max_execution_time = 30`
+- `js/app/mappage.js`: `handleAjaxErrorResponse` now treats HTTP 504 and network-abort (status 0) as transient — shows a "Connection timeout — retrying…" notification, sets program status offline, and reschedules both map and user update pings after 10 s instead of triggering `pf:shutdown`/logout
+
 **Security: SQL injection fix in Route API + error text redaction**
 - `app/Controller/Api/Rest/Route.php`: `excludeTypes` parameter was concatenated unsanitized into a REGEXP SQL clause, enabling error-based SQL injection via `ExtractValue()`. Values are now validated against `ConnectionModel::getConnectionTypeWhitelist()` before use — any value not in the whitelist is silently dropped.
 - `app/Model/Pathfinder/ConnectionModel.php`: Exposed `$connectionTypeWhitelist` via new `public static getConnectionTypeWhitelist()` accessor so Route.php can reference the canonical list without duplication.
