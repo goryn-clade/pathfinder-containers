@@ -55,6 +55,11 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 - `public/templates/admin/maps.html`: Added "Alliance maps" section below corp maps table, rendered only when alliance maps exist
 - `public/templates/admin/notification.html`: Guard `@notification->title` access with a null check — prevents PHP 8 NOTICE when no notification is set
 
+**Security: SQL injection fix in Route API + error text redaction**
+- `app/Controller/Api/Rest/Route.php`: `excludeTypes` parameter was concatenated unsanitized into a REGEXP SQL clause, enabling error-based SQL injection via `ExtractValue()`. Values are now validated against `ConnectionModel::getConnectionTypeWhitelist()` before use — any value not in the whitelist is silently dropped.
+- `app/Model/Pathfinder/ConnectionModel.php`: Exposed `$connectionTypeWhitelist` via new `public static getConnectionTypeWhitelist()` accessor so Route.php can reference the canonical list without duplication.
+- `app/Controller/Controller.php`: `showError()` now redacts the raw DB error text when `DEBUG < 1`, returning a generic `"An internal error occurred"` message instead. Previously only the stack trace was suppressed; the DB error string (which provides the oracle for error-based exfiltration) was still returned to the client. Set `PF_DEBUG=0` in production `.env` to activate.
+
 **Feature: Granular K162 signature options**
 - `js/app/init.js`: Replaced `incomingWormholes` with `incomingWormholesGeneric` (grouped labels: C1/2/3, C4/5, C6, H, L, 0.0, Thera, Trig, Drifter) and `incomingWormholesSpecific` (per-class: C1–C6, H, L, 0.0, Thera, T Pochven, C14–C18 drifter holes)
 - `app/Model/Pathfinder/MapModel.php`: New `granularK162` DT_BOOL field (default 0); exposed in `getData()`
