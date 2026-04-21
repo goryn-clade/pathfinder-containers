@@ -55,6 +55,13 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 - `public/templates/admin/maps.html`: Added "Alliance maps" section below corp maps table, rendered only when alliance maps exist
 - `public/templates/admin/notification.html`: Guard `@notification->title` access with a null check — prevents PHP 8 NOTICE when no notification is set
 
+**Feature: Granular K162 signature options**
+- `js/app/init.js`: Replaced `incomingWormholes` with `incomingWormholesGeneric` (grouped labels: C1/2/3, C4/5, C6, H, L, 0.0, Thera, Trig, Drifter) and `incomingWormholesSpecific` (per-class: C1–C6, H, L, 0.0, Thera, T Pochven, C14–C18 drifter holes)
+- `app/Model/Pathfinder/MapModel.php`: New `granularK162` DT_BOOL field (default 0); exposed in `getData()`
+- `js/app/ui/dialog/map_settings.js`: `granularK162` checkbox wired alongside `allowUnknownSystems`
+- `public/templates/dialog/map.html`: "Granular K162" checkbox added to map settings
+- `js/app/ui/module/system_signature.js`: Incoming WH optgroup now built outside the sig-type cache; `getSignatureTypeOptions()` accepts `granularK162` flag and selects the appropriate source list; `getSignatureTypeOptionsBySystem()` passes the flag through
+
 **Feature: Drifter hole wormhole sig types and auto-alias**
 - `js/app/conf/signature_type.js`: Added `drifterWH` wormhole group (Z647/D382/O477/Y683/N062/R474 — C1–C6) to all five drifter hole classes (C14–C18); previously only combat sites were defined
 - `app/Model/Pathfinder/SystemModel.php`: `afterInsertEvent()` now auto-sets the alias for the five drifter hole systems on first add to a map (31000001 → Sentinel MZ, 31000002 → Liberated Barbican, 31000003 → Sanctified Vidette, 31000004 → Conflux Eyrie, 31000006 → Azdaja Redoubt)
