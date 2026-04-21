@@ -55,6 +55,9 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 - `public/templates/admin/maps.html`: Added "Alliance maps" section below corp maps table, rendered only when alliance maps exist
 - `public/templates/admin/notification.html`: Guard `@notification->title` access with a null check — prevents PHP 8 NOTICE when no notification is set
 
+**Fix: MapUpdate cron crashes with TypeError on scalar INI values**
+- `app/Lib/Config.php`: `getMapsDefaultConfig()` now guards with `is_array()` before calling `arrayChangeKeyCaseRecursive()` — scalar lookups like `getMapsDefaultConfig('private.lifetime')` were passing an `int` to a PHP 8 strict `array` type hint, causing a TypeError 500 on every cron execution
+
 **Fix: 504 gateway timeout causes logout instead of retry**
 - `static/nginx/site.conf`: `fastcgi_read_timeout` reduced from 600s to 40s for all PHP; `/setup` location block retains the 600s override for long-running `buildIndex` operations
 - `static/php/fpm-pool.conf`: Added `request_terminate_timeout = 35s` (was erroneously placed in `php.ini` where it is silently ignored as a PHP-FPM pool directive)
