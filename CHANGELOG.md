@@ -55,6 +55,12 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 - `public/templates/admin/maps.html`: Added "Alliance maps" section below corp maps table, rendered only when alliance maps exist
 - `public/templates/admin/notification.html`: Guard `@notification->title` access with a null check — prevents PHP 8 NOTICE when no notification is set
 
+**Fix: Pasting multiple structures only persists the last one**
+- `app/Model/Pathfinder/AbstractPathfinderModel.php`: `reset()` now calls `parent::reset()` — previously only cleared `$fieldChanges`, leaving the Cortex mapper state intact. Cortex's `getRelInstance()` returns a Registry-cached singleton for each relation type, so `saveStructure()` was reusing the same `CorporationStructureModel` instance with its `_id` still set from the previous iteration. Iterations 2 and 3 were doing `UPDATE` on the existing junction row instead of `INSERT`, leaving only one `corporation_structure` record (for the last structure). `getStructuresData()` uses an EXISTS subquery on that junction table, so only the last structure was returned by `updateUserData`, causing the JS to delete the others.
+
+**Security: Upgrade firebase/php-jwt v6 → v7 (CVE-2025-45769)**
+- `composer.json`, `composer.lock`: Bumped `firebase/php-jwt` from `v6.11.1` to `v7.0.5` — resolves CVE-2025-45769 (weak encryption, low severity). No API changes required in `Sso.php` — `JWT::decode()` and `JWK::parseKeySet()` signatures are unchanged; v7 adds only stricter numeric validation on `iat`/`nbf`/`exp` claims and a 2048-bit RSA key minimum.
+
 **Fix: MapUpdate cron crashes with TypeError on scalar INI values**
 - `app/Lib/Config.php`: `getMapsDefaultConfig()` now guards with `is_array()` before calling `arrayChangeKeyCaseRecursive()` — scalar lookups like `getMapsDefaultConfig('private.lifetime')` were passing an `int` to a PHP 8 strict `array` type hint, causing a TypeError 500 on every cron execution
 
