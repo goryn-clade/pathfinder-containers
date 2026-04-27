@@ -108,6 +108,21 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 
 ---
 
+#### pathfinder_esi — v3.0.13 → v3.0.14
+
+- v3.0.14: Added `getCharactersAffiliationRequest()` — new public-facing callable (`getCharactersAffiliation`) for per-login affiliation refresh, reusing the existing `/v1/characters/affiliation/` POST endpoint and `Affiliation` mapper
+
+#### pathfinder (submodule)
+
+**Fix: Character corporation not updating after corp change**
+
+Root cause: `updateCharacter()` set `corporationId` via a FK assignment that silently failed when the new corporation row didn't yet exist in the local DB. `AbstractModel::save()` swallows `DatabaseException`, so the FK violation was never surfaced. The character's `lastLogin`/`updated` timestamps still advanced (from a separate `touch('lastLogin')` call in `loginByCharacter()`), masking the failure.
+
+- `app/Model/Pathfinder/CharacterModel.php`: Added `affiliationUpdated` nullable timestamp column (requires migration); added `updateAffiliation()` — fetches corp/alliance from ESI via the new `getCharactersAffiliation` endpoint, applies a 1-hour TTL gate, guards against FK constraint failure by verifying the corporation model is valid before assigning it to the character, logs all failure paths to `sso.log`; removed now-orphaned `corporationId`/`allianceId` assignments from `updateFromESI()`
+- `app/Controller/Ccp/Sso.php`: Removed affiliation lookup from `getCharacterData()` (now only fetches basic character data); removed corp/alliance assignment from `updateCharacter()`; wired `updateAffiliation()` into SSO callback (after `updateCharacter()`) and character-switch path (after `updateFromESI()`), both before `isAuthorized()` check
+- `app/Controller/Controller.php`: Wired `updateAffiliation()` into cookie login path after character reload, before `isAuthorized()` check
+- `composer.json`, `composer.lock`: Bumped `goryn-clade/pathfinder_esi` `3.0.13` → `3.0.14`
+
 #### pathfinder_esi — v3.0.7 → v3.0.12
 
 - v3.0.7: Removed `getStatusRequest()` and `meta.status` spec entry — `https://esi.evetech.net/status.json` no longer exists; CCP removed per-route health reporting
