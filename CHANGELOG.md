@@ -4,6 +4,12 @@
 
 ---
 
+### Map deletion tab persistence fix
+
+- **JS** (`util.js`): `deleteCurrentMapData` now stamps a 5-second TTL in a `recentlyDeletedMapIds` guard. `updateCurrentMapData` and `setCurrentMapData` skip any map id in that set, preventing in-flight `mapUpdate` WebSocket messages or the periodic poll from resurrecting the just-deleted map before the tab removal completes.
+
+---
+
 ### R2Z2 killboard poller hardening
 
 - **JS**: all `fetch()` calls in the poll loop now use `AbortController` with explicit timeouts (20s for r2z2, 10s for sequence), preventing opaque `NetworkError` on hung connections
