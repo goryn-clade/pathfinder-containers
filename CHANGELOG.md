@@ -4,6 +4,12 @@
 
 ---
 
+### Fix: 10s lag on initial signature paste (issue #53)
+
+- `app/Lib/Logging/Handler/SocketHandler.php`: Connection and write timeouts reduced from Monolog's 10s default to 2s. Write failures now caught — on `RuntimeException` the socket is immediately marked unavailable in the F3 cache so subsequent log writes within the same request skip the socket handler rather than each timing out independently.
+
+---
+
 ### config/ vs static/ layout cleanup
 
 - Drop redundant `config/pathfinder/config.ini` (byte-identical to static template) and its dev-only compose mount
