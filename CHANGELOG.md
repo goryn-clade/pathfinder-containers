@@ -108,6 +108,9 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 **Security: Upgrade firebase/php-jwt v6 → v7 (CVE-2025-45769)**
 - `composer.json`, `composer.lock`: Bumped `firebase/php-jwt` from `v6.11.1` to `v7.0.5` — resolves CVE-2025-45769 (weak encryption, low severity). No API changes required in `Sso.php` — `JWT::decode()` and `JWK::parseKeySet()` signatures are unchanged; v7 adds only stricter numeric validation on `iat`/`nbf`/`exp` claims and a 2048-bit RSA key minimum.
 
+**Fix: Signature type dropdown not opening on arrow click**
+- `js/app/ui/form_element.js`: `initSignatureTypeSelect` now suppresses the spurious `select2:opening` that fires during `_bindAdapters` init (via a one-shot `preventDefault` handler), preventing the dropdown from being in an already-open state when the user clicks the ▼ arrow; also guards against accidental item selection on the `mouseup` that immediately follows a `mousedown`-triggered open
+
 **Fix: MapUpdate cron crashes with TypeError on scalar INI values**
 - `app/Lib/Config.php`: `getMapsDefaultConfig()` now guards with `is_array()` before calling `arrayChangeKeyCaseRecursive()` — scalar lookups like `getMapsDefaultConfig('private.lifetime')` were passing an `int` to a PHP 8 strict `array` type hint, causing a TypeError 500 on every cron execution
 
