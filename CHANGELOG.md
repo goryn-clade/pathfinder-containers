@@ -4,6 +4,48 @@
 
 ---
 
+### Default connection size from system class and wormhole type
+
+New wormhole connections now get a default jump-mass class based on endpoint system security, and the class auto-updates when a signature's wormhole type is set.
+
+- Connections with a **C1** endpoint default to **Medium** (`wh_jump_mass_m`); connections with a **C13** endpoint default to **Small** (`wh_jump_mass_s`). Most restrictive endpoint wins when both sides are constrained.
+- When a wormhole signature linked to a connection is given a wormhole type (e.g. M001), the connection's mass class is updated automatically. K162 and typeless signatures are no-ops.
+- `ConnectionModel`: added `jumpMassTypeFromMass()`, `setJumpMassType()`, `applyMassFromWormholeTypeId()`, `defaultMassFromEndpoints()`; `setAutoScopeAndType()` now appends the inferred default mass class.
+- `SystemSignatureModel`: `afterInsertEvent`/`afterUpdateEvent` call `syncConnectionMass()` to push the wormhole type's mass class onto the linked connection. `beforeUpdateEvent` captures the pre-save typeId via mapper `initial` values to handle the case where the client clears typeId when linking a connection.
+- `system_signature.js`: `syncConnectionMassType()` method re-renders the connection mass pill immediately after a signature typeId or connectionId save, without requiring a page refresh. Falls back to DataTables row cache for typeId when the server PATCH response returns `typeId=0` (happens when linking a connection in the same request that clears the type dropdown).
+
+### Connection context menu reorder
+
+"Preserve mass" moved below "change scope" in the right-click connection menu, grouping the structural options (scope, preserve mass) together after the status submenus.
+
+---
+
+### EOL phase states (wh_eol1 / wh_eol2 / wh_eol3)
+
+Replaced the single `wh_eol` connection type with three distinct phases matching the game's lifecycle. Naming uses "Phase" prefix to stay audibly and visually distinct from the mass-status "Stage" terminology.
+
+| Phase | Label | Time remaining | Map line |
+|---|---|---|---|
+| `wh_eol1` | Phase 1 (aging) | 1–4h | light pink |
+| `wh_eol2` | Phase 2 (expiring) | 0–1h | pink (was EOL) |
+| `wh_eol3` | Phase 3 (zombie) | past natural end | dark pink |
+
+**Backend**
+- `ConnectionModel`: added `wh_eol1/2/3` to type whitelist; `set_type()` resets `eolUpdated` on each phase transition (not just initial EOL); new nullable `nominalLifespan` INT column (seconds, NULL = 24h default).
+- `Cron/MapUpdate`: `deleteEolConnections` expiry is now per-phase: Ph1 4h+20%, Ph2 1h+20%, Ph3 20% of nominal lifespan. `deleteExpiredConnections` uses `nominalLifespan × 1.2` instead of a fixed constant.
+- `AbstractEveScoutController`: auto-detected EOL now maps `estimatedEol` hours to the correct phase type.
+- Config: `EXPIRE_CONNECTIONS_EOL` + `EXPIRE_CONNECTIONS_WH` replaced by `EXPIRE_CONNECTIONS_NOMINAL_DEFAULT` (86400s).
+- Old `wh_eol` DB rows are backwards-compatible: `getData()` maps them to `wh_eol1` on read.
+
+**Frontend**
+- Context menu: "toggle EOL" → "EOL phase" submenu with Phase 1/2/3 options; icons progress hourglass-start → half → end.
+- Map overlay: shows phase label (`Ph.1 / Ph.2 / Ph.3`) alongside elapsed time.
+- CSS: three distinct shades of pink/dark-pink for the map line and sidebar pill.
+
+**Note**: `nominalLifespan` is not yet auto-populated from linked signatures; all connections default to 24h until a follow-up adds that sync.
+
+---
+
 ### Fixes and features
 
 #### pathfinder-containers
@@ -21,6 +63,11 @@
 - `compose.yml`, `compose.test.yml`: Removed redundant per-router HTTP→HTTPS redirect middleware labels — entrypoint-level redirect (`redirections.entryPoint`) already handles it; adopted unquoted label style
 
 #### pathfinder (submodule)
+
+**Static data: SQL patch files consolidated into eve_universe.sql**
+- `export/sql/eve_universe.sql`: All patch files merged into the canonical dump — Zarzakh region/constellation/system/stargates/types appended as executable SQL (runs while `FOREIGN_KEY_CHECKS=0` is still active); `pochven_and_trailblazer.sql` and `wormhole_lifespan_fix.sql` were already baked into previous dump rows.
+- `export/sql/zarzakh.sql`, `pochven_and_trailblazer.sql`, `wormhole_lifespan_fix.sql`: Deleted — no longer needed.
+- `export/sql/eve_universe.sql.zip`: Regenerated.
 
 **Static data: wormhole lifetime and attribute fixes**
 - `export/sql/wormhole_lifespan_fix.sql`: Expanded to cover all identified issues — frigate WHs (A009/C008/E004/G008/Q003/Z006/M001/L005) corrected from 16h → 4.5h; Pochven exits (R081/U372/X450) corrected from 16h → 12h; C729 variant 56562 corrected (lifetime + mass values); missing attributes inserted for J377, J492, I078, L687, O546, F216 (56543). Confirmed against SDE 2025-07-07 and jambeeno.com/holes.
@@ -122,6 +169,15 @@ Root cause: `updateCharacter()` set `corporationId` via a FK assignment that sil
 - `app/Controller/Ccp/Sso.php`: Removed affiliation lookup from `getCharacterData()` (now only fetches basic character data); removed corp/alliance assignment from `updateCharacter()`; wired `updateAffiliation()` into SSO callback (after `updateCharacter()`) and character-switch path (after `updateFromESI()`), both before `isAuthorized()` check
 - `app/Controller/Controller.php`: Wired `updateAffiliation()` into cookie login path after character reload, before `isAuthorized()` check
 - `composer.json`, `composer.lock`: Bumped `goryn-clade/pathfinder_esi` `3.0.13` → `3.0.14`
+
+**Fix: Crash on route calculation for systems absent from local DB (e.g. Zarzakh)**
+- `app/Controller/Api/Rest/Route.php`: `getSystemInfoBySystemId()` now returns `null` when the system is not in `$nameArray` — previously accessed `$this->nameArray[$systemId]` without a null guard, causing two PHP 8 NOTICEs (escalated to 500) for systems like Zarzakh (30100000) that are absent from the DB dump
+
+**Fix: TypeError crash in system route module when server returns no route data**
+- `js/app/ui/module/system_route.js`: `.then()` handler now guards with `Array.isArray(payload.data.routesData)` before invoking the callback — previously a 200 response with no `routesData` key caused a TypeError that fell into `.catch()` as a plain `Error` object; `.catch()` handler now guards `payload.data.jqXHR` with a ternary — prevents crash when `payload` is a plain `Error` with no `jqXHR` property
+
+**Fix: TypeError in `updateMapByCharacter` when location data is empty**
+- `app/Controller/Api/Map.php`: Added `isset($currentPosition['systemId'])` guard before comparing `$targetSystemId` — `$currentPosition` comes from `$newSystemPositions['location'] ?? []` and may be empty, causing an undefined array key notice escalated to 500
 
 #### pathfinder_esi — v3.0.7 → v3.0.12
 
