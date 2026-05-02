@@ -4,6 +4,18 @@
 
 ---
 
+### R2Z2 killboard poller hardening
+
+- **JS**: all `fetch()` calls in the poll loop now use `AbortController` with explicit timeouts (20s for r2z2, 10s for sequence), preventing opaque `NetworkError` on hung connections
+- **JS**: `AbortError` from page unload or `stopPoller()` is silently discarded rather than logged as an error
+- **JS**: error logging now includes `seqId` and `e.name` for easier diagnosis
+- **JS**: exponential backoff on consecutive poll errors (10s → 20s → 40s → 60s max); after 3 consecutive failures the sequence is resynced from `/api/Killboard/sequence`
+- **PHP**: added `connect_timeout: 3` to Guzzle client in both `sequence()` and `r2z2()` to fail fast on DNS/TCP issues
+- **PHP**: `r2z2()` now catches `\Throwable` (not just `GuzzleException`), logs via `error_log`, and returns **204** on upstream failure so the JS poll loop continues smoothly
+- **PHP**: `sequence()` now catches `\Throwable` and logs upstream failures
+
+---
+
 ### Default connection size from system class and wormhole type
 
 New wormhole connections now get a default jump-mass class based on endpoint system security, and the class auto-updates when a signature's wormhole type is set.
