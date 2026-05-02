@@ -15,7 +15,7 @@ services:
     command: ["valkey-server", "/etc/redis/redis.conf"]
     volumes:
       - redis_data:/data
-      - ./static/redis/redis.conf:/etc/redis/redis.conf:ro
+      - ./config/redis/redis.conf:/etc/redis/redis.conf:ro
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     logging:
@@ -48,8 +48,6 @@ services:
     healthcheck:
       disable: true
     volumes:
-      - ./config/pathfinder/config.ini:/var/www/html/pathfinder/app/templateConfig.ini
-      - ./config/pathfinder/pathfinder.ini:/var/www/html/pathfinder/app/pathfinder.ini
       - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
       - ./logs:/var/www/html/pathfinder/history/map
       - /etc/timezone:/etc/timezone:ro

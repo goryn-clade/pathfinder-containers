@@ -15,7 +15,7 @@ services:
     command: ["valkey-server", "/etc/redis/redis.conf"]
     volumes:
       - redis_data:/data
-      - ./static/redis/redis.conf:/etc/redis/redis.conf:ro
+      - ./config/redis/redis.conf:/etc/redis/redis.conf:ro
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     logging:
