@@ -30,6 +30,8 @@ services:
       context: .
       dockerfile: pf-websocket.Dockerfile
     command: ["--tcpHost", "0.0.0.0"]
+    env_file:
+      - .env
     volumes:
       - ./logs:/var/www/html/pathfinder/history/map
       - /etc/timezone:/etc/timezone:ro

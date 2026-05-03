@@ -26,18 +26,13 @@ Severity scale: **Critical** → **High** → **Medium** → **Low** → **Info*
 | F-10 | Low | Three Api controllers extend Controller — no 401 on unauthenticated calls to `User.php` | Added `beforeroute()` override to `User.php` with public-method allow-list; non-listed methods now call `logoutCharacter()` and return 401 |
 | F-11 | Low | `session.cookie_secure` not set for HTTPS deployments | Added `SESSION_COOKIE_SECURE` env var (default `0`) to `.env.example`; referenced `${SESSION_COOKIE_SECURE}` in `static/php/php.ini` |
 | F-17 | Low | No request-rate limiting on API endpoints | Added `limit_req_zone` to `static/nginx/nginx.conf`; added `/api/` location with `limit_req zone=api burst=60 nodelay` to `static/nginx/site.conf` |
+| F-07 | Medium | WebSocket access token had no session binding — replayable from any IP within 30 s window | Token is now `nonce.HMAC-SHA256(nonce:charId:sessionId, WS_TOKEN_SECRET)`; WS server verifies HMAC with `hash_equals()` instead of plain string comparison; `sessionId` passed via TCP payload and bound into the HMAC; `WS_TOKEN_SECRET` added to `.env.example`; `env_file` added to `pf-socket` in both compose files |
 
 ---
 
 ## Open findings
 
 ### Medium
-
-#### F-07 · WebSocket token has no server-side session binding *(priority 5)*
-- **Files:** `pathfinder/app/Controller/Api/Map.php` ~line 482; `websocket/app/Component/MapUpdate.php` ~line 287
-- **Detail:** `/api/Map/getAccessData` returns a `bin2hex(random_bytes(16))` token to the client. The client sends it in the WebSocket subscribe payload; the server validates by plain string comparison against an in-memory store. Tokens expire in 30 s and are one-time-use, which limits the window, but a token leaked in that window (logs, browser history, unencrypted dev channel) is replayable from any IP with no session binding.
-- **Remediation:** Two-part fix. (1) HMAC-sign the token keyed on a shared secret (`WS_TOKEN_SECRET` env var read by both PHP and the WS server). (2) Bind token issuance to the character's PHP session ID so the WS server can validate it. Requires coordinated changes across `Map.php`, `MapUpdate.php`, and the JS subscribe payload.
-- **Effort:** ~3–4 hr cross-repo. **Risk:** High — incorrect implementation stops live map updates entirely; needs end-to-end test with multiple characters before shipping.
 
 #### F-19 · App connects to MariaDB as root — no least-privilege DB user *(priority 6)*
 - **Files:** `.env.example` (`MYSQL_USER=root`), `compose.dev.yml` / `compose.yml` (`MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD`)

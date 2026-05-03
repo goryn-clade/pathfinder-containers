@@ -42,6 +42,12 @@ A full security review was performed across the container stack, covering CVE sc
 **User controller auth guard**
 - `app/Controller/Api/User.php`: Added `beforeroute()` override with `PUBLIC_METHODS` allow-list (`getCookieCharacter`, `getCaptcha`, `logout`); all other methods now call `logoutCharacter()` and return 401 when no session exists — previously silently returned HTTP 200 with empty data
 
+**WebSocket token HMAC signing**
+- `app/Controller/Api/Map.php`: `getAccessData()` now generates `nonce.HMAC-SHA256(nonce:charId:sessionId, WS_TOKEN_SECRET)` instead of a bare random hex token; `sessionId` included in the TCP payload to the WS server
+- `websocket/app/Component/MapUpdate.php`: `setConnectionAccess()` stores nonce + sessionId; `checkCharacterAccess()` and `checkMapAccess()` verify the HMAC with `hash_equals()` and session binding instead of plain string comparison — prevents replay of leaked tokens from a different session
+- `compose.yml`, `compose.dev.yml`: `env_file: .env` added to `pf-socket` so it receives `WS_TOKEN_SECRET`
+- `.env.example`: Added `WS_TOKEN_SECRET` with generation hint (`openssl rand -hex 32`)
+
 #### websocket (submodule)
 
 **Dependency CVEs**
