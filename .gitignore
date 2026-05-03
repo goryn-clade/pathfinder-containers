@@ -20,3 +20,4 @@ PHP8_STATIC_ANALYSIS.md
 vendor/
 dev-rebuild.sh
 dev-gulp-rebuild.sh
+.DS_Store
