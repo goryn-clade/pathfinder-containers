@@ -13,7 +13,7 @@ services:
 
   pf-redis:
     image: valkey/valkey:8-alpine
-    command: ["valkey-server", "/etc/redis/redis.conf"]
+    command: ["valkey-server", "/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD}"]
     volumes:
       - redis_data:/data
       - ./config/redis/redis.conf:/etc/redis/redis.conf:ro

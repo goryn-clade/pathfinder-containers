@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-alpine AS build
+FROM php:8.3-fpm-alpine AS build
 
 RUN apk update \
     && apk add --no-cache libpng-dev git \
@@ -33,6 +33,7 @@ FROM trafex/php-nginx:3.6.0
 USER root
 
 RUN apk update \
+    && apk upgrade --no-cache \
     && apk add --no-cache \
         busybox-suid sudo shadow gettext bash apache2-utils logrotate ca-certificates \
         php83-redis php83-pdo php83-pdo_mysql php83-fileinfo php83-pecl-event \
