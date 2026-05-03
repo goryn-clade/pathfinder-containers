@@ -4,6 +4,52 @@
 
 ---
 
+### Security hardening
+
+A full security review was performed across the container stack, covering CVE scanning, static analysis, PHP session config, nginx headers, and application auth flow. All findings are tracked in `findings.md`.
+
+#### pathfinder-containers
+
+**Container image / OS packages**
+- `pathfinder.Dockerfile`: Added `apk upgrade --no-cache` to runtime stage; bumped build stage to `php:8.3-fpm-alpine` — resolves CVE-2024-11236 (PHP RCE, Critical) and ~135 further Critical/High CVEs in libcrypto3, libexpat, libxml2, aom-libs, sqlite-libs
+
+**nginx hardening**
+- `static/nginx/nginx.conf`: `server_tokens off` — suppresses nginx version in error responses; added `limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s` for API rate limiting
+- `static/nginx/site.conf`: Added `/api/` location with `limit_req zone=api burst=60 nodelay`; added security headers: `Strict-Transport-Security`, `Referrer-Policy`, `Permissions-Policy`; `fastcgi_hide_header X-Powered-By` — suppresses Fat-Free Framework version disclosure
+
+**PHP session cookie flags**
+- `static/php/php.ini`: `session.cookie_httponly = 1`, `session.cookie_samesite = Lax`, `session.cookie_secure = ${SESSION_COOKIE_SECURE}`
+- `.env.example`: Added `SESSION_COOKIE_SECURE` (default `0`; set to `1` on HTTPS deployments) and `APP_ENV` (set to `production` to activate startup guards)
+
+**Redis authentication**
+- `static/entrypoint.sh`: Builds `REDIS_CACHE_DSN` and `REDIS_SESSION_PATH` conditionally — includes `auth` parameter only when `REDIS_PASSWORD` is set, avoiding empty-password AUTH errors
+- `static/php/php.ini`: Session save path now references `${REDIS_SESSION_PATH}` so Redis auth is included
+- `static/pathfinder/config.ini`: Cache DSN now references `${REDIS_CACHE_DSN}`
+- `compose.yml`, `compose.dev.yml`: `--requirepass "${REDIS_PASSWORD}"` passed to `pf-redis`; empty string disables auth in Valkey
+- `.env.example`: Added `REDIS_PASSWORD` with guidance
+
+**Production debug guard**
+- `static/entrypoint.sh`: Warns to stderr when `APP_ENV=production` and `PF_DEBUG≥1` — prevents accidental stack-trace exposure on internet-facing deployments
+
+#### pathfinder (submodule)
+
+**Session fixation**
+- `app/Controller/Api/User.php`: `session_regenerate_id(true)` called in `loginByCharacter()` after session data is written — prevents session fixation via pre-planted session cookie
+
+**`/setup` defence-in-depth**
+- `app/Controller/Setup.php`: Added `APP_PASSWORD` token check at the start of `init()` for all requests with an `action` param — second gate behind nginx Basic Auth; protects against Direct Request attacks and misconfigured reverse proxies
+
+**User controller auth guard**
+- `app/Controller/Api/User.php`: Added `beforeroute()` override with `PUBLIC_METHODS` allow-list (`getCookieCharacter`, `getCaptcha`, `logout`); all other methods now call `logoutCharacter()` and return 401 when no session exists — previously silently returned HTTP 200 with empty data
+
+#### websocket (submodule)
+
+**Dependency CVEs**
+- `composer.lock`: Bumped `symfony/http-foundation` 5.3.6 → 5.4.50 — resolves CVE-2025-64500 (PATH_INFO auth bypass, High)
+- `composer.lock`: Bumped `guzzlehttp/psr7` 1.8.2 → 1.9.1 — resolves CVE-2023-29197 (header injection, Medium) and CVE-2022-24775 (header parsing, Medium)
+
+---
+
 ### Fix: 10s lag on initial signature paste (issue #53)
 
 - `app/Lib/Logging/Handler/SocketHandler.php`: Connection and write timeouts reduced from Monolog's 10s default to 2s. Write failures now caught — on `RuntimeException` the socket is immediately marked unavailable in the F3 cache so subsequent log writes within the same request skip the socket handler rather than each timing out independently.
