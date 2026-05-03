@@ -13,4 +13,3 @@
 - **assess upgrade to php 8.4**: `trafex/php-nginx:3.8.0+` ships PHP 8.4. Currently pinned to 3.6.0 (PHP 8.3) because all higher tags jumped straight to 8.4+. Alpine package CVEs are mitigated by `apk upgrade --no-cache` in the Dockerfile. When the app is ready for PHP 8.4 compatibility work, bump the base image tag and update all `php83-*` package installs to `php84-*`.
 
 
-
