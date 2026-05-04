@@ -195,6 +195,9 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 **Fix: Signature type dropdown not opening on arrow click**
 - `js/app/ui/form_element.js`: `initSignatureTypeSelect` now suppresses the spurious `select2:opening` that fires during `_bindAdapters` init (via a one-shot `preventDefault` handler), preventing the dropdown from being in an already-open state when the user clicks the ▼ arrow; also guards against accidental item selection on the `mouseup` that immediately follows a `mousedown`-triggered open
 
+**Fix: `updateSovereigntyData` cron NOTICE on missing `length` param**
+- `app/Cron/Universe.php`: `array_slice($ids, $offset, $params['length'])` → `$params['length'] ?? null` — `getParams()` only sets `length` when provided via CLI or last exec state; passing `null` to `array_slice` is the correct "no limit" default; the bare key access caused an F3-fatal NOTICE on every normal cron run
+
 **Fix: MapUpdate cron crashes with TypeError on scalar INI values**
 - `app/Lib/Config.php`: `getMapsDefaultConfig()` now guards with `is_array()` before calling `arrayChangeKeyCaseRecursive()` — scalar lookups like `getMapsDefaultConfig('private.lifetime')` were passing an `int` to a PHP 8 strict `array` type hint, causing a TypeError 500 on every cron execution
 
