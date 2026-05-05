@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v3.0
+
+- `Setup.php` / `environment.ini`: gated `/setup` controller behind new `ENVIRONMENT.SETUP_ENABLED` flag (default `1` in DEVELOP, `0` in PRODUCTION). Returns 404 when disabled. Lets prod images keep the route file intact while still locking out the wizard post-bootstrap.
 
 ---
 
