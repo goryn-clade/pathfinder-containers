@@ -18,6 +18,8 @@ Check systems like Zarzakh are in the database and in the SDE seed file. it seem
 ## Check for /setup switch
 setup page is vulnerable being protected only by basic auth. There might be a built in switch to disable the route once bootstrapping is complete.
 
+## Review github actions pipeline that builds docker images
+
 ## Known bugs / deferred fixes
 
 - **f3-cortex: adopt tagged release**: `ikkez/f3-cortex` is pinned to `dev-master#47d2596` (2025-07-08) because three PHP 8.2 type-hint fixes landed after the `v1.7.8` tag. Once a `v1.7.9`+ tag is published, switch `composer.json` to `"1.7.*"` and drop the commit hash.
