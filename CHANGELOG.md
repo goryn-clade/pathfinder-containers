@@ -132,6 +132,16 @@ Replaced the single `wh_eol` connection type with three distinct phases matching
 
 ---
 
+### Route settings: per-phase EOL filtering
+
+Route search dialogs now expose three individual EOL phase checkboxes (aging / expiring / zombie) instead of the previous single "End of life" toggle, allowing users to route through early-phase holes while excluding zombies.
+
+- `public/templates/dialog/route.html`, `route_settings.html`: replaced single `wormholesEOL` checkbox with `wormholesEOL1` (aging, 1–4h) / `wormholesEOL2` (expiring, 0–1h) / `wormholesEOL3` (zombie, past end); all cascade from the master Wormholes checkbox
+- `js/app/ui/module/system_route.js`: wired three phase keys throughout rowData, routeData, settings save and find-route callbacks; `showSettingsDialog` now merges `{wormholesEOL1:1, wormholesEOL2:1, wormholesEOL3:1}` defaults into Mustache template data so missing localStorage keys render as `1` not `""` (which coerces to `0` under loose equality and incorrectly unchecks the boxes); save callbacks use `0` as the missing-key default (matching `wormholesReduced`/`wormholesCritical` pattern) so unchecked boxes persist correctly
+- `app/Controller/Api/Rest/Route.php`: removed `wormholesEOL` / `$includeEOL` / `eolUpdated IS NULL` path; each unchecked phase appends its type (`wh_eol1/2/3`) to `$excludeTypes`, feeding the existing `NOT REGEXP` SQL clause
+
+---
+
 ### Fixes and features
 
 #### pathfinder-containers
