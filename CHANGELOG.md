@@ -35,6 +35,9 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**SSO: JWT issuer and audience verification (F1 + F2)**
+- `app/Controller/Ccp/Sso.php`: Fixed broken issuer check (`strpos() !== true` was always-true; replaced with `hash_equals`). Added missing audience (`aud`) and optional authorized-party (`azp`) verification against `CCP_SSO_CLIENT_ID`. Both checks now throw `UnexpectedValueException` on mismatch. `verifyCharacterData()` wraps the full verification in try/catch, returns `null` on any failure (caller `!empty()` guards trigger correctly instead of 500).
+
 **Session fixation**
 - `app/Controller/Api/User.php`: `session_regenerate_id(true)` called in `loginByCharacter()` after session data is written — prevents session fixation via pre-planted session cookie
 
