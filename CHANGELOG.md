@@ -35,6 +35,9 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**SSO: cache CCP JWKS in F3 to avoid per-login fetch (A1)**
+- `app/Controller/Ccp/Sso.php`: `VolatileRuntimeStorage` (in-memory PHP array) was the Guzzle cache backend — reset every request, so JWKS was always fetched from CCP on each login callback. Added `getCcpJwkData()` F3 cache layer (1h TTL via Redis in production). On `kid`-invalid exception (CCP key rotation), cache is busted and JWKS re-fetched once automatically.
+
 **SSO: remove dead code in getSsoAccessData (F7)**
 - `app/Controller/Ccp/Sso.php`: Removed unreachable `else` branch (caller always passes non-empty `$authCode`). Simplified to a one-line passthrough to `verifyAuthorizationCode()`.
 
