@@ -35,6 +35,10 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**SSO / cookie auth: replace deprecated CSPRNG (F4)**
+- `app/Controller/Ccp/Sso.php`: `openssl_random_pseudo_bytes(12)` → `random_bytes(32)` for OAuth `state` (entropy bump: 96 → 256 bits).
+- `app/Controller/Controller.php`: Both `openssl_random_pseudo_bytes` calls in cookie selector/validator generation replaced with `random_bytes`. Removed redundant `openssl_cipher_iv_length()` intermediate.
+
 **SSO: refresh token redaction from logs (F3)**
 - `app/Controller/Ccp/Sso.php`: Added `redactSecrets()` helper that masks `refresh_token`, `code`, and `client_secret` before logging. Applied to the `requestAccessData()` failure path where `print_r($requestParams)` previously exposed long-lived tokens to log files.
 
