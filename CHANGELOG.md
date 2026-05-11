@@ -35,6 +35,9 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**A6: tighten log/tmp directory permissions**
+- `pathfinder.Dockerfile`: `chmod 0766` → `chmod 0755` on `pathfinder/logs` and `pathfinder/tmp/` — removes world-write bit; PHP (running as `nobody`, directory owner) retains full write access.
+
 **SSO: cache CCP JWKS in F3 to avoid per-login fetch (A1)**
 - `app/Controller/Ccp/Sso.php`: `VolatileRuntimeStorage` (in-memory PHP array) was the Guzzle cache backend — reset every request, so JWKS was always fetched from CCP on each login callback. Added `getCcpJwkData()` F3 cache layer (1h TTL via Redis in production). On `kid`-invalid exception (CCP key rotation), cache is busted and JWKS re-fetched once automatically.
 
