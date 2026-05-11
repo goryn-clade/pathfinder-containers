@@ -35,6 +35,9 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**SSO: remove dead code in getSsoAccessData (F7)**
+- `app/Controller/Ccp/Sso.php`: Removed unreachable `else` branch (caller always passes non-empty `$authCode`). Simplified to a one-line passthrough to `verifyAuthorizationCode()`.
+
 **SSO / cookie auth: replace deprecated CSPRNG (F4)**
 - `app/Controller/Ccp/Sso.php`: `openssl_random_pseudo_bytes(12)` → `random_bytes(32)` for OAuth `state` (entropy bump: 96 → 256 bits).
 - `app/Controller/Controller.php`: Both `openssl_random_pseudo_bytes` calls in cookie selector/validator generation replaced with `random_bytes`. Removed redundant `openssl_cipher_iv_length()` intermediate.
