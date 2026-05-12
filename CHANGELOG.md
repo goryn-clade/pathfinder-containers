@@ -35,6 +35,9 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**F6: multi-tab SSO login — replace single-slot state with per-tab map**
+- `app/Controller/Ccp/Sso.php`: `SESSION.SSO.STATE` was a scalar; a second tab's login click overwrote it, causing the first tab's CCP callback to fail with "Invalid response". Now stored as a map `{state_token => {from, createdAt}}`, max 5 entries (oldest evicted on overflow). `SESSION.SSO.FROM` (post-login redirect target) embedded per-entry so each tab's callback reads its own redirect, not the last-written scalar. State entries are consumed (deleted from map) on use. Defensive `array_filter` discards any non-array entries from in-flight sessions that held the old scalar shape.
+
 **A3: persist refresh token after refresh; log grant_type on SSO token failures**
 - `app/Model/Pathfinder/CharacterModel.php`: `getAccessToken()` now persists `esiRefreshToken` from CCP's refresh response. Previously it was discarded — no-op if CCP doesn't rotate tokens, correct if CCP ever starts rotating. Redis lock deferred: production evidence suggests CCP does not rotate, so the concurrent-invalidation race may not exist. Revisit if `grant_type=[refresh_token]` failures cluster in SSO logs.
 - `app/Controller/Ccp/Sso.php`: `requestAccessData()` failure log now includes `grant_type=[…]` tag for grep-ability. Lets us measure whether `refresh_token` grant failures occur and whether they cluster (indicating the race).

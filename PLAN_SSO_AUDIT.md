@@ -81,6 +81,14 @@ Columns `esiAccessToken`, `esiRefreshToken` are stored as plain VARCHAR. A DB re
 
 **Why review:** atomic-consume semantics on a F3 session map have a subtle race — confirm the chosen primitive (session write lock vs single `$f3->set` of the modified map) doesn't lose entries under concurrent callbacks from sibling tabs.
 
+**Outcome (2026-05-12):** Applied. `SESSION.SSO.STATE` is now a map; `SESSION.SSO.FROM` is embedded per-entry.
+- `rerouteAuthorization()`: reads existing map, filters invalid entries (defensive against legacy scalar
+  sessions), evicts oldest when at capacity (≥5), inserts `{from, createdAt}` keyed by state token.
+- `callbackAuthorization()`: looks up incoming state in map, extracts `from`, consumes entry (unset + write
+  back / clear when empty). All downstream login logic unchanged.
+- Residual race acknowledged: `\DB\SQL\Session::read()` has no `FOR UPDATE` lock, so truly simultaneous
+  writes can lose one entry. Rare in practice (human-paced tab clicks), accepted for UX-level fix.
+
 ### F7 — Dead code in `getSsoAccessData()`
 **Severity:** Trivial. **Model:** Sonnet. **Location:** [pathfinder/app/Controller/Ccp/Sso.php:354-366](pathfinder/app/Controller/Ccp/Sso.php#L354-L366)
 
