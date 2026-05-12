@@ -35,6 +35,11 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**A4: PKCE (RFC 7636) for EVE SSO authorization flow**
+- `app/Controller/Ccp/Sso.php`: PKCE layered on top of the existing confidential-client flow (`client_secret` stays). `rerouteAuthorization()` generates a `code_verifier` (43 base64url chars from 32 bytes of `random_bytes`), computes `code_challenge = BASE64URL(SHA256(verifier))`, embeds the verifier in the state map entry, and adds `code_challenge` + `code_challenge_method=S256` to the CCP auth URL. `callbackAuthorization()` extracts the verifier from the consumed state entry and passes it through `getSsoAccessData()` → `verifyAuthorizationCode()` where it is included as `code_verifier` in the POST body to `/v2/oauth/token`. ESI client unchanged (already passes `form_params` through). Legacy state map entries (no verifier field) fall back to no PKCE gracefully.
+- `app/environment.ini`: Added `CCP_SSO_USE_PKCE = 1` to both `[ENVIRONMENT.DEVELOP]` and `[ENVIRONMENT.PRODUCTION]`. Set to `0` to disable PKCE without a code change (kill-switch if CCP rejects `code_verifier` on confidential clients).
+- **Pending:** Sisi login round-trip required to confirm CCP accepts `code_verifier` alongside `client_secret`.
+
 **F6: multi-tab SSO login — replace single-slot state with per-tab map**
 - `app/Controller/Ccp/Sso.php`: `SESSION.SSO.STATE` was a scalar; a second tab's login click overwrote it, causing the first tab's CCP callback to fail with "Invalid response". Now stored as a map `{state_token => {from, createdAt}}`, max 5 entries (oldest evicted on overflow). `SESSION.SSO.FROM` (post-login redirect target) embedded per-entry so each tab's callback reads its own redirect, not the last-written scalar. State entries are consumed (deleted from map) on use. Defensive `array_filter` discards any non-array entries from in-flight sessions that held the old scalar shape.
 

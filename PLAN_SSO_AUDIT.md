@@ -170,6 +170,14 @@ EVE SSO v2 supports PKCE (RFC 7636). Currently a confidential client flow with `
 
 **Why review:** OAuth flow correctness. Verifier length, challenge method (`S256`), URL-safe base64 (no padding) all matter for interop. Opus should verify the implementation against RFC 7636 §4 and CCP's documented behaviour.
 
+**Outcome (2026-05-12):** Applied with feature flag. PKCE is now layered on the existing confidential-client flow; `client_secret` stays in Basic Auth.
+- `rerouteAuthorization()`: generates `pkceVerifier` (43 base64url chars from `random_bytes(32)`) and `pkceChallenge` (`BASE64URL(SHA256(verifier))`); embeds verifier in state map entry; adds `code_challenge` + `code_challenge_method=S256` to the CCP auth URL.
+- `callbackAuthorization()`: extracts `pkceVerifier` from consumed state entry; passes to `getSsoAccessData()`.
+- `getSsoAccessData()` / `verifyAuthorizationCode()`: accept optional `$pkceVerifier`; include `code_verifier` in POST body to `/v2/oauth/token` when non-empty.
+- ESI client unchanged — passthrough `form_params` already handled it.
+- Feature flag `CCP_SSO_USE_PKCE = 1` in both `[ENVIRONMENT.DEVELOP]` and `[ENVIRONMENT.PRODUCTION]` in `environment.ini`. Set to `0` to disable without a code change if CCP rejects `code_verifier` on confidential clients.
+- **Pending verification:** Sisi login round-trip required before treating this as confirmed. See Opus review for failure-mode table.
+
 ### A5 — Cookie-based "remember me" auth surface
 **Model:** Sonnet for the audit read, Opus review if new findings surface.
 [Controller.php:255-280](pathfinder/app/Controller/Controller.php#L255-L280) implements the selector/validator persistent login pattern. Read-through audit to confirm:
