@@ -35,6 +35,9 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**A5: cookie auth audit — bump selector entropy**
+- `app/Controller/Controller.php`: `setLoginCookie()` selector bumped from `random_bytes(12)` (96 bits) to `random_bytes(16)` (128 bits) to meet ≥16-byte threshold. Validator was already 16 bytes. All other checks passed: `hash_equals()` used for comparison, DB stores `hash('sha256', $validator)` not plaintext, F3 JAR defaults provide `HttpOnly`, `Secure`, and `SameSite=Lax` automatically. Cookie rotation on use is a new finding (C1) — tracked in PLAN_SSO_AUDIT.md, needs Opus review for concurrent-request edge case.
+
 **A6: tighten log/tmp directory permissions**
 - `pathfinder.Dockerfile`: `chmod 0766` → `chmod 0755` on `pathfinder/logs` and `pathfinder/tmp/` — removes world-write bit; PHP (running as `nobody`, directory owner) retains full write access.
 

@@ -86,6 +86,18 @@ Columns `esiAccessToken`, `esiRefreshToken` are stored as plain VARCHAR. A DB re
 
 `$authCode` is typed `string`; the `!empty()` check + log-only `else` is unreachable in normal use (empty string passes the type check but never hits in practice from the callback flow). Clean while in the file.
 
+### C1 — No cookie rotation on use (found during A5 audit)
+**Severity:** Medium. **Model:** Sonnet + Opus review. **Location:** [pathfinder/app/Controller/Controller.php:302-401](pathfinder/app/Controller/Controller.php#L302-L401)
+
+`getCookieCharacters()` validates the selector/validator pair on every page load but never rotates the token on success. A stolen "remember me" cookie (30-day expiry, from `pathfinder.ini COOKIE_EXPIRE = 30`) remains usable for the full lifetime. The legitimate user has no way to detect or revoke it until their own cookie expires or they explicitly log out.
+
+**Remediation:** On successful validation in `getCookieCharacters()`, before returning the character:
+1. Generate a fresh `$newSelector` / `$newValidator` pair (same sizes as creation).
+2. Update the DB row in place: `$characterAuth->selector = $newSelector; $characterAuth->token = hash('sha256', $newValidator); $characterAuth->save();`
+3. Overwrite the cookie: `$this->getF3()->set('COOKIE.' . self::COOKIE_PREFIX_CHARACTER . '_' . $name, "$newSelector:$newValidator", $remainingTtl);`
+
+**Concurrent-request edge case (why Opus review):** Two simultaneous requests from the same browser (e.g., parallel asset fetches that happen to trigger the auth path) both present the same valid cookie. First request rotates — old selector is gone. Second request's `getByForeignKey('selector', $oldSelector)` returns empty (`dry()` = true) → falls into the `$invalidCookie = true` branch → **erases the cookie** → silent logout. Possible mitigations: (a) "grace period" — retain old selector for ~5s after rotation; (b) per-characterId advisory lock; (c) accept the race (browser parallel requests on the auth path are rare and self-healing on next page load). Opus should pick the appropriate strategy.
+
 ---
 
 ## Part 2 — Remaining audit tasks
@@ -172,10 +184,11 @@ Each line below is one commit, smallest blast radius first. Model column matches
 | 6  | A2          | Sonnet                   |
 | 7  | A6          | Sonnet                   |
 | 8  | A5          | Sonnet (audit read)      |
-| 9  | A3          | Sonnet + Opus review     |
-| 10 | F6          | Sonnet + Opus review     |
-| 11 | A4          | Sonnet + Opus review     |
-| 12 | F5          | Opus                     |
+| 9  | C1          | Sonnet + Opus review     |
+| 10 | A3          | Sonnet + Opus review     |
+| 11 | F6          | Sonnet + Opus review     |
+| 12 | A4          | Sonnet + Opus review     |
+| 13 | F5          | Opus                     |
 
 Items 1–8 can be Sonnet-driven end-to-end. Switch to Opus for the design pass on item 9 onward (or have Sonnet draft each and Opus review the diff before commit).
 
