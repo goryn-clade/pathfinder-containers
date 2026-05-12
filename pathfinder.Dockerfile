@@ -36,7 +36,7 @@ RUN apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache \
         busybox-suid sudo shadow gettext bash apache2-utils logrotate ca-certificates \
-        php83-redis php83-pdo php83-pdo_mysql php83-fileinfo php83-pecl-event \
+        php83-redis php83-pdo php83-pdo_mysql php83-fileinfo php83-pecl-event php83-sodium \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
@@ -59,6 +59,7 @@ COPY static/pathfinder/routes.ini /var/www/html/pathfinder/app/
 COPY static/pathfinder/environment.ini /var/www/html/pathfinder/app/templateEnvironment.ini
 COPY static/pathfinder/config.ini /var/www/html/pathfinder/app/templateConfig.ini
 COPY static/pathfinder/pathfinder.ini /var/www/html/pathfinder/app/templatePathfinder.ini
+COPY static/scripts/rotate-token-key.php /usr/local/bin/rotate-token-key.php
 
 WORKDIR /var/www/html
 EXPOSE 80

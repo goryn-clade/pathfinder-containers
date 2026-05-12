@@ -35,6 +35,18 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**F5: encrypt ESI access / refresh tokens at rest**
+- `app/Lib/TokenCipher.php` (new): libsodium `crypto_secretbox` (XSalsa20 + Poly1305) helper. Versioned wire format `v1:base64(nonce||ciphertext_with_mac)`. Fresh 24-byte nonce per encryption from `random_bytes`; never reused. Key loaded from `TOKEN_ENCRYPTION_KEY` (32 bytes, 64 hex chars); `sodium_memzero()` wipes the key after each operation. Fail-closed: missing or malformed key throws.
+- `app/Model/Pathfinder/CharacterModel.php`: added `set_esiAccessToken` / `set_esiRefreshToken` Cortex setters that encrypt before persistence — covers both write paths (`Sso::callbackAuthorization` `copyfrom()` and `getAccessToken()` refresh assignment). `getAccessToken()` rewritten to decrypt on read; the post-refresh `$accessToken = $this->esiAccessToken` (which would now be ciphertext) replaced with the plaintext from `$accessData->accessToken`.
+- `app/environment.ini`: added `TOKEN_ENCRYPTION_KEY` to both `[ENVIRONMENT.DEVELOP]` and `[ENVIRONMENT.PRODUCTION]`.
+- **Lazy migration:** `decrypt()` returns legacy plaintext (no `v1:` prefix) verbatim, so rows written before the deploy keep working until the next token refresh re-stores them encrypted. No DB migration script required for routine deploys.
+- **Key rotation:** `static/scripts/rotate-token-key.php` (new, copied to `/usr/local/bin/` in the image) re-encrypts all rows from `OLD_TOKEN_ENCRYPTION_KEY` → `NEW_TOKEN_ENCRYPTION_KEY`. Supports `--dry-run`. Run during a maintenance window before swapping `.env`. Without re-encryption, rotation forces every active user through SSO re-login. See [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) §3 for the procedure.
+
+**Container changes for F5**
+- `pathfinder.Dockerfile`: added `php83-sodium` to the runtime stage apk install; COPY rotation script to `/usr/local/bin/rotate-token-key.php`.
+- `static/pathfinder/environment.ini`: added `TOKEN_ENCRYPTION_KEY = $TOKEN_ENCRYPTION_KEY` for envsubst.
+- `.env.example`: added `TOKEN_ENCRYPTION_KEY=""` with generation + rotation guidance.
+
 **A4: PKCE (RFC 7636) for EVE SSO authorization flow**
 - `app/Controller/Ccp/Sso.php`: PKCE layered on top of the existing confidential-client flow (`client_secret` stays). `rerouteAuthorization()` generates a `code_verifier` (43 base64url chars from 32 bytes of `random_bytes`), computes `code_challenge = BASE64URL(SHA256(verifier))`, embeds the verifier in the state map entry, and adds `code_challenge` + `code_challenge_method=S256` to the CCP auth URL. `callbackAuthorization()` extracts the verifier from the consumed state entry and passes it through `getSsoAccessData()` → `verifyAuthorizationCode()` where it is included as `code_verifier` in the POST body to `/v2/oauth/token`. ESI client unchanged (already passes `form_params` through). Legacy state map entries (no verifier field) fall back to no PKCE gracefully.
 - `app/environment.ini`: Added `CCP_SSO_USE_PKCE = 1` to both `[ENVIRONMENT.DEVELOP]` and `[ENVIRONMENT.PRODUCTION]`. Set to `0` to disable PKCE without a code change (kill-switch if CCP rejects `code_verifier` on confidential clients).

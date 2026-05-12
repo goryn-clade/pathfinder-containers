@@ -72,6 +72,15 @@ Columns `esiAccessToken`, `esiRefreshToken` are stored as plain VARCHAR. A DB re
 
 **Why Opus:** key generation, nonce handling (one per encryption, never reused), key rotation strategy, and lazy-migration semantics are easy to get subtly wrong. A reused nonce on `crypto_secretbox` breaks the security model entirely. Worth slow, careful design.
 
+**Outcome (2026-05-12):** Applied.
+- `app/Lib/TokenCipher.php` (new): libsodium `crypto_secretbox` wrapper. Wire format `v1:base64(nonce||ciphertext_with_mac)`. Fresh 24-byte nonce per encrypt via `random_bytes`. Key loaded from `TOKEN_ENCRYPTION_KEY` env (32 bytes hex-encoded). `sodium_memzero()` after each use. Fail-closed: missing/malformed key throws.
+- `app/Model/Pathfinder/CharacterModel.php`: Cortex `set_esiAccessToken` / `set_esiRefreshToken` encrypt on write — covers both the SSO callback `copyfrom()` and the refresh path's direct assignment. `getAccessToken()` decrypts on read; the post-refresh return uses `$accessData->accessToken` directly (because `$this->esiAccessToken` is now ciphertext).
+- Lazy migration via prefix sniff: rows without `v1:` decrypt to themselves and get re-stored encrypted on next refresh. No migration script needed for the routine roll-out.
+- `static/scripts/rotate-token-key.php`: standalone re-encryption utility for key rotation (decrypt-with-old / encrypt-with-new across all character rows). Baked into the image at `/usr/local/bin/rotate-token-key.php` via `pathfinder.Dockerfile`. `--dry-run` supported.
+- `pathfinder.Dockerfile`: `php83-sodium` added to the runtime apk install.
+- `static/pathfinder/environment.ini` + `app/environment.ini` + `.env.example`: `TOKEN_ENCRYPTION_KEY` plumbed through envsubst.
+- Operator runbook in [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) §3 (`.env` rewrite) and §6/§Verify (rotation procedure).
+
 ### F6 — Single-slot `state` storage prevents multi-tab login
 **Severity:** Low (UX, not security). **Model:** Sonnet + Opus review. **Location:** [pathfinder/app/Controller/Ccp/Sso.php:144-145](pathfinder/app/Controller/Ccp/Sso.php#L144-L145)
 
