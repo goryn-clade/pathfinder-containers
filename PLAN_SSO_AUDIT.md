@@ -140,6 +140,20 @@ Two concurrent requests with an expired access token both call `refreshAccessTok
 
 **Why review:** Redis lock semantics are subtle — TTL must exceed the worst-case CCP token endpoint round trip; lock release must be safe under request timeout; "lock acquired but request died" must self-heal. Sonnet often picks reasonable defaults but doesn't reason about the failure cases. Opus should review the TTL, release path, and what happens to the waiting request after lock timeout.
 
+**Outcome (2026-05-12):** Redis lock deferred pending evidence of the race.
+
+- Production evidence (the app works despite `getAccessToken()` previously never persisting the
+  refresh token from CCP's response) strongly suggests CCP does not rotate refresh tokens on use.
+  If it doesn't rotate, there is no concurrent-invalidation race.
+- Applied defensive fix: `CharacterModel::getAccessToken()` now persists `esiRefreshToken` after a
+  successful refresh. Previously the new refresh token from CCP was discarded. No-op if CCP doesn't
+  rotate; correct if CCP ever starts rotating.
+- Added `grant_type=[%s]` tag to the `ERROR_ACCESS_TOKEN` log line so concurrent `refresh_token`
+  grant failures can be measured in production. Revisit lock design if clustered
+  `grant_type=[refresh_token]` failures appear in SSO logs.
+- Deferred: Redis lock, threading `characterId` into `requestAccessData()` for richer failure
+  logging. Track here if evidence emerges.
+
 ### A4 — PKCE feasibility
 **Model:** Sonnet + Opus review.
 EVE SSO v2 supports PKCE (RFC 7636). Currently a confidential client flow with `client_secret` — fine for server-side but PKCE adds defence against code interception (logs, referer leakage at the redirect URI).
@@ -162,7 +176,8 @@ EVE SSO v2 supports PKCE (RFC 7636). Currently a confidential client flow with `
 Beyond F3, sweep all `getSSOLogger()->write(...)` and `error_log(...)` call sites in the SSO + character refresh path for any access/refresh token references. Confirm log files aren't world-readable in the container.
 
 **Outcome (2026-05-12):** Clean with one minor hardening applied.
-- `requestAccessData()` failure path: `redactSecrets()` (F3) covers `refresh_token`, `code`, `client_secret` ✓
+- `requestAccessData()` failure
+ path: `redactSecrets()` (F3) covers `refresh_token`, `code`, `client_secret` ✓
 - `verifyCharacterData()` exception path: logs `$e->getMessage()` — JWT exception messages don't include the raw token ✓
 - `CharacterModel::getAccessToken()` refresh path: no token logging ✓
 - `GuzzleLogMiddleware`: request headers (`Authorization: Bearer …`) not logged (`DEFAULT_LOG_REQUEST_HEADERS=false`); 200 responses not logged (`DEFAULT_LOG_2XX=false`); error response bodies only extract the `error` key, not `access_token`/`refresh_token` ✓

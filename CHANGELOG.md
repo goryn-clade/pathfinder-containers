@@ -35,6 +35,10 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**A3: persist refresh token after refresh; log grant_type on SSO token failures**
+- `app/Model/Pathfinder/CharacterModel.php`: `getAccessToken()` now persists `esiRefreshToken` from CCP's refresh response. Previously it was discarded — no-op if CCP doesn't rotate tokens, correct if CCP ever starts rotating. Redis lock deferred: production evidence suggests CCP does not rotate, so the concurrent-invalidation race may not exist. Revisit if `grant_type=[refresh_token]` failures cluster in SSO logs.
+- `app/Controller/Ccp/Sso.php`: `requestAccessData()` failure log now includes `grant_type=[…]` tag for grep-ability. Lets us measure whether `refresh_token` grant failures occur and whether they cluster (indicating the race).
+
 **C1: remember-me cookie rotation on login use**
 - `app/Controller/Controller.php`: `getCookieCharacters()` now rotates the validator on every successful login (actual login path only — preview endpoint passes `$rotate=false`). Selector kept stable (no schema change). Original expiry preserved.
 - Also splits the "expired OR mismatch → erase" branch: expired rows still erased; token mismatch on a non-expired row no longer erases the DB row, preventing a DoS where an attacker with a stale stolen cookie could log out the legitimate user after rotation.
