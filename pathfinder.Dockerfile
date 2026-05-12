@@ -60,6 +60,7 @@ COPY static/pathfinder/environment.ini /var/www/html/pathfinder/app/templateEnvi
 COPY static/pathfinder/config.ini /var/www/html/pathfinder/app/templateConfig.ini
 COPY static/pathfinder/pathfinder.ini /var/www/html/pathfinder/app/templatePathfinder.ini
 COPY static/scripts/rotate-token-key.php /usr/local/bin/rotate-token-key.php
+COPY static/scripts/migrate-tokens.php /usr/local/bin/migrate-tokens.php
 
 WORKDIR /var/www/html
 EXPOSE 80

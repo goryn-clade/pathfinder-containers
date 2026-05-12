@@ -40,10 +40,11 @@ A full security review was performed across the container stack, covering CVE sc
 - `app/Model/Pathfinder/CharacterModel.php`: added `set_esiAccessToken` / `set_esiRefreshToken` Cortex setters that encrypt before persistence — covers both write paths (`Sso::callbackAuthorization` `copyfrom()` and `getAccessToken()` refresh assignment). `getAccessToken()` rewritten to decrypt on read; the post-refresh `$accessToken = $this->esiAccessToken` (which would now be ciphertext) replaced with the plaintext from `$accessData->accessToken`.
 - `app/environment.ini`: added `TOKEN_ENCRYPTION_KEY` to both `[ENVIRONMENT.DEVELOP]` and `[ENVIRONMENT.PRODUCTION]`.
 - **Lazy migration:** `decrypt()` returns legacy plaintext (no `v1:` prefix) verbatim, so rows written before the deploy keep working until the next token refresh re-stores them encrypted. No DB migration script required for routine deploys.
-- **Key rotation:** `static/scripts/rotate-token-key.php` (new, copied to `/usr/local/bin/` in the image) re-encrypts all rows from `OLD_TOKEN_ENCRYPTION_KEY` → `NEW_TOKEN_ENCRYPTION_KEY`. Supports `--dry-run`. Run during a maintenance window before swapping `.env`. Without re-encryption, rotation forces every active user through SSO re-login. See [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) §3 for the procedure.
+- **Eager migration:** `static/scripts/migrate-tokens.php` (new, copied to `/usr/local/bin/`) encrypts every legacy plaintext row in one idempotent pass. Recommended after a v2→v3 upgrade so inactive characters' tokens don't sit plaintext in the DB indefinitely. Supports `--dry-run`.
+- **Key rotation:** `static/scripts/rotate-token-key.php` (new, copied to `/usr/local/bin/` in the image) re-encrypts all rows from `OLD_TOKEN_ENCRYPTION_KEY` → `NEW_TOKEN_ENCRYPTION_KEY`. Supports `--dry-run`. Run during a maintenance window before swapping `.env`. Without re-encryption, rotation forces every active user through SSO re-login. See [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) for both procedures.
 
 **Container changes for F5**
-- `pathfinder.Dockerfile`: added `php83-sodium` to the runtime stage apk install; COPY rotation script to `/usr/local/bin/rotate-token-key.php`.
+- `pathfinder.Dockerfile`: added `php83-sodium` to the runtime stage apk install; COPY both rotation + migration scripts to `/usr/local/bin/`.
 - `static/pathfinder/environment.ini`: added `TOKEN_ENCRYPTION_KEY = $TOKEN_ENCRYPTION_KEY` for envsubst.
 - `.env.example`: added `TOKEN_ENCRYPTION_KEY=""` with generation + rotation guidance.
 
