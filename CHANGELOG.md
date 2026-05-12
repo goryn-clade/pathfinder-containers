@@ -35,6 +35,11 @@ A full security review was performed across the container stack, covering CVE sc
 
 #### pathfinder (submodule)
 
+**C1: remember-me cookie rotation on login use**
+- `app/Controller/Controller.php`: `getCookieCharacters()` now rotates the validator on every successful login (actual login path only — preview endpoint passes `$rotate=false`). Selector kept stable (no schema change). Original expiry preserved.
+- Also splits the "expired OR mismatch → erase" branch: expired rows still erased; token mismatch on a non-expired row no longer erases the DB row, preventing a DoS where an attacker with a stale stolen cookie could log out the legitimate user after rotation.
+- `app/Controller/Api/User.php`: preview call passes `$rotate=false`.
+
 **A5: cookie auth audit — bump selector entropy**
 - `app/Controller/Controller.php`: `setLoginCookie()` selector bumped from `random_bytes(12)` (96 bits) to `random_bytes(16)` (128 bits) to meet ≥16-byte threshold. Validator was already 16 bytes. All other checks passed: `hash_equals()` used for comparison, DB stores `hash('sha256', $validator)` not plaintext, F3 JAR defaults provide `HttpOnly`, `Secure`, and `SameSite=Lax` automatically. Cookie rotation on use is a new finding (C1) — tracked in PLAN_SSO_AUDIT.md, needs Opus review for concurrent-request edge case.
 
