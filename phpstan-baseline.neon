@@ -3223,18 +3223,6 @@ parameters:
 			path: pathfinder/app/Lib/Logging/AbstractCharacterLog.php
 
 		-
-			message: '#^Cannot call method get\(\) on Base\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: pathfinder/app/Lib/Logging/AbstractLog.php
-
-		-
-			message: '#^Cannot call method hash\(\) on Base\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Lib/Logging/AbstractLog.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\AbstractLog\:\:buffer\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3643,48 +3631,6 @@ parameters:
 			path: pathfinder/app/Lib/Logging/LogCollection.php
 
 		-
-			message: '#^Cannot call method attach\(\) on SplObjectStorage\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogCollection.php
-
-		-
-			message: '#^Cannot call method contains\(\) on SplObjectStorage\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogCollection.php
-
-		-
-			message: '#^Cannot call method count\(\) on SplObjectStorage\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogCollection.php
-
-		-
-			message: '#^Cannot call method current\(\) on SplObjectStorage\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: pathfinder/app/Lib/Logging/LogCollection.php
-
-		-
-			message: '#^Cannot call method next\(\) on SplObjectStorage\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogCollection.php
-
-		-
-			message: '#^Cannot call method rewind\(\) on SplObjectStorage\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: pathfinder/app/Lib/Logging/LogCollection.php
-
-		-
-			message: '#^Cannot call method valid\(\) on SplObjectStorage\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: pathfinder/app/Lib/Logging/LogCollection.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\LogCollection\:\:addLog\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3828,11 +3774,6 @@ parameters:
 			count: 1
 			path: pathfinder/app/Lib/Logging/LogInterface.php
 
-		-
-			message: '#^Cannot call method clean\(\) on Base\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Lib/Logging/MapLog.php
 
 		-
 			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\MapLog\:\:__construct\(\) has parameter \$objectData with no value type specified in iterable type array\.$#'
