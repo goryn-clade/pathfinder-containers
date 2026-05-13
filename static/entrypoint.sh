@@ -16,6 +16,10 @@ if [ "${APP_ENV:-}" = "production" ] && [ "${PF_DEBUG:-0}" -gt 0 ]; then
     echo "WARNING: PF_DEBUG=${PF_DEBUG} is set with APP_ENV=production — stack traces will be exposed to users. Set PF_DEBUG=0." >&2
 fi
 
+# Apply defaults for optional boolean flags before envsubst
+: "${CCP_SSO_USE_PKCE:=1}"
+export CCP_SSO_USE_PKCE
+
 envsubst '$DOMAIN'</etc/nginx/templateSite.conf >/etc/nginx/sites_enabled/site.conf
 envsubst '$PATHFINDER_SOCKET_HOST' </etc/nginx/templateNginx.conf >/etc/nginx/nginx.conf
 envsubst  </var/www/html/pathfinder/app/templateEnvironment.ini >/var/www/html/pathfinder/app/environment.ini
