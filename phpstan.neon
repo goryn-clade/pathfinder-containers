@@ -1,0 +1,29 @@
+parameters:
+    level: 8
+    paths:
+        - pathfinder/app
+        - websocket/app
+    excludePaths:
+        - pathfinder/vendor
+        - pathfinder/tmp
+        - websocket/vendor
+    stubFiles:
+        - stubs/f3/Prefab.php
+        - stubs/f3/Base.php
+        - stubs/f3/Template.php
+        - stubs/f3/Log.php
+        - stubs/f3/Audit.php
+        - stubs/f3/Cache.php
+        - stubs/f3/DB/SQL.php
+        - stubs/f3/DB/Schema.php
+        - stubs/f3/DB/Cortex.php
+        - stubs/f3/DB/CortexCollection.php
+    scanFiles:
+        - pathfinder/vendor/monolog/monolog/src/Monolog/Logger.php
+        - websocket/vendor/cboden/ratchet/src/Ratchet/MessageComponentInterface.php
+        - websocket/vendor/cboden/ratchet/src/Ratchet/WebSocket/MessageComponentInterface.php
+    bootstrapFiles: []
+    ignoreErrors: []
+
+includes:
+    - phpstan-baseline.neon

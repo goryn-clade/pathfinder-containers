@@ -2,6 +2,25 @@
 
 ## v3.0
 
+### F3 framework stubs (Phase 1a)
+
+- `stubs/f3/`: hand-written PHPStan stubs for `\Prefab`, `\Base`, `\Template`, `\Log`, `\Audit`, `\Cache`, `\DB\SQL`, `\DB\SQL\Schema`, `\DB\Cortex`, `\DB\CortexCollection`
+- `\Base` stub: `@method` declarations for all app-registered hive callables (ccpClient, ssoClient, gitHubClient, eveScoutClient, webSocket, getTimeZone, getDateTime); `@property` for $DB and $CACHE; concrete method signatures with typed array params
+- `\DB\Cortex` stub: `__get/__set/__isset/__unset` magic (ActiveRecord pattern); `find()` returns `CortexCollection|false` (not the PHPStan-inferred intersection type); intentionally preserves 2 real `string-given-not-array` bugs in filter params
+- `\DB\CortexCollection` stub: extends `\ArrayIterator<int, \DB\Cortex>` — eliminates `(CortexCollection&iterable<Model>)|false` intersection errors
+- `\DB\SQL\Schema` stub: all `DT_*`/`DF_*` constants + `TableBuilder`/`TableModifier`/`Column` class hierarchy
+- `phpstan.neon`: F3 vendor moved from `scanFiles` to `stubFiles`; Ratchet and Monolog remain in `scanFiles`
+- **Result:** baseline 1949 → 1822 absorbed errors, 1651 → 1597 unique entries (−127/−54)
+
+### Static analysis tooling restored (Phase 0)
+
+- `phpstan.neon` / `phpstan-baseline.neon`: PHPStan level 8, 1949-error baseline; `scanFiles` covers F3 core, Cortex, Ratchet, Monolog vendor
+- `.phpcs.xml`: PHPCompatibility ruleset targeting PHP 8.3+; excludes two pre-existing soft-reserved-keyword warnings (scope to fix separately)
+- `rector.php`: Rector configured for PHP 8.3 across `pathfinder/app` + `websocket/app`
+- `phpstan-bootstrap.php`: deprecation-suppressing bootstrap kept for reference
+- `pathfinder/composer.json`: added `require-dev` — phpstan, phpcs, phpcompatibility, rector; added `scripts` for `phpstan`, `phpstan-baseline`, `phpcs`, `rector`; `post-install-cmd` registers PHPCompatibility standard
+- `.github/workflows/static-analysis.yml`: CI runs PHPStan + PHPCS on every PR; fails on any new error not in baseline
+
 - `Setup.php` / `environment.ini`: gated `/setup` controller behind new `ENVIRONMENT.SETUP_ENABLED` flag (default `1` in DEVELOP, `0` in PRODUCTION). Returns 404 when disabled. Lets prod images keep the route file intact while still locking out the wizard post-bootstrap.
 
 ---
