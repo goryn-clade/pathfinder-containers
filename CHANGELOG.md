@@ -2,6 +2,15 @@
 
 ## v3.0
 
+### Connection type enums (Phase 1b)
+
+- `pathfinder/app/Enum/ConnectionType.php`: new PHP 8.1 backed string enum — 15 cases covering all valid `scope`/`type` column values; utility methods `whitelist()`, `eolCases()`, `jumpMassCases()`, `eolBaseSeconds()`; legacy `wh_eol` deliberately absent (callers map it to `WhEol1`)
+- `ConnectionModel`: removed `$connectionTypeWhitelist` static array; `getConnectionTypeWhitelist()` delegates to `ConnectionType::whitelist()`; all scope/type string literals replaced with enum values; `set_type()` validates via `ConnectionType::tryFrom()`
+- `Route.php`: EOL key→type map and scope/type filter literals → enum values
+- `AbstractEveScoutController.php`: EveScout EOL phase mapping, jump-mass mapping, and `scope` literal → enum values
+- `MapUpdate.php`: `$phaseBase` array replaced with `ConnectionType::eolCases()` + `eolBaseSeconds()`; `scope` SQL param literal → enum value
+- **Result:** baseline 1,597 → 1,596 unique entries (stale property entry removed)
+
 ### F3 framework stubs (Phase 1a)
 
 - `stubs/f3/`: hand-written PHPStan stubs for `\Prefab`, `\Base`, `\Template`, `\Log`, `\Audit`, `\Cache`, `\DB\SQL`, `\DB\SQL\Schema`, `\DB\Cortex`, `\DB\CortexCollection`

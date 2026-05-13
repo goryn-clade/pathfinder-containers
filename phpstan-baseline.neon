@@ -5796,11 +5796,6 @@ parameters:
 			count: 2
 			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
-		-
-			message: '#^Property Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:\$connectionTypeWhitelist type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
 		-
 			message: '#^Property Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:\$fieldConf type has no value type specified in iterable type array\.$#'
