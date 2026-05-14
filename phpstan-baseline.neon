@@ -4471,12 +4471,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/SystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SystemModel\:\:afterUpdateEvent\(\) with return type void returns null but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: pathfinder/app/Model/Universe/SystemModel.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SystemModel\:\:getStargatesData\(\) should return array\<string, mixed\> but returns list\<null\>\.$#'
 			identifier: return.type
 			count: 1
@@ -4497,12 +4491,6 @@ parameters:
 		-
 			message: '#^Property Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:\$security \(int\) does not accept string\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: pathfinder/app/Model/Universe/SystemModel.php
-
-		-
-			message: '#^Result of method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterUpdateEvent\(\) \(void\) is used\.$#'
-			identifier: staticMethod.void
 			count: 1
 			path: pathfinder/app/Model/Universe/SystemModel.php
 
@@ -4603,18 +4591,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/TypeModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:afterInsertEvent\(\) with return type void returns null but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:afterUpdateEvent\(\) with return type void returns null but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeModel.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:set_dogma_attributes\(\) has parameter \$dogmaAttributesData with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -4641,18 +4617,6 @@ parameters:
 		-
 			message: '#^Property Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:\$typeId \(int\) does not accept \$this\(Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\)\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeModel.php
-
-		-
-			message: '#^Result of method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterInsertEvent\(\) \(void\) is used\.$#'
-			identifier: staticMethod.void
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeModel.php
-
-		-
-			message: '#^Result of method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterUpdateEvent\(\) \(void\) is used\.$#'
-			identifier: staticMethod.void
 			count: 1
 			path: pathfinder/app/Model/Universe/TypeModel.php
 

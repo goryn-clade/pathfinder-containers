@@ -62,7 +62,7 @@ via the setup wizard.
 
 ### Known remaining issues (backlog)
 
-1. `GET /api/User/getEveServerStatus` 500 — Redis TTL passed as string
+1. ~~`GET /api/User/getEveServerStatus` 500 — Redis TTL passed as string~~ **Fixed** (returns 200 with valid EVE server data)
 2. DB schema not yet created (blocked on /setup loading)
 
 ## Key Architecture Notes
