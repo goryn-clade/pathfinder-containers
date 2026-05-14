@@ -2,6 +2,17 @@
 
 ## v3.0
 
+### Iterable value type annotations (Phase 2.4)
+
+- Ran Rector `TypeDeclarationDocblocksLevel` rules across all PHP source to auto-infer `array<K,V>` PHPDoc annotations; 7 Rector-inferred types were too narrow and corrected to `array<string, mixed>`
+- Python bulk-annotation script applied `@param array<string, mixed>` / `@return array<string, mixed>` / `@var array<string, mixed>` across 131 files (449 total annotations)
+- Fixed script double-counting bug that placed 2 annotations outside docblocks (`AbstractWebhookHandler.php`, `MapUpdate.php`)
+- Fixed 13 `#[\Override]` placement errors (script inserted new docblock between attribute and function; merged into the pre-attribute docblock): `AbstractChannelLog`, `AbstractCharacterLog`, `AbstractMapTrackingModel`, `AbstractMapWebhookHandler`, `AbstractRallyWebhookHandler`, `LogCollection`, `MapLog`, `MapModel::getLogData`, `RallyLog`, `Setup::beforeroute`, `SocketHandler::handle`, `SystemModel::beforeUpdateEvent`, `SystemSignatureModel::beforeUpdateEvent`
+- Fixed class-level `@method`/`@property` tags: `CcpClient`, `EveScoutClient`, `GitHubClient` (`sendBatch $configs`), `Cron` (`$jobs`)
+- Fixed `Traversable` return types in `Search` (`getFilesByCallback/MTime/Size` → `Traversable<mixed, \SplFileInfo>`) and `SortingIterator::__construct` (`$iterator`)
+- Fixed remaining edge cases: `CharacterModel::AUTHORIZATION_STATUS` constant, `Controller::getEnvironmentData` union return, `Config::setAllEnvironmentData` (dropped spurious `|mixed`), `MapModel::getSystems/getConnections` (`array<array-key, mixed>|CortexCollection`), `AbstractModel::indexExists`, `Sql::exec`, `Payload::$characterIds`, `MapUpdate::receiveData`
+- **Result:** `missingType.iterableValue` 516 → 0; baseline 1,301 → 1,264 (−37)
+
 ### Return types + PHP 8.3 modernisation (Phase 2.1–2.2)
 
 - `AbstractLog.$f3`: changed `null|\Base` → `\Base` (constructor always calls setF3())
