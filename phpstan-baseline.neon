@@ -1,8 +1,8 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\AccessController\:\:beforeroute\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\AccessController\:\:beforeroute\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/AccessController.php
 
@@ -49,32 +49,14 @@ parameters:
 			path: pathfinder/app/Controller/Admin.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:activateMap\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:beforeroute\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Admin.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:banCharacter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:beforeroute\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:deleteMap\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:dispatch\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:dispatch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Admin.php
 
@@ -87,36 +69,6 @@ parameters:
 		-
 			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:getAccessibleCorporations\(\) should return array\<Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\> but returns DB\\CortexCollection\|list\<Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\>\.$#'
 			identifier: return.type
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:initMaps\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:initMembers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:initSettings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:kickCharacter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Admin.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Admin\:\:saveSettings\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Controller/Admin.php
 
@@ -139,8 +91,8 @@ parameters:
 			path: pathfinder/app/Controller/Admin.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Access\:\:search\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Access\:\:search\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Access.php
 
@@ -202,24 +154,6 @@ parameters:
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 2
-			path: pathfinder/app/Controller/Api/Map.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Map\:\:broadcastMapAccess\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Api/Map.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Map\:\:getAccessData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Api/Map.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Map\:\:import\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: pathfinder/app/Controller/Api/Map.php
 
 		-
@@ -337,26 +271,20 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/AbstractEveScoutController.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\AbstractRestController\:\:out\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Api/Rest/AbstractRestController.php
-
-		-
 			message: '#^Access to an undefined property Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:\$source\.$#'
 			identifier: property.notFound
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Connection.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Connection\:\:delete\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Connection\:\:delete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Connection.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Connection\:\:get\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Connection\:\:get\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Connection.php
 
@@ -374,6 +302,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$connectionIds of method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getConnections\(\) expects null, list\<int\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: pathfinder/app/Controller/Api/Rest/Connection.php
+
+		-
+			message: '#^Parameter \#1 \$map of method Exodus4D\\Pathfinder\\Controller\\AccessController\:\:broadcastMap\(\) expects Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel, int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Connection.php
@@ -403,14 +337,14 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/Log.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Log\:\:delete\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Log\:\:delete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Log.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Log\:\:patch\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Log\:\:patch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Log.php
 
@@ -469,26 +403,20 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/Map.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Map\:\:broadcastMapAccess\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Map\:\:delete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Map.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Map\:\:delete\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Map\:\:patch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Map.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Map\:\:patch\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Controller/Api/Rest/Map.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Map\:\:put\(\) has parameter \$test with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Map\:\:put\(\) has parameter \$test with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Map.php
 
@@ -559,20 +487,20 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/MapGroup.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\MapGroup\:\:delete\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\MapGroup\:\:delete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/MapGroup.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\MapGroup\:\:get\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\MapGroup\:\:get\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/MapGroup.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\MapGroup\:\:patch\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\MapGroup\:\:patch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/MapGroup.php
 
@@ -595,80 +523,74 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:filterJumpData\(\) has parameter \$filterData with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:filterJumpData\(\) has parameter \$filterData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:filterJumpData\(\) has parameter \$keepSystems with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:filterJumpData\(\) has parameter \$keepSystems with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:getRouteCacheKey\(\) has parameter \$mapIds with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:getRouteCacheKey\(\) has parameter \$mapIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:resetJumpData\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRoute\(\) has parameter \$filterData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRoute\(\) has parameter \$filterData with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRoute\(\) has parameter \$mapIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRoute\(\) has parameter \$mapIds with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteCustom\(\) has parameter \$filterData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteCustom\(\) has parameter \$filterData with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteCustom\(\) has parameter \$mapIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteCustom\(\) has parameter \$mapIds with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteESI\(\) has parameter \$filterData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteESI\(\) has parameter \$filterData with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteESI\(\) has parameter \$mapIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:searchRouteESI\(\) has parameter \$mapIds with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:setDynamicJumpData\(\) has parameter \$filterData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:setDynamicJumpData\(\) has parameter \$filterData with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:setDynamicJumpData\(\) has parameter \$mapIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:setDynamicJumpData\(\) has parameter \$mapIds with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Controller/Api/Rest/Route.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:updateJumpData\(\) has parameter \$rows with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Route\:\:updateJumpData\(\) has parameter \$rows with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Route.php
 
@@ -763,14 +685,14 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/Signature.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Signature\:\:delete\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Signature\:\:delete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Signature.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Signature\:\:patch\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Signature\:\:patch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Signature.php
 
@@ -793,8 +715,8 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/Signature.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\SignatureHistory\:\:get\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\SignatureHistory\:\:get\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/SignatureHistory.php
 
@@ -811,14 +733,14 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/SignatureHistory.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Structure\:\:delete\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Structure\:\:delete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Structure.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Structure\:\:patch\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\Structure\:\:patch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/Structure.php
 
@@ -853,20 +775,20 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/System.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\System\:\:delete\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\System\:\:delete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/System.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\System\:\:get\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\System\:\:get\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/System.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\System\:\:patch\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\System\:\:patch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/System.php
 
@@ -907,14 +829,14 @@ parameters:
 			path: pathfinder/app/Controller/Api/Rest/SystemGraph.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\SystemGraph\:\:get\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\SystemGraph\:\:get\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/SystemGraph.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\SystemSearch\:\:get\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Rest\\SystemSearch\:\:get\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Rest/SystemSearch.php
 
@@ -949,8 +871,8 @@ parameters:
 			path: pathfinder/app/Controller/Api/Setup.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Setup\:\:beforeroute\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Setup\:\:beforeroute\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Setup.php
 
@@ -1045,8 +967,8 @@ parameters:
 			path: pathfinder/app/Controller/Api/Universe.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Universe\:\:search\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\Universe\:\:search\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/Universe.php
 
@@ -1069,8 +991,8 @@ parameters:
 			path: pathfinder/app/Controller/Api/User.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\User\:\:beforeroute\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Api\\User\:\:beforeroute\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Api/User.php
 
@@ -1081,8 +1003,8 @@ parameters:
 			path: pathfinder/app/Controller/Api/User.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\AppController\:\:beforeroute\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\AppController\:\:beforeroute\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/AppController.php
 
@@ -1153,8 +1075,8 @@ parameters:
 			path: pathfinder/app/Controller/Ccp/Sso.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Ccp\\Sso\:\:beforeroute\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Ccp\\Sso\:\:beforeroute\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Ccp/Sso.php
 
@@ -1273,14 +1195,8 @@ parameters:
 			path: pathfinder/app/Controller/Controller.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Controller\:\:beforeroute\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Controller/Controller.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Controller\:\:echoErrorCLI\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Controller\:\:beforeroute\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Controller/Controller.php
 
@@ -1299,24 +1215,6 @@ parameters:
 		-
 			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Controller\:\:getScopesByAuthType\(\) should return array\<string, mixed\> but returns list\<mixed\>\.$#'
 			identifier: return.type
-			count: 1
-			path: pathfinder/app/Controller/Controller.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Controller\:\:logActivities\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Controller.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Controller\:\:setLoginCookie\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Controller.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Controller\:\:setTemplate\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Controller/Controller.php
 
@@ -1447,30 +1345,6 @@ parameters:
 			path: pathfinder/app/Controller/Setup.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Setup\:\:clearFiles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Setup.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Setup\:\:createDB\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Setup.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Setup\:\:exportTable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Setup.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Setup\:\:flushRedisDb\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Controller/Setup.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Setup\:\:getIndexData\(\) should return array\<string, mixed\> but returns array\<int\|string, array\<string, array\<int\|string, array\<string, string\>\|int\>\|int\|string\>\>\.$#'
 			identifier: return.type
 			count: 1
@@ -1479,12 +1353,6 @@ parameters:
 		-
 			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Setup\:\:importTable\(\) should return bool but returns array\<string, mixed\>\|bool\.$#'
 			identifier: return.type
-			count: 1
-			path: pathfinder/app/Controller/Setup.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Controller\\Setup\:\:invalidateCookies\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Controller/Setup.php
 
@@ -1575,24 +1443,6 @@ parameters:
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$timeCheck \(float\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
-			count: 1
-			path: pathfinder/app/Cron/AbstractCron.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Cron\\AbstractCron\:\:logEnd\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Cron/AbstractCron.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Cron\\AbstractCron\:\:logStart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Cron/AbstractCron.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Cron\\AbstractCron\:\:setMaxExecutionTime\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Cron/AbstractCron.php
 
@@ -1759,8 +1609,8 @@ parameters:
 			path: pathfinder/app/Data/Mapper/AbstractIterator.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Data\\Mapper\\AbstractIterator\:\:camelCaseKeys\(\) has parameter \$array with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Data\\Mapper\\AbstractIterator\:\:camelCaseKeys\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Data/Mapper/AbstractIterator.php
 
@@ -1921,18 +1771,6 @@ parameters:
 			path: pathfinder/app/Lib/Config.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Config\:\:setHiveVariables\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Config.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Config\:\:setServerData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Config.php
-
-		-
 			message: '#^Parameter \#2 \$port of static method Exodus4D\\Pathfinder\\Lib\\Config\:\:pingDomain\(\) expects int, int\<0, 65535\>\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1951,12 +1789,6 @@ parameters:
 			path: pathfinder/app/Lib/Cron.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Cron\:\:__get\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Lib/Cron.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Cron\:\:getJob\(\) should return Exodus4D\\Pathfinder\\Model\\Pathfinder\\CronModel\|null but returns Exodus4D\\Pathfinder\\Model\\AbstractModel\.$#'
 			identifier: return.type
 			count: 1
@@ -1967,12 +1799,6 @@ parameters:
 			identifier: varTag.nativeType
 			count: 1
 			path: pathfinder/app/Lib/Cron.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Db\\Pool\:\:pushError\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Db/Pool.php
 
 		-
 			message: '#^PHPDoc tag @var has invalid value \(\[\]\[\]\)\: Unexpected token "\[", expected type at offset 16 on line 2$#'
@@ -2017,12 +1843,6 @@ parameters:
 			path: pathfinder/app/Lib/Db/Sql.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\AbstractChannelLog\:\:setChannelData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Logging/AbstractChannelLog.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 2
@@ -2045,12 +1865,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: pathfinder/app/Lib/Logging/AbstractLog.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\Handler\\AbstractRallyWebhookHandler\:\:htmlToMarkdown\(\) has parameter \$html with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Lib/Logging/Handler/AbstractRallyWebhookHandler.php
 
 		-
 			message: '#^Parameter \#1 \$level of method Monolog\\Handler\\AbstractHandler\:\:__construct\(\) expects 100\|200\|250\|300\|400\|500\|550\|600\|''ALERT''\|''alert''\|''CRITICAL''\|''critical''\|''DEBUG''\|''debug''\|''EMERGENCY''\|''emergency''\|''ERROR''\|''error''\|''INFO''\|''info''\|''NOTICE''\|''notice''\|''WARNING''\|''warning'', int given\.$#'
@@ -2113,42 +1927,6 @@ parameters:
 			path: pathfinder/app/Lib/Logging/LogCollection.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\LogInterface\:\:buffer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogInterface.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\LogInterface\:\:removeHandlerGroup\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogInterface.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\LogInterface\:\:removeHandlerGroups\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogInterface.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\LogInterface\:\:setLevel\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogInterface.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\LogInterface\:\:setMessage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogInterface.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Logging\\LogInterface\:\:setTag\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Logging/LogInterface.php
-
-		-
 			message: '#^Offset 0 does not exist on array\<string, mixed\>\.$#'
 			identifier: offsetAccess.notFound
 			count: 2
@@ -2203,12 +1981,6 @@ parameters:
 			path: pathfinder/app/Lib/PriorityCacheStore.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Resource\:\:build\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Lib/Resource.php
-
-		-
 			message: '#^Anonymous function has an unused use \$connection\.$#'
 			identifier: closure.unusedUse
 			count: 1
@@ -2227,8 +1999,8 @@ parameters:
 			path: pathfinder/app/Lib/Socket/AbstractSocket.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Socket\\AbstractSocket\:\:initWrite\(\) has parameter \$payload with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Lib\\Socket\\AbstractSocket\:\:initWrite\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Lib/Socket/AbstractSocket.php
 
@@ -2377,24 +2149,6 @@ parameters:
 			path: pathfinder/app/Model/AbstractModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterEraseEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/AbstractModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterInsertEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/AbstractModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterUpdateEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/AbstractModel.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:existsCacheValue\(\) should return bool but returns array\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -2445,24 +2199,6 @@ parameters:
 		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:relFind\(\) should return DB\\CortexCollection\|null but returns DB\\CortexCollection\|true\|null\.$#'
 			identifier: return.type
-			count: 1
-			path: pathfinder/app/Model/AbstractModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:setValidationError\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/AbstractModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:throwDbException\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/AbstractModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:throwValidationException\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/AbstractModel.php
 
@@ -2587,14 +2323,14 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/AbstractMapTrackingModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\AbstractMapTrackingModel\:\:logActivity\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Property Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:\$updatedCharacterId \(int\) does not accept Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\|null\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/AbstractMapTrackingModel.php
 
 		-
-			message: '#^Property Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:\$updatedCharacterId \(int\) does not accept Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\|null\.$#'
-			identifier: assign.propertyType
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/AbstractMapTrackingModel.php
 
@@ -2752,18 +2488,6 @@ parameters:
 			message: '#^Call to function is_object\(\) with Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 3
-			path: pathfinder/app/Model/Pathfinder/CharacterLogModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterLogModel\:\:deleteLogsHistory\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CharacterLogModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterLogModel\:\:updateLogsHistory\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: pathfinder/app/Model/Pathfinder/CharacterLogModel.php
 
 		-
@@ -2983,26 +2707,14 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:deleteAuthentications\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:deleteLog\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:filterLogsHistory\(\) should return array\<string, mixed\> but returns list\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:getAll\(\) has parameter \$characterIds with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:getAll\(\) has parameter \$characterIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
 
@@ -3031,44 +2743,20 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:mergeSessionCharacterData\(\) has parameter \$characterDataBase with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:mergeSessionCharacterData\(\) has parameter \$characterDataBase with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:set_esiAccessToken\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:updateLog\(\) has parameter \$additionalOptions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:set_esiAccessToken\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:set_esiRefreshToken\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:set_esiRefreshToken\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:updateLog\(\) has parameter \$additionalOptions with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:updateLogHistoryEntry\(\) has parameter \$historyEntry with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CharacterModel\:\:updateLogHistoryEntry\(\) has parameter \$historyEntry with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CharacterModel.php
 
@@ -3247,24 +2935,6 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:afterEraseEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:afterInsertEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:afterUpdateEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
-
-		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:getLogsData\(\) should return array\<string, mixed\> but returns list\.$#'
 			identifier: return.type
 			count: 1
@@ -3277,20 +2947,8 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:setAutoScopeAndType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:setEndpointData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:setEndpointData\(\) has parameter \$endpointData with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:setEndpointData\(\) has parameter \$endpointData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
@@ -3301,20 +2959,14 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:set_endpoints\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:set_endpoints\(\) has parameter \$endpointsData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:set_endpoints\(\) has parameter \$endpointsData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:set_type\(\) has parameter \$type with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\ConnectionModel\:\:set_type\(\) has parameter \$type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/ConnectionModel.php
 
@@ -3397,8 +3049,8 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getAll\(\) has parameter \$options with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getAll\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
@@ -3409,20 +3061,20 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getCharacters\(\) has parameter \$characterIds with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getCharacters\(\) has parameter \$characterIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getCharacters\(\) has parameter \$options with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getCharacters\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getMaps\(\) has parameter \$options with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getMaps\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
@@ -3433,14 +3085,14 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getRights\(\) has parameter \$names with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getRights\(\) has parameter \$names with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getRights\(\) has parameter \$options with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getRights\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
@@ -3453,12 +3105,6 @@ parameters:
 		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:getStructuresData\(\) should return array\<string, mixed\> but returns list\.$#'
 			identifier: return.type
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationModel\:\:saveStructure\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationModel.php
 
@@ -3478,12 +3124,6 @@ parameters:
 			message: '#^Cannot call method getData\(\) on int\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: pathfinder/app/Model/Pathfinder/CorporationRightModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CorporationRightModel\:\:setData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: pathfinder/app/Model/Pathfinder/CorporationRightModel.php
 
 		-
@@ -3538,18 +3178,6 @@ parameters:
 			message: '#^Call to function is_null\(\) with int will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 2
-			path: pathfinder/app/Model/Pathfinder/CronModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CronModel\:\:logState\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/CronModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\CronModel\:\:setData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: pathfinder/app/Model/Pathfinder/CronModel.php
 
 		-
@@ -3621,24 +3249,6 @@ parameters:
 		-
 			message: '#^Cannot call method hasAccess\(\) on int\<min, \-1\>\|int\<1, max\>\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/MapGroupModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapGroupModel\:\:afterEraseEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/MapGroupModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapGroupModel\:\:afterInsertEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/MapGroupModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapGroupModel\:\:afterUpdateEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapGroupModel.php
 
@@ -3871,26 +3481,20 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:clearAccess\(\) has parameter \$clearKeys with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:clearAccess\(\) has parameter \$clearKeys with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:deleteLogFile\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getAll\(\) has parameter \$mapIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getAll\(\) has parameter \$mapIds with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/MapModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getAll\(\) has parameter \$options with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getAll\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
@@ -3901,8 +3505,8 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getAllCharacters\(\) has parameter \$options with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getAllCharacters\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
@@ -3913,8 +3517,8 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getCharactersData\(\) has parameter \$options with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getCharactersData\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
@@ -3925,14 +3529,14 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getSystemByCCPId\(\) has parameter \$addFilters with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:getSystemByCCPId\(\) has parameter \$addFilters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:setData\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\MapModel\:\:setData\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/MapModel.php
 
@@ -4315,110 +3919,20 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/SystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_constellation\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:sendRallyPoke\(\) has parameter \$rallyData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/SystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_constellationId\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:setData\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/SystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_effect\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_factionWar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_name\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_planets\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_region\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_regionId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_security\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_shattered\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_sovereignty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_statics\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_stations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:get_trueSec\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:sendRallyPoke\(\) has parameter \$rallyData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:setData\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:set_position\(\) has parameter \$position with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Pathfinder/SystemModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:set_status\(\) has parameter \$status with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemModel\:\:set_status\(\) has parameter \$status with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/SystemModel.php
 
@@ -4537,14 +4051,14 @@ parameters:
 			path: pathfinder/app/Model/Pathfinder/SystemSignatureModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemSignatureModel\:\:hasChanged\(\) has parameter \$signatureData with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemSignatureModel\:\:hasChanged\(\) has parameter \$signatureData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/SystemSignatureModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemSignatureModel\:\:setData\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Pathfinder\\SystemSignatureModel\:\:setData\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Pathfinder/SystemSignatureModel.php
 
@@ -4627,18 +4141,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/AbstractUniverseModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/AbstractUniverseModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:set_position\(\) has parameter \$position with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Universe/AbstractUniverseModel.php
-
-		-
 			message: '#^Parameter \#1 \$key of static method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:existsCacheValue\(\) expects string, string\|true given\.$#'
 			identifier: argument.type
 			count: 1
@@ -4663,18 +4165,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/AllianceModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\AllianceModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/AllianceModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\AllianceModel\:\:set_dateFounded\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Universe/AllianceModel.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AllianceModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -4693,20 +4183,8 @@ parameters:
 			path: pathfinder/app/Model/Universe/CategoryModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\CategoryModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/CategoryModel.php
-
-		-
 			message: '#^Access to an undefined property Exodus4D\\Pathfinder\\Model\\Universe\\ConstellationModel\:\:\$regionId\.$#'
 			identifier: property.notFound
-			count: 1
-			path: pathfinder/app/Model/Universe/ConstellationModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\ConstellationModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Universe/ConstellationModel.php
 
@@ -4717,40 +4195,16 @@ parameters:
 			path: pathfinder/app/Model/Universe/ConstellationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\CorporationModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/CorporationModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\CorporationModel\:\:set_dateFounded\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Universe/CorporationModel.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\CorporationModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: pathfinder/app/Model/Universe/CorporationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\DogmaAttributeModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/DogmaAttributeModel.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\DogmaAttributeModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: pathfinder/app/Model/Universe/DogmaAttributeModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\FactionModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/FactionModel.php
 
 		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\FactionModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
@@ -4795,12 +4249,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/FactionWarSystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\FactionWarSystemModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/FactionWarSystemModel.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\FactionWarSystemModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -4819,20 +4267,8 @@ parameters:
 			path: pathfinder/app/Model/Universe/GroupModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\GroupModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/GroupModel.php
-
-		-
 			message: '#^Cannot access property \$name on int\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: pathfinder/app/Model/Universe/PlanetModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\PlanetModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Universe/PlanetModel.php
 
@@ -4849,22 +4285,10 @@ parameters:
 			path: pathfinder/app/Model/Universe/RaceModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\RaceModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/RaceModel.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\RaceModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: pathfinder/app/Model/Universe/RaceModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\RegionModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/RegionModel.php
 
 		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\RegionModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
@@ -4885,12 +4309,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/SovereigntyMapModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SovereigntyMapModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/SovereigntyMapModel.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\SovereigntyMapModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -4899,12 +4317,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$name on int\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: pathfinder/app/Model/Universe/StarModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\StarModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Universe/StarModel.php
 
@@ -4929,12 +4341,6 @@ parameters:
 		-
 			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\StargateModel\:\:getData\(\) should return null but returns object\{\}&stdClass\.$#'
 			identifier: return.type
-			count: 1
-			path: pathfinder/app/Model/Universe/StargateModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\StargateModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Universe/StargateModel.php
 
@@ -4975,12 +4381,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/StationModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\StationModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/StationModel.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Exodus4D\\Pathfinder\\Model\\Universe\\StationModel\:\:getData\(\) should be compatible with return type \(null\) of method Exodus4D\\Pathfinder\\Model\\Universe\\AbstractUniverseModel\:\:getData\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -4995,12 +4395,6 @@ parameters:
 		-
 			message: '#^Cannot call method getData\(\) on int\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Model/Universe/StructureModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\StructureModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Universe/StructureModel.php
 
@@ -5077,8 +4471,8 @@ parameters:
 			path: pathfinder/app/Model/Universe/SystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SystemModel\:\:afterUpdateEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SystemModel\:\:afterUpdateEvent\(\) with return type void returns null but should not return anything\.$#'
+			identifier: return.void
 			count: 1
 			path: pathfinder/app/Model/Universe/SystemModel.php
 
@@ -5095,12 +4489,6 @@ parameters:
 			path: pathfinder/app/Model/Universe/SystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SystemModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/SystemModel.php
-
-		-
 			message: '#^Non\-standard \(double\) cast is deprecated in PHP 8\.5\. Use \(float\) instead\.$#'
 			identifier: cast.deprecated
 			count: 1
@@ -5109,6 +4497,12 @@ parameters:
 		-
 			message: '#^Property Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:\$security \(int\) does not accept string\.$#'
 			identifier: assign.propertyType
+			count: 1
+			path: pathfinder/app/Model/Universe/SystemModel.php
+
+		-
+			message: '#^Result of method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterUpdateEvent\(\) \(void\) is used\.$#'
+			identifier: staticMethod.void
 			count: 1
 			path: pathfinder/app/Model/Universe/SystemModel.php
 
@@ -5131,20 +4525,8 @@ parameters:
 			path: pathfinder/app/Model/Universe/SystemModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SystemNeighbourModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/SystemNeighbourModel.php
-
-		-
 			message: '#^Cannot call method getWormholeName\(\) on int\<min, \-1\>\|int\<1, max\>\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: pathfinder/app/Model/Universe/SystemStaticModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\SystemStaticModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Universe/SystemStaticModel.php
 
@@ -5163,12 +4545,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Exodus4D\\Pathfinder\\Model\\Universe\\TypeAttributeModel\:\:\$value\.$#'
 			identifier: property.notFound
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeAttributeModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeAttributeModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: pathfinder/app/Model/Universe/TypeAttributeModel.php
 
@@ -5227,38 +4603,20 @@ parameters:
 			path: pathfinder/app/Model/Universe/TypeModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:afterInsertEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:afterInsertEvent\(\) with return type void returns null but should not return anything\.$#'
+			identifier: return.void
 			count: 1
 			path: pathfinder/app/Model/Universe/TypeModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:afterUpdateEvent\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:afterUpdateEvent\(\) with return type void returns null but should not return anything\.$#'
+			identifier: return.void
 			count: 1
 			path: pathfinder/app/Model/Universe/TypeModel.php
 
 		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:loadData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:manipulateDogmaAttributes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:set_dogma_attributes\(\) has parameter \$dogmaAttributesData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: pathfinder/app/Model/Universe/TypeModel.php
-
-		-
-			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:syncDogmaAttributes\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\:\:set_dogma_attributes\(\) has parameter \$dogmaAttributesData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: pathfinder/app/Model/Universe/TypeModel.php
 
@@ -5283,6 +4641,18 @@ parameters:
 		-
 			message: '#^Property Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:\$typeId \(int\) does not accept \$this\(Exodus4D\\Pathfinder\\Model\\Universe\\TypeModel\)\.$#'
 			identifier: assign.propertyType
+			count: 1
+			path: pathfinder/app/Model/Universe/TypeModel.php
+
+		-
+			message: '#^Result of method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterInsertEvent\(\) \(void\) is used\.$#'
+			identifier: staticMethod.void
+			count: 1
+			path: pathfinder/app/Model/Universe/TypeModel.php
+
+		-
+			message: '#^Result of method Exodus4D\\Pathfinder\\Model\\AbstractModel\:\:afterUpdateEvent\(\) \(void\) is used\.$#'
+			identifier: staticMethod.void
 			count: 1
 			path: pathfinder/app/Model/Universe/TypeModel.php
 
@@ -5314,42 +4684,6 @@ parameters:
 			message: '#^Method Exodus4D\\Socket\\Component\\AbstractMessageComponent\:\:getConnection\(\) has invalid return type Ratchet\\ConnectionInterface\.$#'
 			identifier: class.notFound
 			count: 2
-			path: websocket/app/Component/AbstractMessageComponent.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\AbstractMessageComponent\:\:onClose\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/AbstractMessageComponent.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\AbstractMessageComponent\:\:onError\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/AbstractMessageComponent.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\AbstractMessageComponent\:\:onMessage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/AbstractMessageComponent.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\AbstractMessageComponent\:\:onOpen\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/AbstractMessageComponent.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\AbstractMessageComponent\:\:send\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/AbstractMessageComponent.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\AbstractMessageComponent\:\:updateConnection\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: websocket/app/Component/AbstractMessageComponent.php
 
 		-
@@ -5455,18 +4789,6 @@ parameters:
 			path: websocket/app/Component/Formatter/SubscriptionFormatter.php
 
 		-
-			message: '#^Method Exodus4D\\Socket\\Component\\Handler\\LogFileHandler\:\:createDir\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/Handler/LogFileHandler.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\Handler\\LogFileHandler\:\:write\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/Handler/LogFileHandler.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$remoteAddress\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5563,36 +4885,6 @@ parameters:
 			path: websocket/app/Component/MapUpdate.php
 
 		-
-			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:handleLogData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/MapUpdate.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:onClose\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/MapUpdate.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:onError\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/MapUpdate.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:onMessage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/MapUpdate.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:onOpen\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Component/MapUpdate.php
-
-		-
 			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:removeMapAccessEntry\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
@@ -5601,12 +4893,6 @@ parameters:
 		-
 			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:setConnectionAccess\(\) should return bool but returns string\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: websocket/app/Component/MapUpdate.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Component\\MapUpdate\:\:unSubscribeConnection\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: websocket/app/Component/MapUpdate.php
 
@@ -5931,48 +5217,6 @@ parameters:
 		-
 			message: '#^Call to sprintf contains an invalid placeholder\.$#'
 			identifier: argument.sprintf
-			count: 1
-			path: websocket/app/Socket/TcpSocket.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Socket\\TcpSocket\:\:addConnection\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Socket/TcpSocket.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Socket\\TcpSocket\:\:cancelTimer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Socket/TcpSocket.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Socket\\TcpSocket\:\:cancelTimers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Socket/TcpSocket.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Socket\\TcpSocket\:\:connectionError\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Socket/TcpSocket.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Socket\\TcpSocket\:\:removeConnection\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Socket/TcpSocket.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Socket\\TcpSocket\:\:setTimer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: websocket/app/Socket/TcpSocket.php
-
-		-
-			message: '#^Method Exodus4D\\Socket\\Socket\\TcpSocket\:\:setTimerTimeout\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: websocket/app/Socket/TcpSocket.php
 
