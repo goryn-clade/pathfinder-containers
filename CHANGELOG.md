@@ -2,6 +2,12 @@
 
 ## v3.0
 
+### Return type completion + param types (Phase 2.X + 2.3)
+
+- Eliminated remaining 126 `missingType.return` entries: `void`/`never` for event hooks and exception throwers; `: mixed` for Cortex virtual field getters (`SystemModel::get_*`); fixed `Api/Map::import()/getAccessData()` early `return $value;` bail-outs → `return;`
+- Eliminated 77 `missingType.parameter` entries: `array` for F3 route handler `$params`, model `$data`/`$options`; `mixed` for Cortex virtual setters and `set_position()`; `Cron::__get()` typed `mixed` (contravariance with parent)
+- **Result:** `missingType.return` 0, `missingType.parameter` 0; baseline 1,264 → 876 unique entries (−388)
+
 ### Iterable value type annotations (Phase 2.4)
 
 - Ran Rector `TypeDeclarationDocblocksLevel` rules across all PHP source to auto-infer `array<K,V>` PHPDoc annotations; 7 Rector-inferred types were too narrow and corrected to `array<string, mixed>`
