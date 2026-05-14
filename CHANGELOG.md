@@ -2,6 +2,16 @@
 
 ## v3.0
 
+### Return types + PHP 8.3 modernisation (Phase 2.1–2.2)
+
+- `AbstractLog.$f3`: changed `null|\Base` → `\Base` (constructor always calls setF3())
+- `LogCollection.$collection`: changed `null|\SplObjectStorage` → `\SplObjectStorage` (constructor always initializes)
+- `AbstractModel.getFormattedColumn()`: added `: ?string` return type; fixed `strtotime()|false` → `int|null` for `date()`
+- Rector PHP 8.3 set applied across 99 files: `#[\Override]` on all overrides, typed class constants, anonymous catch blocks, `(string)` casts where needed
+- Rector TypeDeclaration rules applied: `void` return types on no-return methods, `bool`/`int`/`array` returns from strict return expressions, `?T` nullable return types, parent-based return type declarations
+- `ConnectionModel/CorporationMapModel/MapGroupModel::clearCacheData()`: added `: void`
+- **Result:** missingType.return 313 → 126 (−187); method.nonObject 39 → 29 (−10); total baseline 1584 → 1624 (+40 newly exposed by return type additions)
+
 ### Connection type enums (Phase 1b)
 
 - `pathfinder/app/Enum/ConnectionType.php`: new PHP 8.1 backed string enum — 15 cases covering all valid `scope`/`type` column values; utility methods `whitelist()`, `eolCases()`, `jumpMassCases()`, `eolBaseSeconds()`; legacy `wh_eol` deliberately absent (callers map it to `WhEol1`)
