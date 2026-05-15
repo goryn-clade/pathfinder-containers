@@ -2,6 +2,10 @@
 
 ## v3.0
 
+### WebSocket security hardening
+
+- `LogFileHandler`: restrict stream paths to `/var/www/html/pathfinder/history/map`; reject `..` traversal and out-of-root absolutes; drop world-writable `@chmod`
+
 ### Return type completion + param types (Phase 2.X + 2.3)
 
 - Eliminated remaining 126 `missingType.return` entries: `void`/`never` for event hooks and exception throwers; `: mixed` for Cortex virtual field getters (`SystemModel::get_*`); fixed `Api/Map::import()/getAccessData()` early `return $value;` bail-outs → `return;`
