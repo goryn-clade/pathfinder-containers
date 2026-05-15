@@ -373,6 +373,43 @@ Maps with "Allow Unknown systems" enabled can now add `???` placeholder nodes fo
 
 ---
 
+#### pathfinder_esi — v3.0.15 → v3.0.18 (security audit)
+
+**Security: redact sensitive headers in GuzzleLogMiddleware (v3.0.16)**
+- `app/Lib/Middleware/GuzzleLogMiddleware.php`: Added `SENSITIVE_HEADERS` class constant (`['authorization', 'set-cookie', 'proxy-authorization', 'cookie']`); added `redactHeaders(array $headers): array` helper that replaces sensitive header value arrays with `['[REDACTED]']`; wired into both `logRequest()` (`requestHeaders` key) and `logResponse()` (`responseHeaders` key) — `Authorization: Bearer <token>` no longer reaches the log callback under any flag combination, including `log_request_headers = true`
+
+**Security: strip Bearer token from serialized CacheEntry (v3.0.16)**
+- `app/Lib/Middleware/Cache/CacheEntry.php`: `__sleep()` was serialising ALL object properties including `$this->request` — a PSR-7 `Request` object whose private `$headers` array contains `Authorization: Bearer <token>`; fixed by stripping headers named in a new `SENSITIVE_REQUEST_HEADERS` constant (`['Authorization']`) from the request clone before returning the property list; tokens no longer stored at rest in Redis or Filesystem cache backends (5–30s TTL, but token-at-rest in a shared cache is a real exposure)
+
+**Security: `#[\SensitiveParameter]` on all token and credential parameters (v3.0.16)**
+- `app/Client/AbstractApi.php`, `app/Client/Ccp/Sso/Sso.php`, `app/Client/Ccp/Esi/Esi.php`: Applied PHP 8.2 `#[\SensitiveParameter]` attribute to every parameter named `$accessToken`, `$refreshToken`, `$credentials`, `$code` — redacts token values from PHP stack traces logged on exception; no behaviour change
+
+**Security: warn when disabling TLS verification or enabling wire debug (v3.0.16)**
+- `app/Client/AbstractApi.php`: `setVerify(false)` and `setDebugRequests(true)` now emit a `warning`-level log via the configured logger when called with the unsafe value; `setDebugRequests(true)` enables Guzzle `debug` mode which dumps the full cURL wire transcript — including `Authorization` headers and POST bodies — to STDOUT; the warning surfaces this risk at configuration time so it is visible in logs rather than silently active in production
+
+**Security: guard SSO response formatters against non-object bodies (v3.0.16)**
+- `app/Client/Ccp/Sso/Sso.php`: All three formatters (`getAccessRequest`, `verifyAuthorizationRequest`, `getJwksRequest`) used `if(!($body->error ?? null))` which entered the success branch when `$body` is null (network error path), then attempted to construct a token object from null data; replaced with `is_object($body) && !($body->error ?? null)` — null or array responses now fall through to the error branch
+
+**PHP 8 cleanup: extract `RequestConfig::isErrorBody()` helper (v3.0.17)**
+- `app/Lib/RequestConfig.php`: New `public static isErrorBody(mixed $body): bool` centralises the `is_object($body) && ($body->error ?? null)` guard; returns false for null, arrays, and objects without a truthy `error` property
+- `app/Client/Ccp/Esi/Esi.php`: 40 inline occurrences of the pattern replaced with `RequestConfig::isErrorBody($body)` / `!RequestConfig::isErrorBody($body)` — eliminates the series of PHP 8 `$body->error` patches accumulated across v3.0.7–v3.0.12; behaviour is bit-for-bit identical
+
+**PHP 8 cleanup: replace deprecated `GuzzleHttp\Promise\rejection_for` (v3.0.17)**
+- `app/Lib/Middleware/GuzzleLogMiddleware.php`: `\GuzzleHttp\Promise\rejection_for($reason)` → `\GuzzleHttp\Promise\Create::rejectionFor($reason)` — top-level function deprecated in Promises 1.5, removed in 2.0; full codebase sweep confirmed this was the only deprecated promise function in use
+
+**PHP 8 cleanup: typed properties in AbstractApi (v3.0.17)**
+- `app/Client/AbstractApi.php`: 31 class properties converted from `@var`-docblock-only to PHP typed declarations; key additions: `private ?WebClient $client = null`, `private string $url = ''`, `private float $timeout`, `private bool $verify = true`, `private ?\Closure $getCachePool = null`, `protected ?ConfigInterface $config = null` — `$config` required an explicit `= null` default because nullable typed properties without a default are "uninitialised" (not null) in PHP 8 and throw on read; 5 union-typed properties left untyped (`$decodeContent bool|array|string`, `$proxy null|string|array`, `$debugRequests bool|resource`, `$getLog`, `$isLoggable`)
+
+**Tooling: PHPStan level-5 static analysis with baseline (v3.0.18)**
+- `phpstan.neon` (new): level 5, `treatPhpDocTypesAsCertain: false`, `bootstrapFiles: stubs/pathfinder.stub.php`, `includes: phpstan-baseline.neon`
+- `stubs/pathfinder.stub.php` (new): minimal PHPStan bootstrap stubs for the three cross-project runtime dependencies (`\Prefab`, `lib\logging\LogInterface`, `Exodus4D\Pathfinder\Data\Mapper\AbstractIterator`) — not autoloaded; only used by static analysis to suppress `class.notFound` errors for deps that live in the parent pathfinder project's vendor; properties and return types deliberately left untyped where child mappers override without annotations to avoid non-ignorable `property.missingNativeType` / `method.childReturnType` errors
+- `phpstan-baseline.neon` (new): 32 pre-existing errors baselined to establish a green floor without a whole-codebase cleanup; `vendor/bin/phpstan analyse` reports 0 errors; notable baselined items: `newErrorResponse(bool $json, string given)` type mismatch (all 6 callers pass `getAcceptType()` string; PHP loose-coerces to `true` — correct by accident), `substr(int $statusCode)` in status helpers (PHP 8.1+ deprecation), duplicate `'updated_at'` key in `EveScout\Connection::$map` (second declaration silently wins; state mapping is dead), `ApiInterface::DEFAULT_BATCH_CONCURRENCY` constant missing from interface (declared on `AbstractApi` only)
+- `phpstan/phpstan: ^2.1` added to `require-dev` in `composer.json`
+
+**Tooling: GitHub Actions CI; PHP 8.2 / 8.3 / 8.4 test matrix (v3.0.18)**
+- `.github/workflows/ci.yml` (new): triggers on push + PR; matrix PHP 8.2, 8.3, 8.4; steps: `composer install --prefer-dist --no-progress` → `find app -name '*.php' | xargs php -l` → `phpstan analyse --no-progress --memory-limit=512M`; cross-project deps are not declared in `composer.json` so install succeeds standalone; PHPStan uses bootstrap stubs for the missing deps; PHP 8.4 is included to surface the four `parameter.implicitlyNullable` deprecations (baselined) as CI log warnings ahead of PHP 8.4 adoption
+- `README.md`: PHP requirement updated `>=7.2` → `>=8.2`; install snippet version updated `v2.1.4` → `^3.0`
+
 #### pathfinder_esi — v3.0.13 → v3.0.14
 
 - v3.0.14: Added `getCharactersAffiliationRequest()` — new public-facing callable (`getCharactersAffiliation`) for per-login affiliation refresh, reusing the existing `/v1/characters/affiliation/` POST endpoint and `Affiliation` mapper
