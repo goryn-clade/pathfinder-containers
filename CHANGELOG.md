@@ -5,6 +5,7 @@
 ### WebSocket security hardening
 
 - `LogFileHandler`: restrict stream paths to `/var/www/html/pathfinder/history/map`; reject `..` traversal and out-of-root absolutes; drop world-writable `@chmod`
+- `cmd.php`: fail-fast at boot if `WS_TOKEN_SECRET` is absent or shorter than 32 hex chars
 
 ### Return type completion + param types (Phase 2.X + 2.3)
 
