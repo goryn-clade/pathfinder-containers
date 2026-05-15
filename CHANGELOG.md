@@ -9,6 +9,7 @@
 - `WebSockets.php`: wrap `WsServer` in Ratchet `OriginCheck` using `WS_ALLOWED_ORIGINS` env var; production boot fails if empty; non-prod auto-allows localhost/127.0.0.1
 - `Payload::jsonSerialize()`: emit only `task` and `load`; suppress `characterIds` server-routing field from outbound WS frames
 - `AbstractMessageComponent`: reject new connections once 5000 are active; reject inbound frames over 64 KB before `json_decode`
+- `composer.json`: bump `cboden/ratchet` →0.4.4, `react/*` to latest 1.x, `clue/ndjson-react` →1.3, pin `react/promise: ^2.11`; `rfc6455` v0.3.1 unblocked `guzzlehttp/psr7` →2.x and `symfony/*` →6.4.x; replace removed `Promise\Timer\TimeoutException` with `\RuntimeException` in `TcpSocket`; bump Dockerfile base to `composer:2`
 
 ### Return type completion + param types (Phase 2.X + 2.3)
 
