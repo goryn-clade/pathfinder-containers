@@ -8,6 +8,7 @@
 - `cmd.php`: fail-fast at boot if `WS_TOKEN_SECRET` is absent or shorter than 32 hex chars
 - `WebSockets.php`: wrap `WsServer` in Ratchet `OriginCheck` using `WS_ALLOWED_ORIGINS` env var; production boot fails if empty; non-prod auto-allows localhost/127.0.0.1
 - `Payload::jsonSerialize()`: emit only `task` and `load`; suppress `characterIds` server-routing field from outbound WS frames
+- `AbstractMessageComponent`: reject new connections once 5000 are active; reject inbound frames over 64 KB before `json_decode`
 
 ### Return type completion + param types (Phase 2.X + 2.3)
 
