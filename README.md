@@ -1,38 +1,53 @@
 # Pathfinder Containers
 
-[![Docker Image Master Branch](https://github.com/goryn-clade/pathfinder-containers/actions/workflows/docker-image.yml/badge.svg?branch=master)](https://github.com/goryn-clade/pathfinder-containers/actions/workflows/docker-image.yml)
-
 A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/goryn-clade/pathfinder/) fork, using [Traefik](https://traefik.io/) as a reverse proxy with automatic TLS via Let's Encrypt.
 
 ---
 
-## v3.0 Breaking Changes
+## Upgrading from v2.x
 
-If you are upgrading from v2.x, note the following changes:
+**v3.0 is a major release.** The PHP runtime, MariaDB image, cache image, reverse proxy, service names, compose file layout, several env variables, and the database schema all change.
 
-- **Redis → Valkey**: The `redis:7-alpine` image has been replaced with `valkey/valkey:8-alpine`. Valkey is the Linux Foundation fork of Redis, wire-compatible but under an open-source licence. No data migration required.
-- **MariaDB image**: Replaced the abandoned `bianjp/mariadb-alpine` with the official `mariadb:10.11` (LTS until 2028).
-- **Service renamed**: `pfdb` → `pf-db`. Update any scripts or manual `docker exec` commands.
-- **Compose file renamed**: `docker-compose.yml` → `compose.yml`. Use `docker compose` (Compose v2 plugin) rather than the legacy `docker-compose` CLI.
-- **SMTP removed**: Email notification support has been removed. Remove any `SMTP_*` variables from your `.env`.
-- **Configuration via `.env` only**: Deployment-specific settings (install name, super admin ID, login whitelists, debug level) are now set in `.env`. You no longer need to edit any `.ini` files.
-- **`plugin.ini` is the only mounted config file**: `config.ini` and `pathfinder.ini` are now baked into the image. Only `config/pathfinder/plugin.ini` is volume-mounted (for custom module configuration).
+**Read the full upgrade guide before you start:** [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v2-to-v3.md).
 
-### Upgrade steps
+### Breaking changes at a glance
 
-1. Export your database before upgrading:
-   ```shell
-   docker compose exec pf-db mysqldump -u root -p$MYSQL_PASSWORD pathfinder > pathfinder_backup.sql
-   ```
-2. Pull the new image and recreate containers:
-   ```shell
-   docker compose pull && docker compose up -d --force-recreate
-   ```
-3. If the MariaDB data volume was created by the old `bianjp` image, you may need to import your backup into the new container. Check `docker compose logs pf-db` for any startup errors.
+| Area | v2.x | v3.0 |
+|---|---|---|
+| PHP runtime | 7.2 | 8.3 |
+| MariaDB image | `bianjp/mariadb-alpine` (abandoned) | `mariadb:10.11` (official, LTS) |
+| Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
+| Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
+| Compose file | `docker-compose.yml` | `compose.yml` (+ `compose.dev.yml`, `compose.test.yml`) |
+| DB service | `pfdb` | `pf-db` |
+| Cache service | `redis` | `pf-redis` |
+| Socket service | `pathfinder-socket` | `pf-socket` |
+| External `web` network | required | not required |
+| Email / SMTP | supported | **removed** — use Slack or Discord webhooks |
+| `pathfinder.ini` / `config.ini` | bind-mounted, hand-edited | baked into image, driven by `.env` |
+| `plugin.ini` | bind-mounted | bind-mounted (unchanged — only ini file still mounted) |
+| DB schema | v2 | adds columns to `system`, `connection`, `map`, `character`; new `map_group` table |
+| ESI tokens at rest | plaintext | encrypted (libsodium `crypto_secretbox`) |
+
+### New required env variables
+
+These have no v2 equivalent — `.env.example` documents each:
+
+- `SERVER_NAME` — unique-per-install identifier (cache key seed, ESI User-Agent)
+- `WS_TOKEN_SECRET` — HMAC secret binding WebSocket tokens to PHP sessions. `pf-socket` refuses to start without it.
+- `WS_ALLOWED_ORIGINS` — comma-separated hostnames allowed to open WebSocket connections. `pf-socket` refuses to start in production if empty.
+- `TOKEN_ENCRYPTION_KEY` — 32-byte hex key for ESI token encryption at rest. Blank fails closed.
+- `REDIS_PASSWORD` — enables Valkey AUTH
+- `SESSION_COOKIE_SECURE` — set to `1` on HTTPS deployments
+- `APP_ENV` — set to `production` to activate startup guards
+
+Generate the random secrets with `openssl rand -hex 32`.
+
+If you are upgrading, follow [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v2-to-v3.md) — it covers backup, `.env` rewrite, MariaDB restore, schema migration, and optional bulk encryption of legacy ESI tokens.
 
 ---
 
-## Installation
+## Installation (fresh install)
 
 ### Prerequisites
 
@@ -70,11 +85,19 @@ If you are upgrading from v2.x, note the following changes:
    ```shell
    cp .env.example .env
    ```
-   Open `.env` and fill in every value. Each variable is documented with a comment in `.env.example`. The key ones are:
+   Open `.env` and fill in every value. Each variable is documented with a comment in `.env.example`. The minimum set:
    - `DOMAIN` — your public domain name
+   - `SERVER_NAME` — unique identifier for this install
    - `CCP_SSO_CLIENT_ID` / `CCP_SSO_SECRET_KEY` — from step 1
-   - `MYSQL_PASSWORD` — set a strong password
+   - `MYSQL_PASSWORD` / `MYSQL_ROOT_PASSWORD` — set strong passwords
    - `APP_PASSWORD` — password for the `/setup` page (HTTP Basic Auth, user: `pf`)
+   - `REDIS_PASSWORD` — `openssl rand -hex 32`
+   - `WS_TOKEN_SECRET` — `openssl rand -hex 32`
+   - `WS_ALLOWED_ORIGINS` — your `DOMAIN`
+   - `TOKEN_ENCRYPTION_KEY` — `openssl rand -hex 32`
+   - `APP_ENV=production`
+   - `SESSION_COOKIE_SECURE=1`
+   - `PF_DEBUG=0`
    - `PF_SUPER_ADMIN_ID` — your CCP character ID (grants full admin access)
    - `PF_LOGIN_WHITELIST_CORP` / `PF_LOGIN_WHITELIST_ALLIANCE` — optional; restrict who can log in
 
@@ -94,7 +117,7 @@ If you are upgrading from v2.x, note the following changes:
    docker compose exec pf-db sh -c "unzip -p /eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe"
    ```
 
-7. **Verify everything works**, then ensure `PF_DEBUG` is set to `0` in your `.env` for production.
+7. **Verify everything works**, then confirm `PF_DEBUG=0` and `APP_ENV=production` in your `.env`.
 
 ---
 

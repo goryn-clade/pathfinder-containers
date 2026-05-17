@@ -11,21 +11,20 @@ RUN apk update \
 COPY pathfinder /app
 WORKDIR /app
 
-RUN composer self-update && \
-    composer update --no-dev --optimize-autoloader && \
-    # PHP 8 compat: $fieldsCache declared but not initialized in cortex — array_key_exists(null) is TypeError in PHP 8
-    # TODO: remove once upstream fix lands in ikkez/f3-cortex dev-master
-    grep -q '\$fieldsCache,' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
-        sed -i 's/\$fieldsCache,\(.*relation field cache\)/\$fieldsCache = [],\1/' vendor/ikkez/f3-cortex/lib/db/cortex.php || true && \
-    # PHP 8 compat: F3 Base::config() captures TTL as string via regex; php-redis 6.x rejects non-int/float EXPIRY
-    grep -q 'list(\$rval,\$ttl)=\$tmp;' vendor/bcosca/fatfree-core/base.php && \
-        sed -i 's/list(\$rval,\$ttl)=\$tmp;/list($rval,$ttl)=$tmp; $ttl=(int)$ttl;/' vendor/bcosca/fatfree-core/base.php || true && \
-    # PHP 8 compat: cast $ttl to int at all Redis-write paths in Cache::set()
-    grep -q '\$ttl=\$cached\[1\];' vendor/bcosca/fatfree-core/base.php && \
-        sed -i 's/\$ttl=\$cached\[1\];/$ttl=(int)$cached[1];/' vendor/bcosca/fatfree-core/base.php || true && \
-    # PHP 8 / php-redis 6 compat: route TTL from ini comma-split arrives as ' 0' (truthy string but int value 0)
-    # Redis rejects ['ex'=>0]. Guard with (int)$ttl>0 so zero/negative TTLs produce [] (no expiry) instead.
-    grep -qF "\$ttl?['ex'=>\$ttl]:[]" vendor/bcosca/fatfree-core/base.php && \
+# PHP 8 / php-redis 6 vendor patches. Each is run as a separate command so an
+# inline comment cannot accidentally break a `&&` chain. TODOs: drop once
+# upstream fixes land in ikkez/f3-cortex dev-master and bcosca/fatfree-core.
+RUN composer update --no-dev --optimize-autoloader --no-scripts
+RUN echo "=== before cortex patch ===" && \
+    sed -n '43,47p' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
+    sed -i '/relation field cache/s/\$fieldsCache,/\$fieldsCache = [],/' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
+    echo "=== after cortex patch ===" && \
+    sed -n '43,47p' vendor/ikkez/f3-cortex/lib/db/cortex.php
+RUN grep -q 'list(\$rval,\$ttl)=\$tmp;' vendor/bcosca/fatfree-core/base.php && \
+        sed -i 's/list(\$rval,\$ttl)=\$tmp;/list($rval,$ttl)=$tmp; $ttl=(int)$ttl;/' vendor/bcosca/fatfree-core/base.php || true
+RUN grep -q '\$ttl=\$cached\[1\];' vendor/bcosca/fatfree-core/base.php && \
+        sed -i 's/\$ttl=\$cached\[1\];/$ttl=(int)$cached[1];/' vendor/bcosca/fatfree-core/base.php || true
+RUN grep -qF "\$ttl?['ex'=>\$ttl]:[]" vendor/bcosca/fatfree-core/base.php && \
         sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php || true
 
 FROM trafex/php-nginx:3.6.0

@@ -2,6 +2,11 @@
 
 ## v3.0
 
+### Docker build: composer `--no-scripts` (exit 127 fix)
+
+- `pathfinder.Dockerfile`: add `--no-scripts` to the `composer update --no-dev` invocation; upstream `pathfinder/composer.json` declares `post-install-cmd`/`post-update-cmd` hooks calling `vendor/bin/phpcs` (a `require-dev` binary that doesn't exist under `--no-dev`), which caused clean `--no-cache` rebuilds to fail with exit 127
+- Split the vendor-patch chain into one `RUN` per patch so inline comments can't break a `&&` chain; cherry-picked from samoneilll/pathfinder-containers@dfd1b64b
+
 ### Deployment & dependency hygiene audit (PKG 5 audit)
 
 - Full audit of `.env.example` documentation, operator rotation playbook, Composer/npm CVE surfaces, libsodium runtime assertion, `.dockerignore` coverage, compose port exposure, and container user
