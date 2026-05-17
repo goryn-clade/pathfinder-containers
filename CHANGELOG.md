@@ -2,6 +2,16 @@
 
 ## v3.0
 
+### Deployment & dependency hygiene audit (PKG 5 audit)
+
+- Full audit of `.env.example` documentation, operator rotation playbook, Composer/npm CVE surfaces, libsodium runtime assertion, `.dockerignore` coverage, compose port exposure, and container user
+- Composer CVE scan: CLEAN (zero advisories for both `pathfinder` and `websocket`); npm: N/A (no runtime deps)
+- Findings doc: `.claude/AUDIT-PKG-5-deployment-and-dependency-hygiene-findings.md`
+- `.dockerignore` (new): exclude `.env`, `letsencrypt/`, `.git/`, `.claude/`, `pathfinder/node_modules/`, `pathfinder/vendor/`, `websocket/vendor/`, `logs/`, `stubs/` from build context; prevents live secrets being transferred to the Docker daemon on every build
+- `pathfinder/composer.json`: declare `ext-sodium: *` in `require` block; ensures `composer install` fails-fast if sodium extension is absent rather than discovering it at runtime
+- `.env.example`: add `openssl rand -hex 32/16` generation hints for `MYSQL_PASSWORD`, `REDIS_PASSWORD`, `APP_PASSWORD`; add fail-behavior and rotation note for `CCP_SSO_SECRET_KEY`
+- `.claude/MIGRATION-v2-to-v3.md`: add `WS_TOKEN_SECRET` and `CCP_SSO_SECRET_KEY` rotation procedures (both secrets previously lacked operator-facing "what do I do if this leaked?" guidance)
+
 ### Session, cookie & CSRF audit (PKG 4 audit)
 
 - Full audit of PHP session cookie attributes, remember-me cookie hardening, CSRF posture, logout flow, SSO state validation, session regeneration, and concurrent-session policy
