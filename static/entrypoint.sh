@@ -16,6 +16,17 @@ if [ "${APP_ENV:-}" = "production" ] && [ "${PF_DEBUG:-0}" -gt 0 ]; then
     echo "WARNING: PF_DEBUG=${PF_DEBUG} is set with APP_ENV=production — stack traces will be exposed to users. Set PF_DEBUG=0." >&2
 fi
 
+# Fail-fast: TOKEN_ENCRYPTION_KEY must be 64 hex chars (32 bytes) for libsodium crypto_secretbox.
+# Absent/invalid means every ESI token op throws and SSO breaks silently for users.
+if [ -z "${TOKEN_ENCRYPTION_KEY:-}" ]; then
+    echo "FATAL: TOKEN_ENCRYPTION_KEY must be set. Generate with: openssl rand -hex 32" >&2
+    exit 1
+fi
+if ! printf '%s' "$TOKEN_ENCRYPTION_KEY" | grep -qE '^[0-9a-fA-F]{64}$'; then
+    echo "FATAL: TOKEN_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes). Generate with: openssl rand -hex 32" >&2
+    exit 1
+fi
+
 # Apply defaults for optional boolean flags before envsubst
 : "${CCP_SSO_USE_PKCE:=1}"
 export CCP_SSO_USE_PKCE

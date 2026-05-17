@@ -2,6 +2,10 @@
 
 ## v3.0
 
+### Token-at-rest fail-fast (PKG 1 audit)
+
+- `entrypoint.sh`: validate `TOKEN_ENCRYPTION_KEY` is present and exactly 64 hex chars before launching supervisord; container exits non-zero with a clear `FATAL:` message on misconfig instead of booting and silently breaking SSO at first user login
+
 ### WebSocket security hardening
 
 - `LogFileHandler`: restrict stream paths to `/var/www/html/pathfinder/history/map`; reject `..` traversal and out-of-root absolutes; drop world-writable `@chmod`
