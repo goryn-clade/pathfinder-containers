@@ -1,0 +1,28 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# TLS material
+letsencrypt/
+
+# VCS / GitHub metadata
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Internal docs / audit artifacts
+.claude/
+
+# Build artifacts (rebuilt inside the image)
+pathfinder/node_modules/
+pathfinder/vendor/
+websocket/vendor/
+
+# Runtime bind-mount targets (top-level only — pathfinder/logs and pathfinder/tmp
+# must remain for the build-stage chmod)
+logs/
+
+# IDE stubs
+stubs/
