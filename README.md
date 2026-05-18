@@ -99,7 +99,7 @@ If you are upgrading, follow [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v
    - `SESSION_COOKIE_SECURE=1`
    - `PF_DEBUG=0`
    - `PF_SUPER_ADMIN_ID` — your CCP character ID (grants full admin access)
-   - `PF_LOGIN_WHITELIST_CORP` / `PF_LOGIN_WHITELIST_ALLIANCE` — optional; restrict who can log in
+   - `PF_LOGIN_ALLOWLIST_CORP` / `PF_LOGIN_ALLOWLIST_ALLIANCE` — optional; restrict who can log in
 
 4. **Start the stack**
    ```shell

@@ -2,6 +2,18 @@
 
 ## v3.0
 
+### Rename: whitelist → allowlist (breaking)
+
+- **Breaking** for operators: `PF_LOGIN_WHITELIST_CHAR` / `PF_LOGIN_WHITELIST_CORP` / `PF_LOGIN_WHITELIST_ALLIANCE` env vars renamed to `PF_LOGIN_ALLOWLIST_*`. Update `.env` accordingly — no compat shim
+- `pathfinder/app/Enum/ConnectionType.php`: `whitelist()` → `allowlist()`
+- `pathfinder/app/Model/Pathfinder/ConnectionModel.php`: `getConnectionTypeWhitelist()` → `getConnectionTypeAllowlist()`
+- `pathfinder/app/Controller/Api/Rest/Route.php`: caller updates + comments
+- `pathfinder/app/Controller/Ccp/Universe.php`: internal var/param renames (`$regionsWhitelist`, `$constellationsWhitelist`, `$categoriesWhitelist`, `$groupsWhitelist` → `*Allowlist`)
+- `pathfinder/app/Data/Mapper/AbstractIterator.php`: `$keyWhitelist` → `$keyAllowlist`
+- `pathfinder/app/Model/Pathfinder/CharacterModel.php`: auth error strings + local vars renamed (`$whitelistCharacter`/`$whitelistCorporations`/`$whitelistAlliance` → `$allowlist*`); F3 config keys (`login.character`/`corporation`/`alliance`) unchanged
+- `websocket/app/Component/MapUpdate.php`: 3 comment updates
+- `.env.example`, `static/pathfinder/pathfinder.ini`, `README.md`: env-var name + doc updates
+
 ### Docker build: composer `--no-scripts` (exit 127 fix)
 
 - `pathfinder.Dockerfile`: add `--no-scripts` to the `composer update --no-dev` invocation; upstream `pathfinder/composer.json` declares `post-install-cmd`/`post-update-cmd` hooks calling `vendor/bin/phpcs` (a `require-dev` binary that doesn't exist under `--no-dev`), which caused clean `--no-cache` rebuilds to fail with exit 127
