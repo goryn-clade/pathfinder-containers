@@ -18,7 +18,7 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 | MariaDB image | `bianjp/mariadb-alpine` (abandoned) | `mariadb:10.11` (official, LTS) |
 | Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
 | Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
-| Compose file | `docker-compose.yml` | `compose.yml` (+ `compose.dev.yml`, `compose.test.yml`) |
+| Compose file | `docker-compose.yml` | `compose.yml` |
 | DB service | `pfdb` | `pf-db` |
 | Cache service | `redis` | `pf-redis` |
 | Socket service | `pathfinder-socket` | `pf-socket` |
@@ -29,9 +29,11 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 | DB schema | v2 | adds columns to `system`, `connection`, `map`, `character`; new `map_group` table |
 | ESI tokens at rest | plaintext | encrypted (libsodium `crypto_secretbox`) |
 
-### New required env variables
+### New env variables in v3
 
-These have no v2 equivalent — `.env.example` documents each:
+`.env.example` documents each. The first group are genuinely new (no v2 equivalent); the second group existed in v2's bind-mounted `pathfinder.ini` / `environment.ini` and are now driven through `.env`.
+
+**Net-new (no v2 equivalent):**
 
 - `SERVER_NAME` — unique-per-install identifier (cache key seed, ESI User-Agent)
 - `WS_TOKEN_SECRET` — HMAC secret binding WebSocket tokens to PHP sessions. `pf-socket` refuses to start without it.
@@ -40,10 +42,20 @@ These have no v2 equivalent — `.env.example` documents each:
 - `REDIS_PASSWORD` — enables Valkey AUTH
 - `SESSION_COOKIE_SECURE` — set to `1` on HTTPS deployments
 - `APP_ENV` — set to `production` to activate startup guards
+- `PF_SETUP_ENABLED` — gates the `/setup` route; set to `1` only during bootstrap, then back to `0`
+- `CCP_SSO_USE_PKCE` — optional kill-switch (default on); set to `0` if CCP changes break the PKCE flow
+
+**Moved from `pathfinder.ini` / `environment.ini` (now driven via `.env`):**
+
+- `PF_DEBUG` — F3 debug/error detail level (was `[ENVIRONMENT]/DEBUG`)
+- `PF_INSTALL_NAME` — display name shown in UI (was `[PATHFINDER]/NAME`)
+- `PF_REGISTRATION_STATUS` — `1` = open, `0` = locked (was `[PATHFINDER.REGISTRATION]/STATUS`)
+- `PF_SUPER_ADMIN_ID` — CCP character ID of the super admin
+- `PF_LOGIN_ALLOWLIST_CHAR` / `_CORP` / `_ALLIANCE` — login restriction lists (was `[PATHFINDER.LOGIN]/CHARACTER` / `/CORPORATION` / `/ALLIANCE`; renamed from "whitelist")
 
 Generate the random secrets with `openssl rand -hex 32`.
 
-If you are upgrading, follow [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v2-to-v3.md) — it covers backup, `.env` rewrite, MariaDB restore, schema migration, and optional bulk encryption of legacy ESI tokens.
+If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) — it covers backup, `.env` rewrite, MariaDB restore, schema migration, and optional bulk encryption of legacy ESI tokens.
 
 ---
 
@@ -86,18 +98,30 @@ If you are upgrading, follow [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v
    cp .env.example .env
    ```
    Open `.env` and fill in every value. Each variable is documented with a comment in `.env.example`. The minimum set:
+
+   *Identity & TLS:*
    - `DOMAIN` — your public domain name
-   - `SERVER_NAME` — unique identifier for this install
-   - `CCP_SSO_CLIENT_ID` / `CCP_SSO_SECRET_KEY` — from step 1
-   - `MYSQL_PASSWORD` / `MYSQL_ROOT_PASSWORD` — set strong passwords
+   - `SERVER_NAME` — unique identifier for this install (used in cache keys and ESI User-Agent)
+   - `LE_EMAIL` — email for Let's Encrypt certificate expiry notifications
+
+   *Secrets (generate each with `openssl rand -hex 32`):*
+   - `MYSQL_PASSWORD` — MariaDB root password
    - `APP_PASSWORD` — password for the `/setup` page (HTTP Basic Auth, user: `pf`)
-   - `REDIS_PASSWORD` — `openssl rand -hex 32`
-   - `WS_TOKEN_SECRET` — `openssl rand -hex 32`
-   - `WS_ALLOWED_ORIGINS` — your `DOMAIN`
-   - `TOKEN_ENCRYPTION_KEY` — `openssl rand -hex 32`
+   - `REDIS_PASSWORD` — enables Valkey AUTH
+   - `WS_TOKEN_SECRET` — HMAC secret for WebSocket tokens
+   - `TOKEN_ENCRYPTION_KEY` — encrypts ESI tokens at rest
+
+   *CCP SSO (from step 1):*
+   - `CCP_SSO_CLIENT_ID` / `CCP_SSO_SECRET_KEY`
+
+   *Bootstrap & runtime flags:*
+   - `PF_SETUP_ENABLED=1` — **required for first boot** so the `/setup` wizard renders; set back to `0` after step 5
    - `APP_ENV=production`
    - `SESSION_COOKIE_SECURE=1`
    - `PF_DEBUG=0`
+   - `WS_ALLOWED_ORIGINS` — your `DOMAIN` (comma-separated if multiple)
+
+   *Access control:*
    - `PF_SUPER_ADMIN_ID` — your CCP character ID (grants full admin access)
    - `PF_LOGIN_ALLOWLIST_CORP` / `PF_LOGIN_ALLOWLIST_ALLIANCE` — optional; restrict who can log in
 
@@ -114,10 +138,13 @@ If you are upgrading, follow [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v
 
 6. **Import the EVE universe data**
    ```shell
-   docker compose exec pf-db sh -c "unzip -p /eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe"
+   unzip -p ./pathfinder/export/sql/eve_universe.sql.zip | docker compose exec -T pf-db sh -c 'mysql -u root -p"$MYSQL_ROOT_PASSWORD" eve_universe'
    ```
 
-7. **Verify everything works**, then confirm `PF_DEBUG=0` and `APP_ENV=production` in your `.env`.
+7. **Lock down the install.** Set `PF_SETUP_ENABLED=0` in `.env`, confirm `PF_DEBUG=0` and `APP_ENV=production`, then recreate the app container:
+   ```shell
+   docker compose up -d --force-recreate pf
+   ```
 
 ---
 
@@ -146,16 +173,12 @@ docker logs -f pathfinder
 # Rebuild after code changes
 docker compose -f compose.dev.yml build --no-cache pf && docker compose -f compose.dev.yml up -d --force-recreate pf
 ```
-
-For step-through debugging with VSCode and Xdebug, see the `development/` directory.
-
 ---
 
 ## Acknowledgments
 
 - [exodus4d](https://github.com/exodus4d/) for creating Pathfinder
 - [techfreak](https://gitlab.com/techfreak/pathfinder-container) for the original container project
-- [johnschultz](https://gitlab.com/johnschultz/pathfinder-container/) for Traefik config improvements
 - [tyrheimdaleve](https://github.com/TyrHeimdalEVE/pathfinder_esi) for maintaining the `pathfinder_esi` dependency
 
 ## License
