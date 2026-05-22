@@ -2,6 +2,17 @@
 
 ## v3.0
 
+### MIGRATION doc: break-fix entry for stale Valkey serialization 500s
+
+- `MIGRATION-v2-to-v3.md`: new "Break-fix scenarios" section documenting the symptom — every page 500s with `GuzzleHttp\Psr7\Uri::$composedComponents` dynamic-property `E_DEPRECATED` notices spamming the PHP-FPM log — and its fix: `valkey-cli FLUSHALL`. Cause is PHP 8.2 raising deprecations on `unserialize()` rehydrating cached objects whose vendor property shape shifted between rebuilds (Dockerfile runs `composer update` against constraint ranges, so patch versions drift). FAQ "Do I need to clear caches?" updated to cross-link.
+
+### Signature module: "+ create unknown system" shortcut in Leads-to popover
+
+- `pathfinder/js/app/ui/module/system_signature.js`: small `+` icon added to the right of the "Leads to" popover-title for wormhole signatures. Clicking it opens the Add-System dialog with the **Unknown** toggle pre-checked, the **Security Class** dropdown pre-filled from the signature's wormhole type via `Init.wormholes[].security` (E545 → 0.0, N968 → C3, …; blank for generic K162/unset/ambiguous), and the source-system pre-bound so a connection is drawn automatically. On successful creation the new connection is auto-linked back into the originating signature row via `PATCH /api/rest/Signature/{id}` — no manual round-trip.
+- New helpers on `SystemSignatureModule`: `securityClassForTypeId()`, `triggerCreateUnknownSystem()`, `linkSignatureToConnection()`, `renderConnectionCell()`. Added `app/map/system` to the module's `define()` imports.
+- `pathfinder/js/app/map/system.js`: `showNewSystemDialog(options)` now respects optional `options.unknownSystem` (bool) and `options.securityClass` (string) prefill flags; ignored when the map disables `allowUnknownSystems`. The system-search Select2 init is now lazy — when the dialog opens already in Unknown mode the init is skipped, suppressing the auto-opening Select2 dropdown that previously appeared overlaying the modal; the init runs on demand if the user later toggles Unknown off.
+- `linkSignatureToConnection()` now renders the "Leads to" cell directly via `FormElement.formatSignatureConnectionSelectionData` after `tableApi.draw()`. Previously the auto-link path left the cell showing the raw `connection.id` integer until the next full page reload, because xEditable's `display()` callback was never invoked (we never went through its submit flow) and its cached source list didn't contain the freshly-created connection. The new `renderConnectionCell()` helper mirrors the column's existing display logic using a fresh call to `getSignatureConnectionOptions`; the editable's internal value is also nudged via `option('value', …)` so the next popover open highlights the right system.
+
 ### Rename: whitelist → allowlist (breaking)
 
 - **Breaking** for operators: `PF_LOGIN_WHITELIST_CHAR` / `PF_LOGIN_WHITELIST_CORP` / `PF_LOGIN_WHITELIST_ALLIANCE` env vars renamed to `PF_LOGIN_ALLOWLIST_*`. Update `.env` accordingly — no compat shim

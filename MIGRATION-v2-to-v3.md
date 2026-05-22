@@ -413,6 +413,47 @@ Effect: any SSO login in progress at the moment of the restart will fail with `i
 
 ---
 
+## Break-fix scenarios
+
+### Stack returns 500 after a rebuild with PHP `dynamic property` notices in the logs
+
+Symptom: every page 500s; `docker logs pathfinder` shows a flood of
+
+```
+NOTICE: PHP message: Creation of dynamic property GuzzleHttp\Psr7\Uri::$composedComponents is deprecated
+NOTICE: PHP message: [vendor/cache/redis-adapter/RedisCachePool.php:54] unserialize()
+NOTICE: PHP message: [vendor/cache/adapter-common/AbstractCachePool.php:133] Cache\Adapter\Redis\RedisCachePool->fetchObjectFromCache()
+…
+```
+
+Cause: the cache layer (`cache/redis-adapter`) `unserialize()`s objects that were serialized under an earlier patch version of `guzzlehttp/psr7` (or another vendor library) whose property shape has since changed. PHP 8.2 raises `E_DEPRECATED` on every such property; F3 escalates the notice to HTTP 500.
+
+This is most likely after:
+- a `docker compose build --no-cache pf` that picked up a newer patch release of a vendor library (the Dockerfile runs `composer update` against `composer.json` constraint ranges, so patch versions can drift between rebuilds).
+- a PHP version bump.
+- a vendor patch landing in `pathfinder.Dockerfile`.
+
+**Fix — flush Valkey:**
+
+```bash
+# from the repo root
+REDIS_PASSWORD=$(grep ^REDIS_PASSWORD= .env | cut -d= -f2 | tr -d '"')
+docker compose -f compose.dev.yml exec -T pf-redis \
+  valkey-cli -a "$REDIS_PASSWORD" FLUSHALL
+```
+
+For a production stack, drop the `-f compose.dev.yml`:
+
+```bash
+docker compose exec -T pf-redis valkey-cli -a "$REDIS_PASSWORD" FLUSHALL
+```
+
+After the flush, the next page load repopulates the cache with objects serialized against the current vendor tree, and the 500s clear immediately. Side effects: any cached ESI responses are gone — the next few ESI-backed page loads will be slower while the cache warms.
+
+If `FLUSHALL` doesn't fix it, the deprecation is firing on a *fresh* serialization rather than a stale one, which means a vendor class needs `#[\AllowDynamicProperties]` or an explicit property declaration. Add the patch to `pathfinder.Dockerfile` alongside the existing cortex / fatfree-core `sed` patches.
+
+---
+
 ## Rollback
 
 If the upgrade goes badly and you need to roll back to v2.x:
@@ -460,10 +501,13 @@ If a value is broadly useful, open an issue to expose it as an env var.
 
 **Q: Do I need to clear caches?**
 A: Compiled F3 templates in `pathfinder/tmp/` are inside the image, so
-they're already fresh after `docker compose pull` / `build`. The Redis
-cache is fine to keep — keys are namespaced by `SERVER_NAME`'s md5 so
-stale entries are ignored, and Valkey's first-run AOF replay is
-transparent.
+they're already fresh after `docker compose pull` / `build`. The Valkey
+cache normally survives upgrades — keys are namespaced by `SERVER_NAME`'s
+md5 so stale entries are ignored, and Valkey's first-run AOF replay is
+transparent. The one exception is when a vendor library's property shape
+shifts under PHP 8.2's stricter dynamic-property handling and the cache
+holds serialized instances of that class — see
+[Break-fix scenarios → Stack returns 500 after a rebuild](#stack-returns-500-after-a-rebuild-with-php-dynamic-property-notices-in-the-logs).
 
 **Q: What happened to email rally pokes?**
 A: Removed with the rest of SMTP. Use the Discord or Slack rally webhook
