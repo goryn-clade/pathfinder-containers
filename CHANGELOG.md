@@ -2,6 +2,10 @@
 
 ## v3.0
 
+### Signature module: fix missing "Wandering" optgroup in type dropdown
+
+- `pathfinder/js/app/ui/module/system_signature.js`: in `getSignatureTypeOptions()` the gate that pushes the "Wandering" `<optgroup>` was keyed on `newSelectOptionsCount > 0`, but that counter is only incremented in the fallback branch of the ternary used to compute each option's `value` — i.e. only when `Init.wormholes[whName].typeId` is missing. Now that every wandering wormhole has a real `typeId` in `Init.wormholes`, the counter stayed at 0 and the entire Wandering optgroup was silently dropped from the dropdown (affected all w-space classes — observed as e.g. T405 not selectable from a C3). Switched the gate to `fixSelectOptions.length > 0`.
+
 ### MIGRATION doc: break-fix entry for stale Valkey serialization 500s
 
 - `MIGRATION-v2-to-v3.md`: new "Break-fix scenarios" section documenting the symptom — every page 500s with `GuzzleHttp\Psr7\Uri::$composedComponents` dynamic-property `E_DEPRECATED` notices spamming the PHP-FPM log — and its fix: `valkey-cli FLUSHALL`. Cause is PHP 8.2 raising deprecations on `unserialize()` rehydrating cached objects whose vendor property shape shifted between rebuilds (Dockerfile runs `composer update` against constraint ranges, so patch versions drift). FAQ "Do I need to clear caches?" updated to cross-link.
