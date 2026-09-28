@@ -6,7 +6,6 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
-      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     restart: always
 
@@ -16,7 +15,6 @@ services:
     volumes:
       - redis_data:/data
       - ./config/redis/redis.conf:/etc/redis/redis.conf:ro
-      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     logging:
       driver: json-file
@@ -34,7 +32,6 @@ services:
       - .env
     volumes:
       - ./logs:/var/www/html/pathfinder/history/map
-      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     restart: always
 
@@ -52,7 +49,6 @@ services:
     volumes:
       - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
       - ./logs:/var/www/html/pathfinder/history/map
-      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       - pf-db

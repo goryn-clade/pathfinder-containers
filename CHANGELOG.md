@@ -2,6 +2,10 @@
 
 ## v3.0
 
+### TokenCipher: fail closed instead of 500 on a bad key (release gate 2)
+
+- `pathfinder/app/Model/Pathfinder/CharacterModel.php`: `getAccessToken()` catches the `RuntimeException` that `TokenCipher::decrypt()` throws for a missing/malformed `TOKEN_ENCRYPTION_KEY` and returns `false`, so the character re-authenticates instead of every request returning HTTP 500. Defense in depth — the entrypoint guard already refuses to boot with a bad key.
+
 ### Startup guards: required secrets and legacy allowlist vars (release gate 1 + 3)
 
 - `static/entrypoint.sh`: `pf` now exits FATAL at boot when:
