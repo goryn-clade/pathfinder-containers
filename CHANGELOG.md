@@ -2,6 +2,16 @@
 
 ## v3.0
 
+### Startup guards: required secrets and legacy allowlist vars (release gate 1 + 3)
+
+- `static/entrypoint.sh`: `pf` now exits FATAL at boot when:
+  - `WS_TOKEN_SECRET` is absent, non-hex or shorter than 32 chars (same rule `pf-socket` already enforces)
+  - `CCP_SSO_SECRET_KEY` is empty (previously surfaced only as `invalid_client` at first login)
+  - `APP_PASSWORD` is empty (previously `htpasswd` created an empty-password `/setup` login)
+  - any `PF_LOGIN_WHITELIST_*` is set while its `PF_LOGIN_ALLOWLIST_*` is blank — a carried-forward v2 `.env` would otherwise silently open login to every EVE character
+- `pathfinder/app/Controller/Api/Map.php`: `getAccessData()` throws instead of signing WS tokens with an empty/short `WS_TOKEN_SECRET` (defense in depth behind the boot guard)
+- `.env.example`, `MIGRATION-v2-to-v3.md`: document the new refuse-to-start behaviour
+
 ### Signature module: fix missing "Wandering" optgroup in type dropdown
 
 - `pathfinder/js/app/ui/module/system_signature.js`: in `getSignatureTypeOptions()` the gate that pushes the "Wandering" `<optgroup>` was keyed on `newSelectOptionsCount > 0`, but that counter is only incremented in the fallback branch of the ternary used to compute each option's `value` — i.e. only when `Init.wormholes[whName].typeId` is missing. Now that every wandering wormhole has a real `typeId` in `Init.wormholes`, the counter stayed at 0 and the entire Wandering optgroup was silently dropped from the dropdown (affected all w-space classes — observed as e.g. T405 not selectable from a C3). Switched the gate to `fixSelectOptions.length > 0`.

@@ -133,7 +133,7 @@ fallback in v3.
 | `SERVER_NAME` | Cache key seed (md5) and ESI User-Agent. Should be unique per install. | e.g. `pathfinder-yourcorp` |
 | `SESSION_COOKIE_SECURE` | `1` on HTTPS deployments, `0` for plain HTTP dev | `1` for prod |
 | `REDIS_PASSWORD` | Enables Valkey AUTH. Leave blank only if Redis is strictly Docker-network-internal. | `openssl rand -hex 32` |
-| `WS_TOKEN_SECRET` | HMAC secret binding WebSocket access tokens to PHP sessions. **Must match in `pf` and `pf-socket` containers** (both read it from `.env`). **`pf-socket` refuses to start** if this is absent or shorter than 32 hex characters. | `openssl rand -hex 32` |
+| `WS_TOKEN_SECRET` | HMAC secret binding WebSocket access tokens to PHP sessions. **Must match in `pf` and `pf-socket` containers** (both read it from `.env`). **`pf` and `pf-socket` refuse to start** if this is absent or shorter than 32 hex characters. | `openssl rand -hex 32` |
 | `WS_ALLOWED_ORIGINS` | Comma-separated hostnames that browsers are allowed to open WebSocket connections from (matched against the HTTP `Origin` header). Example: `pathfinder.example.com,maps.example.com`. **`pf-socket` refuses to start if this is empty when `APP_ENV=production`**. In non-production environments `localhost` and `127.0.0.1` are always auto-allowed regardless. | your app's public hostname(s) |
 | `TOKEN_ENCRYPTION_KEY` | 32-byte hex key (64 chars) used to encrypt ESI access/refresh tokens at rest with libsodium `crypto_secretbox`. Required: blank fails closed (all token reads return empty, users forced through SSO). See [Key rotation](#key-rotation-token_encryption_key) below before changing this value on a running deployment. | `openssl rand -hex 32` |
 | `APP_ENV` | Set to `production` to activate startup guards: `pf-socket` refuses to start if `WS_ALLOWED_ORIGINS` is empty; `pf` warns loudly if `PF_DEBUG > 0`. | `production` for prod |
@@ -141,7 +141,7 @@ fallback in v3.
 | `PF_INSTALL_NAME` | Display name in UI/title bar. Replaces hand-editing `[PATHFINDER] NAME` in `pathfinder.ini`. | e.g. `Pathfinder — Goryn Clade` |
 | `PF_REGISTRATION_STATUS` | `1` open registration, `0` locked. Replaces hand-editing `[PATHFINDER.REGISTRATION] STATUS`. | per your policy |
 | `PF_SUPER_ADMIN_ID` | CCP character ID granted SUPER admin. Replaces `[PATHFINDER.ROLES] CHARACTER.0.ID`. | your character ID |
-| `PF_LOGIN_ALLOWLIST_CHAR` | Comma-separated CCP character IDs (blank = no restriction). **Renamed from `PF_LOGIN_WHITELIST_CHAR`** — update your `.env` if you carried this from v2. | per your policy |
+| `PF_LOGIN_ALLOWLIST_CHAR` | Comma-separated CCP character IDs (blank = no restriction). **Renamed from `PF_LOGIN_WHITELIST_CHAR`** — update your `.env` if you carried this from v2. **`pf` refuses to start** if an old `PF_LOGIN_WHITELIST_*` is set and its `PF_LOGIN_ALLOWLIST_*` is blank. | per your policy |
 | `PF_LOGIN_ALLOWLIST_CORP` | Comma-separated CCP corp IDs. **Renamed from `PF_LOGIN_WHITELIST_CORP`**. | per your policy |
 | `PF_LOGIN_ALLOWLIST_ALLIANCE` | Comma-separated CCP alliance IDs. **Renamed from `PF_LOGIN_WHITELIST_ALLIANCE`**. | per your policy |
 | `CCP_SSO_USE_PKCE` | Kill-switch for PKCE on the CCP SSO authorization flow. Enabled by default; set to `0` only if upstream CCP changes break the PKCE handshake. | `1` (default) |

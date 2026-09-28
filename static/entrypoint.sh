@@ -27,6 +27,36 @@ if ! printf '%s' "$TOKEN_ENCRYPTION_KEY" | grep -qE '^[0-9a-fA-F]{64}$'; then
     exit 1
 fi
 
+# Fail-fast: WS_TOKEN_SECRET signs WebSocket access tokens. Same rule as pf-socket (websocket/cmd.php).
+# Empty/short makes the HMAC trivially forgeable.
+if ! printf '%s' "${WS_TOKEN_SECRET:-}" | grep -qE '^[0-9a-fA-F]{32,}$'; then
+    echo "FATAL: WS_TOKEN_SECRET must be at least 32 hex characters and match pf-socket. Generate with: openssl rand -hex 32" >&2
+    exit 1
+fi
+
+# Fail-fast: empty CCP_SSO_SECRET_KEY only surfaces as "invalid_client" at the first SSO login.
+if [ -z "${CCP_SSO_SECRET_KEY:-}" ]; then
+    echo "FATAL: CCP_SSO_SECRET_KEY must be set. Create an application at https://developers.eveonline.com/applications" >&2
+    exit 1
+fi
+
+# Fail-fast: empty APP_PASSWORD would make htpasswd below accept an empty /setup password.
+if [ -z "${APP_PASSWORD:-}" ]; then
+    echo "FATAL: APP_PASSWORD must be set — it protects /setup and the Setup API. Generate with: openssl rand -hex 16" >&2
+    exit 1
+fi
+
+# Fail-fast: PF_LOGIN_WHITELIST_* were renamed to PF_LOGIN_ALLOWLIST_* in v3.0.
+# A v2 .env carried forward would leave the allowlist blank = login open to every EVE character.
+for suffix in CHAR CORP ALLIANCE; do
+    old="PF_LOGIN_WHITELIST_${suffix}"
+    new="PF_LOGIN_ALLOWLIST_${suffix}"
+    if [ -n "${!old:-}" ] && [ -z "${!new:-}" ]; then
+        echo "FATAL: ${old} is set but ${new} is empty. ${old} was renamed to ${new} in v3.0 — rename it in .env. See MIGRATION-v2-to-v3.md." >&2
+        exit 1
+    fi
+done
+
 # Apply defaults for optional boolean flags before envsubst
 : "${CCP_SSO_USE_PKCE:=1}"
 export CCP_SSO_USE_PKCE
