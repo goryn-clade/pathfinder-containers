@@ -2,7 +2,7 @@
 
 This guide walks operators of an existing Pathfinder deployment (the
 `goryn-clade/pathfinder-containers:master` v2.x stack) through upgrading to
-the `v3-fixes-and-features` branch.
+v3.0 (the `release/v3.0` branch).
 
 v3.0 is a major release. The PHP runtime, MariaDB image, Redis image,
 service names, compose file layout, env variables, and several DB tables
@@ -15,13 +15,13 @@ For the rationale behind individual changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Breaking changes at a glance
 
-| Area | v2.x (master) | v3.0 (v3-fixes-and-features) |
+| Area | v2.x (master) | v3.0 (release/v3.0) |
 |---|---|---|
 | PHP runtime | 7.2 | 8.3 |
 | MariaDB image | `bianjp/mariadb-alpine:latest` (abandoned) | `mariadb:10.11` (official, LTS) |
 | Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
 | Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
-| Compose file | `docker-compose.yml` | `compose.yml` (+ `compose.dev.yml`, `compose.test.yml`) |
+| Compose file | `docker-compose.yml` | `compose.yml` (+ `compose.dev.yml` for local development) |
 | DB service name | `pfdb` | `pf-db` |
 | Redis service name | `redis` (container `redis`) | `pf-redis` |
 | Socket service name | `pathfinder-socket` (container `socket`) | `pf-socket` |
@@ -33,17 +33,18 @@ For the rationale behind individual changes, see [CHANGELOG.md](CHANGELOG.md).
 | pathfinder DB schema | v2 schema | adds `system.groupId`, `system.securityClass`, `connection.nominalLifespan`, `map.allowUnknownSystems`, `map.granularK162`, `map.allowGroups`, `character.affiliationUpdated`, new `map_group` table |
 
 If you are happy with the defaults, the upgrade is essentially:
-**back up → pull → rewrite `.env` → recreate stack → rerun `/setup` table migration → review map settings.**
+**back up → stop the v2 database cleanly → pull → rewrite `.env` → upgrade the database in place → start the stack → run the `/setup` table migration → review map settings.**
 
 ---
 
-## 1. Back up before doing anything
+## 1. Back up, then stop v2 cleanly
 
-The MariaDB image is changing from `bianjp/mariadb-alpine` (Alpine, MariaDB
-10.4 era) to the official `mariadb:10.11`. The on-disk file format is
-forward-compatible in practice, but a clean dump/restore is strongly
-recommended — it avoids any chance of the new server refusing to start on
-the old data dir, and gives you a known-good restore point.
+The MariaDB image changes from `bianjp/mariadb-alpine` (MariaDB 10.3) to the
+official `mariadb:10.11`. v3 upgrades your existing database volume in
+place (step 4). The dump you take here is your restore point if anything
+goes wrong. You don't restore it during a normal upgrade.
+
+### 1a. Take the backups
 
 ```bash
 # from your existing deployment (still on v2.x / master)
@@ -51,56 +52,110 @@ docker compose exec pfdb sh -c \
   "mysqldump -u root -p\$MYSQL_ROOT_PASSWORD --all-databases --routines --triggers --events" \
   > pathfinder-backup-$(date +%Y%m%d).sql
 
-# also snapshot the redis_data volume in case you want to roll back
+# check it: expect your Pathfinder database, eve_universe and mysql
+grep '^CREATE DATABASE' pathfinder-backup-*.sql
+```
+
+Snapshot the Redis volume too. Its name is `<project>_redis_data`, where
+`<project>` is your folder name, or `COMPOSE_PROJECT_NAME` if you set it:
+
+```bash
+docker volume ls --format '{{.Name}}' | grep -E '_(db|redis)_data$'
+
+# replace pathfinder_redis_data with the name listed above
 docker run --rm -v pathfinder_redis_data:/data -v "$PWD":/backup alpine \
   tar czf /backup/redis_data-$(date +%Y%m%d).tgz -C /data .
 ```
 
-Confirm the dump file is non-empty and contains your `pathfinder` and
-`eve_universe` databases before continuing.
+> **If `docker compose` rejects the v2 file** with
+> `services.pf-redis.logging.options must be a mapping`, your Compose
+> version is newer than the file. Change the `pf-redis` logging block to:
+> ```yaml
+>     logging:
+>       driver: json-file
+>       options:
+>         max-size: "5m"
+>         max-file: "3"
+> ```
+> Undo the edit before step 2 with `git checkout -- docker-compose.yml`.
 
-> **Note:** the v2 service was named `pfdb`; the env var was
-> `MYSQL_ROOT_PASSWORD` inside the container. Adjust if your `.env` uses a
-> different name.
+### 1b. Stop v2 and shut the database down cleanly
 
-Stop the v2 stack:
+**Do not skip this.** The v2 database image runs a shell as its main
+process, and that shell ignores Docker's stop signal. So `docker compose
+down` kills MariaDB after 10 seconds instead of shutting it down. MariaDB
+10.11 then refuses to start on the volume with:
+
+```
+InnoDB: Upgrade after a crash is not supported. The redo log was created with MariaDB 10.3.17.
+```
+
+Stop the stack, then start the old database once on its own and shut it
+down properly:
 
 ```bash
 docker compose down
+
+# replace pathfinder_db_data with your volume name from 1a
+docker run -d --name v2db-shutdown \
+  -e MYSQL_ROOT_PASSWORD="$(grep ^MYSQL_PASSWORD= .env | cut -d= -f2- | tr -d '"')" \
+  -v pathfinder_db_data:/var/lib/mysql bianjp/mariadb-alpine:latest
+
+# wait until it answers (about 10 seconds), then shut it down
+until docker exec v2db-shutdown sh -c 'mysqladmin -uroot -p"$MYSQL_ROOT_PASSWORD" ping' >/dev/null 2>&1; do sleep 2; done
+docker exec v2db-shutdown sh -c 'mysqladmin -uroot -p"$MYSQL_ROOT_PASSWORD" shutdown'
+docker wait v2db-shutdown && docker rm v2db-shutdown
 ```
 
-Do **not** delete the `db_data` or `redis_data` volumes yet. They are your
-fallback if anything goes wrong.
+`docker wait` returns once MariaDB has finished shutting down. It is
+normal for the start-up to log "Crash recovery finished": that is the old
+server repairing the unclean stop from `docker compose down`.
+
+Do **not** delete the `db_data` or `redis_data` volumes. v3 uses them.
 
 ---
 
-## 2. Pull the v3 branch
+## 2. Pull v3
 
 ```bash
 git fetch origin
-git checkout v3-fixes-and-features
+git checkout release/v3.0
 git submodule update --init --recursive
 ```
 
-You should now see `compose.yml`, `compose.dev.yml`, `compose.test.yml`,
-`MIGRATION-config-static-cleanup.md`, and a refreshed `.env.example`.
+You should now see `compose.yml`, `compose.dev.yml` and a refreshed
+`.env.example`. The v2 `docker-compose.yml` is gone. All v3 commands use
+the `docker compose` plugin, never the legacy `docker-compose` binary.
 
-The legacy `docker-compose.yml` is renamed to `_docker-compose.yml` (kept
-for reference only). All v3 commands use the new `docker compose`
-(plugin) form, never the legacy `docker-compose` binary.
+If `git checkout` refuses because of local changes to
+`docker-compose.yml`, see the note in step 1a.
 
 ---
 
 ## 3. Rewrite your `.env`
 
-The variable set has changed substantially. The simplest path is to start
-from `.env.example` and copy your existing secrets into it:
+The variable set has changed a lot. Start from `.env.example` and copy
+your existing values into it:
 
 ```bash
 cp .env .env.v2.bak
 cp .env.example .env
 $EDITOR .env
 ```
+
+### Values to carry over from `.env.v2.bak`
+
+| Variable | Why |
+|---|---|
+| `DOMAIN`, `LE_EMAIL` | Same site, same certificate account |
+| `MYSQL_PASSWORD` | It is the root password stored in your existing database volume |
+| `MYSQL_PF_DB_NAME` | The example says `pathfinder`. If yours is different, keep yours, or the app connects to an empty database |
+| `APP_PASSWORD` | Protects `/setup`. v3 refuses to start if it is empty |
+| `CCP_SSO_CLIENT_ID`, `CCP_SSO_SECRET_KEY` | Your CCP application. v3 refuses to start if the secret is empty |
+| `COMPOSE_PROJECT_NAME` | Only if you set it. It decides the volume names, so v3 must use the same value to find your data |
+
+Also set `PF_SETUP_ENABLED="1"` for now. `/setup` returns 404 while it is
+`0`, and step 6 needs it. You set it back to `0` in step 6.
 
 ### Removed variables
 
@@ -123,8 +178,16 @@ notification flows.
 | `REDIS_HOST="redis"` | `REDIS_HOST="pf-redis"` | Match the new service name |
 | `PATHFINDER_SOCKET_HOST="pathfinder-socket"` | `PATHFINDER_SOCKET_HOST="pf-socket"` | Match the new service name |
 
-If you keep your old hostnames, update them — there is no compose alias
-fallback in v3.
+Starting from `.env.example` gives you the new values. If you edited your
+old file instead, update these — there is no compose alias fallback in v3.
+
+### Login allowlist
+
+`.env.example` leaves `PF_LOGIN_ALLOWLIST_CHAR`, `_CORP` and `_ALLIANCE`
+blank, which means **any EVE character can log in**. If your v2 install
+restricted logins with `PF_LOGIN_WHITELIST_*`, move those IDs to the
+`PF_LOGIN_ALLOWLIST_*` names now. v3 refuses to start if an old
+`PF_LOGIN_WHITELIST_*` is set and its new name is blank.
 
 ### New required-or-recommended variables
 
@@ -167,36 +230,44 @@ v3 ships a substantial set of SSO, session, and WebSocket hardening changes. Non
 
 ---
 
-## 4. Restore the database into the new MariaDB
+## 4. Upgrade the database in place
 
-Bring up only the database service first so you can import cleanly:
+Start only the new database. It opens your existing `db_data` volume:
 
 ```bash
 docker compose up -d pf-db
 docker compose logs -f pf-db   # wait for "ready for connections", Ctrl-C to detach
 ```
 
-If you took the dump in step 1, restore it now:
+The log shows errors such as `Incorrect definition of table mysql.event`.
+They are expected: the system tables are still in the 10.3 format. Upgrade
+them:
+
+```bash
+docker compose exec -T pf-db sh -c 'mariadb-upgrade -u root -p"$MYSQL_ROOT_PASSWORD"'
+docker compose restart pf-db
+docker compose logs --since 1m pf-db | grep -c '\[ERROR\]'   # → 0
+```
+
+If `pf-db` keeps restarting with "Upgrade after a crash is not supported",
+the v2 database was not shut down cleanly. Run `docker compose down` and
+repeat step 1b.
+
+Then reimport the EVE universe data. v3 ships an updated `eve_universe`
+with Zarzakh, Pochven/Trailblazer and frigate wormhole lifetime fixes.
+The `mariadb:10.11` image has no `unzip`, so stream the plain `.sql` file
+from the host:
 
 ```bash
 docker compose exec -T pf-db sh -c \
-  "mysql -u root -p\$MYSQL_ROOT_PASSWORD" < pathfinder-backup-YYYYMMDD.sql
+  'mariadb -u root -p"$MYSQL_ROOT_PASSWORD" eve_universe' \
+  < pathfinder/export/sql/eve_universe.sql
 ```
 
-Reimport the EVE universe dump as well — v3 ships an updated
-`eve_universe.sql.zip` with Zarzakh, Pochven/Trailblazer, and frigate
-wormhole lifetime fixes baked in:
-
-```bash
-docker compose exec pf-db sh -c \
-  "unzip -p /eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe"
-```
-
-> **If you skip the dump/restore and reuse the `db_data` volume directly:**
-> the official `mariadb:10.11` server will usually start fine on the old
-> data dir, but check `docker compose logs pf-db` for upgrade warnings and
-> run `docker compose exec pf-db mariadb-upgrade -u root -p$MYSQL_PASSWORD`
-> if prompted. The dump/restore path is still recommended.
+> **Do not restore `pathfinder-backup-*.sql` here.** It contains the old
+> server's `mysql` system database. Loading it into 10.11 fails partway
+> with `Cannot load from mysql.proc`. The dump is for rollback only (see
+> [Rollback](#rollback)).
 
 ---
 
@@ -208,12 +279,23 @@ docker compose ps
 docker compose logs -f pf
 ```
 
-Watch for:
-- `entrypoint.sh` warnings about `PF_DEBUG > 0` in production (fix `.env`).
+`pf` and `pf-socket` check their settings at start-up and exit with a
+`FATAL:` line if something is wrong. Each message says how to fix it; fix
+`.env`, then `docker compose up -d` again.
+
+| Container | Message starts with | Fix |
+|---|---|---|
+| `pf` | `FATAL: TOKEN_ENCRYPTION_KEY must be set` / `must be exactly 64 hex characters` | `openssl rand -hex 32` |
+| `pf` | `FATAL: WS_TOKEN_SECRET must be at least 32 hex characters and match pf-socket` | `openssl rand -hex 32` |
+| `pf` | `FATAL: CCP_SSO_SECRET_KEY must be set` | Copy it from your CCP application |
+| `pf` | `FATAL: APP_PASSWORD must be set` | `openssl rand -hex 16` |
+| `pf` | `FATAL: PF_LOGIN_WHITELIST_… is set but PF_LOGIN_ALLOWLIST_… is empty` | Rename the variable (step 3) |
+| `pf-socket` | `FATAL: WS_TOKEN_SECRET must be at least 32 hex characters` | Same value as `pf` |
+| `pf-socket` | `FATAL: WS_ALLOWED_ORIGINS must not be empty in production` | Your public hostname(s) |
+
+Also watch for:
+- `WARNING: PF_DEBUG=… is set with APP_ENV=production` — set `PF_DEBUG=0`.
 - Redis AUTH errors on `pf` startup (mismatched `REDIS_PASSWORD`).
-- `FATAL: TOKEN_ENCRYPTION_KEY must be a 64-char hex string` — `pf` exiting immediately at entrypoint; generate one with `openssl rand -hex 32` and recreate.
-- `FATAL: WS_TOKEN_SECRET must be at least 32 hex characters` — `pf-socket` exiting immediately; set a valid secret and recreate.
-- `FATAL: WS_ALLOWED_ORIGINS must not be empty in production` — set `WS_ALLOWED_ORIGINS` to your app's public hostname(s) and recreate.
 
 ---
 
@@ -238,7 +320,8 @@ of them.
 Steps:
 
 1. Browse to `https://[YOUR_DOMAIN]/setup` (HTTP Basic Auth: user `pf`,
-   password from `APP_PASSWORD`).
+   password from `APP_PASSWORD`). A 404 means `PF_SETUP_ENABLED` is still
+   `0` (step 3).
 2. In the **Database** section click **Setup tables**, then
    **Fix columns/keys**. Cortex auto-migrates new columns; you should see
    green ticks for `system`, `connection`, `map`, `character`, and
@@ -246,6 +329,8 @@ Steps:
 3. If `map_group` is missing from the schema list, hard-reload the setup
    page — the schema list is built from `Setup.php`, which now includes
    `MapGroupModel`.
+4. When the token step below is done, set `PF_SETUP_ENABLED="0"` in `.env`
+   and run `docker compose up -d --force-recreate pf`.
 
 No data migration scripts are needed beyond this — every new column has a
 safe default, and old `wh_eol` rows are translated on read by
@@ -262,14 +347,11 @@ happen on its own.
 To encrypt every legacy row in one pass:
 
 ```bash
-docker compose run --rm \
-  -e TOKEN_ENCRYPTION_KEY="$(grep ^TOKEN_ENCRYPTION_KEY= .env | cut -d= -f2 | tr -d '"')" \
-  pf php /usr/local/bin/migrate-tokens.php --dry-run
-
-docker compose run --rm \
-  -e TOKEN_ENCRYPTION_KEY="$(grep ^TOKEN_ENCRYPTION_KEY= .env | cut -d= -f2 | tr -d '"')" \
-  pf php /usr/local/bin/migrate-tokens.php
+docker compose run --rm pf php /usr/local/bin/migrate-tokens.php --dry-run
+docker compose run --rm pf php /usr/local/bin/migrate-tokens.php
 ```
+
+The key comes from `.env`, like the running container.
 
 The script reports `total / migrated / already_encrypted / empty`. It is
 idempotent — already-encrypted rows (`v1:` prefix) are skipped, so it can
@@ -456,7 +538,9 @@ If `FLUSHALL` doesn't fix it, the deprecation is firing on a *fresh* serializati
 
 ## Rollback
 
-If the upgrade goes badly and you need to roll back to v2.x:
+Once MariaDB 10.11 has upgraded the volume (step 4), the v2 database
+server can no longer open it. Rolling back therefore means a fresh volume
+plus the dump from step 1.
 
 ```bash
 docker compose down
@@ -466,18 +550,17 @@ git submodule update --init --recursive
 # restore the v2 .env you backed up in step 3
 mv .env.v2.bak .env
 
-# restore the v2 database dump into the v2 db image
-docker compose -f docker-compose.yml up -d pfdb
-docker compose -f docker-compose.yml exec -T pfdb sh -c \
+# replace pathfinder_db_data with your volume name from step 1a
+docker volume rm pathfinder_db_data
+
+docker compose up -d pfdb   # if Compose rejects the file, see the note in step 1a
+# wait ~10 s for the new, empty database to start, then
+docker compose exec -T pfdb sh -c \
   "mysql -u root -p\$MYSQL_ROOT_PASSWORD" < pathfinder-backup-YYYYMMDD.sql
-docker compose -f docker-compose.yml up -d
+docker compose up -d
 ```
 
-The new v3 columns (`groupId`, `securityClass`, `nominalLifespan`,
-`allowUnknownSystems`, `granularK162`, `allowGroups`, `affiliationUpdated`)
-and the `map_group` table are additive — they will linger on a v2 schema
-without harm if you choose not to restore the dump, but the cleanest
-rollback path is the dump-restore above.
+Restore the Redis snapshot the same way if you need it.
 
 ---
 

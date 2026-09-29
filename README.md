@@ -138,7 +138,7 @@ If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) — 
 
 6. **Import the EVE universe data**
    ```shell
-   unzip -p ./pathfinder/export/sql/eve_universe.sql.zip | docker compose exec -T pf-db sh -c 'mysql -u root -p"$MYSQL_ROOT_PASSWORD" eve_universe'
+   docker compose exec -T pf-db sh -c 'mariadb -u root -p"$MYSQL_ROOT_PASSWORD" eve_universe' < pathfinder/export/sql/eve_universe.sql
    ```
 
 7. **Lock down the install.** Set `PF_SETUP_ENABLED=0` in `.env`, confirm `PF_DEBUG=0` and `APP_ENV=production`, then recreate the app container:

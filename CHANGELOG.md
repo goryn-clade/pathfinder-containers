@@ -2,6 +2,18 @@
 
 ## v3.0
 
+### MIGRATION doc: rewrite steps 1–6 after the v2 → v3 dress rehearsal (release gate 8)
+
+- `MIGRATION-v2-to-v3.md`: rehearsed on a copy of live data (2026-09-29); the old steps failed as written. Now:
+  - Step 1 shuts the v2 database down cleanly (`mysqladmin shutdown`). `docker compose down` kills it, and MariaDB 10.11 then refuses the volume ("Upgrade after a crash is not supported").
+  - Step 4 upgrades the volume in place with `mariadb-upgrade`. The `--all-databases` dump is rollback-only: restoring it into 10.11 fails on `mysql.proc`.
+  - `eve_universe` is streamed from the host; `mariadb:10.11` has no `unzip`.
+  - Branch is `release/v3.0`; removed claims about `_docker-compose.yml` and `compose.test.yml`.
+  - Step 3 lists values to carry over (`MYSQL_PF_DB_NAME`, `COMPOSE_PROJECT_NAME`, …), sets `PF_SETUP_ENABLED=1` for `/setup`, and warns that a blank allowlist opens login to everyone.
+  - Step 5 lists the current startup FATAL messages. `migrate-tokens.php` no longer needs `-e TOKEN_ENCRYPTION_KEY`. Redis snapshot uses the real volume name.
+  - Rollback uses a fresh volume, since v2 can't open a 10.11-upgraded one.
+- `README.md`: `eve_universe` import streams the `.sql` file instead of needing `unzip` on the host.
+
 ### TokenCipher: fail closed instead of 500 on a bad key (release gate 2)
 
 - `pathfinder/app/Model/Pathfinder/CharacterModel.php`: `getAccessToken()` catches the `RuntimeException` that `TokenCipher::decrypt()` throws for a missing/malformed `TOKEN_ENCRYPTION_KEY` and returns `false`, so the character re-authenticates instead of every request returning HTTP 500. Defense in depth — the entrypoint guard already refuses to boot with a bad key.
@@ -197,7 +209,7 @@ A full security review was performed across the container stack, covering CVE sc
 **A4: PKCE (RFC 7636) for EVE SSO authorization flow**
 - `app/Controller/Ccp/Sso.php`: PKCE layered on top of the existing confidential-client flow (`client_secret` stays). `rerouteAuthorization()` generates a `code_verifier` (43 base64url chars from 32 bytes of `random_bytes`), computes `code_challenge = BASE64URL(SHA256(verifier))`, embeds the verifier in the state map entry, and adds `code_challenge` + `code_challenge_method=S256` to the CCP auth URL. `callbackAuthorization()` extracts the verifier from the consumed state entry and passes it through `getSsoAccessData()` → `verifyAuthorizationCode()` where it is included as `code_verifier` in the POST body to `/v2/oauth/token`. ESI client unchanged (already passes `form_params` through). Legacy state map entries (no verifier field) fall back to no PKCE gracefully.
 - `app/environment.ini`: Added `CCP_SSO_USE_PKCE = 1` to both `[ENVIRONMENT.DEVELOP]` and `[ENVIRONMENT.PRODUCTION]`. Set to `0` to disable PKCE without a code change (kill-switch if CCP rejects `code_verifier` on confidential clients).
-- **Pending:** Sisi login round-trip required to confirm CCP accepts `code_verifier` alongside `client_secret`.
+- **Verified 2026-09-29:** live SSO (login.eveonline.com) accepts `code_verifier` alongside `client_secret`; login round trip succeeded with `CCP_SSO_USE_PKCE=1`.
 
 **F6: multi-tab SSO login — replace single-slot state with per-tab map**
 - `app/Controller/Ccp/Sso.php`: `SESSION.SSO.STATE` was a scalar; a second tab's login click overwrote it, causing the first tab's CCP callback to fail with "Invalid response". Now stored as a map `{state_token => {from, createdAt}}`, max 5 entries (oldest evicted on overflow). `SESSION.SSO.FROM` (post-login redirect target) embedded per-entry so each tab's callback reads its own redirect, not the last-written scalar. State entries are consumed (deleted from map) on use. Defensive `array_filter` discards any non-array entries from in-flight sessions that held the old scalar shape.
