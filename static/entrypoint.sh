@@ -60,6 +60,8 @@ done
 # Apply defaults for optional boolean flags before envsubst
 : "${CCP_SSO_USE_PKCE:=1}"
 export CCP_SSO_USE_PKCE
+: "${PF_SESSION_SHARING:=0}"
+export PF_SESSION_SHARING
 
 envsubst '$DOMAIN'</etc/nginx/templateSite.conf >/etc/nginx/sites_enabled/site.conf
 envsubst '$PATHFINDER_SOCKET_HOST' </etc/nginx/templateNginx.conf >/etc/nginx/nginx.conf

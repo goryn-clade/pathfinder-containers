@@ -204,6 +204,7 @@ restricted logins with `PF_LOGIN_WHITELIST_*`, move those IDs to the
 | `PF_INSTALL_NAME` | Display name in UI/title bar. Replaces hand-editing `[PATHFINDER] NAME` in `pathfinder.ini`. | e.g. `Pathfinder — Goryn Clade` |
 | `PF_REGISTRATION_STATUS` | `1` open registration, `0` locked. Replaces hand-editing `[PATHFINDER.REGISTRATION] STATUS`. | per your policy |
 | `PF_SUPER_ADMIN_ID` | CCP character ID granted SUPER admin. Replaces `[PATHFINDER.ROLES] CHARACTER.0.ID`. | your character ID |
+| `PF_SESSION_SHARING` | `1` lets characters in the same browser session open each other's maps, `0` off (default). Replaces hand-editing `[PATHFINDER] SESSION_SHARING`. | `0` unless you used it in v2 |
 | `PF_LOGIN_ALLOWLIST_CHAR` | Comma-separated CCP character IDs (blank = no restriction). **Renamed from `PF_LOGIN_WHITELIST_CHAR`** — update your `.env` if you carried this from v2. **`pf` refuses to start** if an old `PF_LOGIN_WHITELIST_*` is set and its `PF_LOGIN_ALLOWLIST_*` is blank. | per your policy |
 | `PF_LOGIN_ALLOWLIST_CORP` | Comma-separated CCP corp IDs. **Renamed from `PF_LOGIN_WHITELIST_CORP`**. | per your policy |
 | `PF_LOGIN_ALLOWLIST_ALLIANCE` | Comma-separated CCP alliance IDs. **Renamed from `PF_LOGIN_WHITELIST_ALLIANCE`**. | per your policy |

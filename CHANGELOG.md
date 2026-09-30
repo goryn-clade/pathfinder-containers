@@ -2,6 +2,10 @@
 
 ## v3.0
 
+### `PF_SESSION_SHARING` env var
+
+- `static/pathfinder/pathfinder.ini`: `[PATHFINDER] SESSION_SHARING` now reads `$PF_SESSION_SHARING`, so operators set it in `.env` instead of editing the ini. `static/entrypoint.sh` defaults it to `0` (unchanged behaviour). Documented in `.env.example`, `README.md` and `MIGRATION-v2-to-v3.md`.
+
 ### Setup auth bypass and nginx hardening (release gate 13, beta.4)
 
 Audit findings A8-2, A10-2, A10-1 and A9-1 (`.claude/AUDIT-2026-09-code-audits.md`).

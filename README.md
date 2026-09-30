@@ -51,6 +51,7 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 - `PF_INSTALL_NAME` — display name shown in UI (was `[PATHFINDER]/NAME`)
 - `PF_REGISTRATION_STATUS` — `1` = open, `0` = locked (was `[PATHFINDER.REGISTRATION]/STATUS`)
 - `PF_SUPER_ADMIN_ID` — CCP character ID of the super admin
+- `PF_SESSION_SHARING` — `1` = characters in the same session share map access, `0` = off (was `[PATHFINDER]/SESSION_SHARING`)
 - `PF_LOGIN_ALLOWLIST_CHAR` / `_CORP` / `_ALLIANCE` — login restriction lists (was `[PATHFINDER.LOGIN]/CHARACTER` / `/CORPORATION` / `/ALLIANCE`; renamed from "whitelist")
 
 Generate the random secrets with `openssl rand -hex 32`.
