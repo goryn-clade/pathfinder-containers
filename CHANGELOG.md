@@ -2,6 +2,19 @@
 
 ## v3.0
 
+### Setup auth bypass and nginx hardening (release gate 13, beta.4)
+
+Audit findings A8-2, A10-2, A10-1 and A9-1 (`.claude/AUDIT-2026-09-code-audits.md`).
+
+- **Setup page reachable without Basic Auth (A8-2).** nginx only protected `location = /setup`, but F3 matched routes case-insensitively, so `/SETUP`, `/Setup` and `/setup%2F` reached the setup page with no login — and the page contained `APP_PASSWORD`. Now:
+  - `static/nginx/site.conf`: `location ~* ^/setup(/|$)` covers every spelling, and sets `fastcgi_param PF_SETUP_AUTH 1`.
+  - `pathfinder/app/Controller/Setup.php`: `beforeroute()` returns 404 unless `PF_SETUP_AUTH` is set, i.e. the request came through the Basic Auth location.
+  - `Setup.php`, `Api/Setup.php`: setup actions use a random per-session token (`getSetupToken()` / `isValidSetupToken()`) instead of `APP_PASSWORD`. `APP_PASSWORD` is now only the Basic Auth password and never appears in a page, URL or log. `/api/Setup/*` only works from a browser session that loaded `/setup`, so it also stops working when setup is disabled.
+- **Case-sensitive routes (A10-2).** `static/pathfinder/config.ini`, `pathfinder/app/config.ini`: `CASELESS = FALSE`. `/Api/…` and `/API/…` used to reach the API while skipping the `^~ /api/` rate limit; they now 404. `site.conf` also rate-limits `~* ^/api/` as a second layer.
+- **Real client IP for rate limiting (A10-1).** `static/nginx/nginx.conf`: `set_real_ip_from` the private ranges + `real_ip_header X-Forwarded-For` + `real_ip_recursive on`. Behind Traefik every request used to come from Traefik's IP, so all users shared one 30 r/s bucket. Access logs and the WebSocket `X-Forwarded-For` now show the real client.
+- **Only `index.php` runs (A9-1).** `site.conf`: `location = /index.php` replaces `location ~ \.php$`; any other `.php` returns 404 (vendor test scripts, compiled templates and app classes used to run when requested directly). `/app/`, `/vendor/`, `/tmp/`, `/logs/`, `/history/`, `/export/`, `composer.*`, `package*.json` and `gulpfile.js` return 404.
+- **Build unblocked: removed `cache/filesystem-adapter`.** Composer now refuses every `league/flysystem` 1.x (advisories `PKSA-w9tt-7782-78jx` / CVE-2026-102601, published 2026-09-29, and `PKSA-pwh8-d4fr-nywn`), so every image build failed at `composer update`. The adapter was only the ESI cache fallback for when Redis is down (dead in the Docker stack, where sessions need Redis too). `pathfinder/composer.json` + `composer.lock` (`composer remove`: adapter, flysystem, mime-type-detection); `pathfinder/app/Lib/Api/AbstractClient.php` now falls back from Redis straight to the in-memory array pool.
+
 ### MIGRATION doc: rewrite steps 1–6 after the v2 → v3 dress rehearsal (release gate 8)
 
 - `MIGRATION-v2-to-v3.md`: rehearsed on a copy of live data (2026-09-29); the old steps failed as written. Now:
