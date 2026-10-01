@@ -1,5 +1,41 @@
 # Changelog
 
+## v3.0.1
+
+### Access-check fixes (audit A2-1, A2-2, A2-3, A2-4, A3-1)
+
+From `.claude/AUDIT-2026-09-code-audits.md`. All inherited from exodus4d.
+
+- **Connection move across maps (A2-1).** `Rest/Connection.php` `put()`: an existing connection is now loaded through `$map->getConnectionById()`, so only a connection on the caller's map can be changed. Before, any connection ID could be moved onto the caller's map.
+- **Log leak (A2-2).** `Rest/Log.php` `update()` returns `false` when `hasAccess()` fails. `PATCH`/`DELETE` no longer send back another map's connection, signatures and jump logs.
+- **Structure access (A2-3).** `StructureModel::hasAccess()` now checks that the structure is linked to the caller's corporation. The old Cortex `has()` call never applied, so any character with a corp could edit or delete any structure.
+- **Map rights enforced on the server (A2-4).** New `CharacterModel::hasMapRight()` applies the same rules as the JS (`Util.hasRight()`): `SUPER` always, `MEMBER` right means everyone, otherwise the role must match. Private maps: always. Alliance maps: everything except delete (`SUPER` only).
+  - `Rest/Map.php`: `PUT` needs `map_create`, `PATCH` needs `map_update` (settings) or `map_share` (sharing only), and a map type change also needs `map_delete` on the old type. `DELETE` uses the same helper; it used to refuse a `CORPORATION`-role admin when the right was `MEMBER`, and refuse `SUPER` unless the role matched exactly.
+  - `Api/Map.php` `import()` needs `map_import`.
+  - `MapModel::setData()` takes only the fields the settings dialog edits (`MapModel::EDITABLE_FIELDS`). `active` is no longer settable through `PATCH`; deactivating needs `DELETE`.
+  - Saving map settings without share fields (the edit tab, or a member without `map_share`) no longer resets the map's sharing to the owner only.
+- **Corp rights moved to another corp (A3-1).** `CorporationRightModel::setData()` only sets `roleId`.
+
+### Stored XSS fixes (audit A5-1 to A5-6, A5-8, A5-9)
+
+Needs an asset rebuild (`build-assets.sh`).
+
+- **System description (A5-1).** New vendored `js/lib/purify.min.js` (DOMPurify 3.4.16, RequireJS path `purify`) and `Util.sanitizeHtml()`. The system info panel (`system_info.js`) and the add-system dialog (`map/system.js`) sanitise the Summernote HTML before rendering. Formatting, lists and links still work; scripts and event handlers are removed.
+- **Signature description (A5-2).** `system_signature.js`: the description column escapes on display.
+- **Structure name and note (A5-3).** `system_intel.js`: both columns escape on display, and so does the note popover.
+- **Jump log names (A5-4).** `connection_info.js`: the ship and character `<img>` tags are built with jQuery, so `title` values are escaped (`Util.htmlEncode()` does not escape quotes).
+- **System alias (A5-5).** Escaped in the map info systems table (`map_info.js`) and the structure paste confirm (`system_intel.js`).
+- **Debug overlay (A5-6).** `overlay.js`: connection and endpoint scope/type escaped.
+- **Map icon (A5-8).** `MapModel::set_icon()` accepts only `fa-[a-z0-9-]` and falls back to `fa-desktop` (covers settings and import). `module_map.js` skips an invalid stored icon instead of throwing.
+- **Rally email (A5-9).** `MailFormatter`: the greeting (holds the map name) and the user's rally message are HTML-escaped before the template prints them with `| raw`.
+
+### Medium audit fixes (A6-1, A8-3, A3-2, A8-1)
+
+- **Discord/Slack mention injection (A6-1).** Discord payloads (`DiscordMapWebhookHandler`, `DiscordRallyWebhookHandler`) set `allowed_mentions: {parse: []}`, so a map name like `@everyone` no longer pings. Slack: `AbstractWebhookHandler::escapeSlackText()` escapes `&`, `<`, `>` in text fields, so `<!channel>` is shown, not run.
+- **Setup actions reach outside the app (A8-3).** `Setup.php`: `clearFiles` takes a key (`TEMP`/`CACHE`, from `getClearableDirs()`) instead of a path. `flushRedisDb` only connects to Redis hosts from the app's own config (`getRedisHosts()`: `CACHE`, `API_CACHE`, session handler), so the Redis password is never sent to another host.
+- **Webhook URLs sent to every map client (A3-2).** `MapModel::getData()` no longer contains `slackWebHookURL`, `discordWebHookURLRally`, `discordWebHookURLHistory` (it still has the enabled flags). New `GET /api/rest/Map/<id>` returns them (`MapModel::getWebhookData()`), 401 without `map_update`. `map_settings.js` loads them when the dialog opens; if that request fails, the dialog does not open (saving with empty fields would clear the webhooks).
+- **Admin CSRF (A8-1).** `/admin` actions (rights save, kick, ban, map activate/deactivate/delete) need `POST` with a per-session token (`Admin::getAdminToken()` / `isValidAdminPost()`); a GET to an action URL just redirects to the page. `routes.ini`: `GET|POST @admin`. Templates: the settings form posts the token; action links carry `data-method="post"` and `admin.js` submits them as a form. Ban now redirects after the action like the others.
+
 ## v3.0
 
 ### `PF_SESSION_SHARING` env var
