@@ -2,6 +2,14 @@
 
 ## v3.0.1
 
+### `/setup` "Wormholes" import 500 (duplicate `type_attribute`)
+
+- `Universe/TypeModel::syncDogmaAttributes()` added new attribute rows through `$this->rel('attributes')`. Cortex's `rel()` returns one shared (`\Registry`) instance per relation that is never reset, so after the first insert every later "new" attribute was an UPDATE of the last saved row: it moved that row to another type/attribute, and failed with `Duplicate entry '<typeId>-<attributeId>'` when that pair already existed. Now each new row is a fresh `TypeAttributeModel` (and `DogmaAttributeModel`), and an existing `(typeId, attributeId)` row is loaded and updated instead of inserted twice.
+- Earlier imports may have moved attribute rows between types. Running the Wormholes (and Structures) import again re-syncs each type's attributes.
+- Same shared-`rel()` insert bug fixed in three more places, now using `getNew()`:
+  - `Universe/SystemModel::updateSovereigntyData()` / `updateFactionWarData()`. The `updateSovereigntyData` cron loops over every system in one process, so each new sovereignty / faction-war row moved the previous system's new row (both tables are unique on `systemId`); only the last new system of a run kept its data.
+  - `Pathfinder/CharacterModel::updateLog()` (new location log) and `getLogPrevSystem()`. Low risk today (one character per request), but a second new log in the same process would have taken over the first character's log row.
+
 ### Access-check fixes (audit A2-1, A2-2, A2-3, A2-4, A3-1)
 
 From `.claude/AUDIT-2026-09-code-audits.md`. All inherited from exodus4d.
