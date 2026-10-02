@@ -4,7 +4,7 @@ RUN apk update \
     && apk add --no-cache libpng-dev  zeromq-dev git \
     $PHPIZE_DEPS \
     && docker-php-ext-install gd && docker-php-ext-install pdo_mysql && \
-    pecl install redis && docker-php-ext-enable redis && \
+    pecl install redis-5.3.7 && docker-php-ext-enable redis && \
     pecl install channel://pecl.php.net/zmq-1.1.3 && docker-php-ext-enable zmq && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
