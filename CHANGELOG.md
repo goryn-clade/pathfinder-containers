@@ -2,6 +2,14 @@
 
 ## v3.0.1
 
+### Small fixes and version bump
+
+- **Version 3.0.1.** `pathfinder/package.json`, `pathfinder/app/pathfinder.ini` and `static/pathfinder/pathfinder.ini`: `VERSION = v3.0.1`, so the asset build writes `public/{js,css,img}/v3.0.1/` and browsers load the new JS instead of cached v3.0.0 files. Run the asset build before building the image.
+- **`/setup` jump-table build 500 (A1-2, T14).** `Api/Setup.php`: `array_map([$universeDB, 'quotekey'], …)` instead of reading `quotekey` as a property.
+- **`/setup` DB variable notice (A1-3).** `Controller/Setup.php`: no more `end(reset(…))` on a temporary.
+- **Login 500 without a home clone location (A7-1).** `CharacterModel::updateCloneData()` guards the missing key; `pathfinder_esi` `Esi::getCharacterClonesRequest()` only maps `home_location` when ESI sends it (takes effect once `pathfinder_esi` is tagged and the pin is bumped).
+- **Killboard r2z2 proxy.** `Api\Killboard` now extends `AccessController` (logged-in characters only); r2z2 outbound timeout 15 s → 8 s. `static/nginx/site.conf`: `limit_req zone=api burst=120 nodelay` on `/api/Killboard/r2z2/`, which skipped the `/api/` limit.
+
 ### `/setup` "Wormholes" import 500 (duplicate `type_attribute`)
 
 - `Universe/TypeModel::syncDogmaAttributes()` added new attribute rows through `$this->rel('attributes')`. Cortex's `rel()` returns one shared (`\Registry`) instance per relation that is never reset, so after the first insert every later "new" attribute was an UPDATE of the last saved row: it moved that row to another type/attribute, and failed with `Duplicate entry '<typeId>-<attributeId>'` when that pair already existed. Now each new row is a fresh `TypeAttributeModel` (and `DogmaAttributeModel`), and an existing `(typeId, attributeId)` row is loaded and updated instead of inserted twice.
