@@ -16,6 +16,12 @@
 - **npm (build only):** `gulp-bytediff` (unmaintained; pulled in `lodash.template` and `gulp-util`) replaced by a small `bytediff` helper in `gulpfile.js`. Lock file updated within existing ranges (postcss 8, js-yaml, immutable, brace-expansion, nanoid, browserslist, …); `overrides` lift lodash to 4.18 and jshint's minimatch to 3.1. A clean `./build-assets.sh` produces byte-identical `public/*/v3.0.1`.
 - Remaining Dependabot alerts are all in the gulp toolchain (imagemin, gulp-sourcemaps, gulp 4) and need plugin replacements; deferred.
 
+### Reproducible PHP dependencies
+
+- **`pathfinder.Dockerfile` runs `composer install`, not `composer update`.** Each build now installs exactly what `composer.lock` lists, so the image ships the tested versions. Before, every build resolved fresh versions: beta.3 shipped fatfree-core 3.9.3 and php-jwt 7.2.1 while the lock said 3.9.2 and 7.0.5. To update a PHP dependency, update `composer.lock` in the pathfinder repo.
+- **`composer.lock`:** fatfree-core 3.9.3, php-jwt 7.2.1, matching what beta.3 shipped.
+- **Vendor patches fail loudly.** The three fatfree-core `sed` patches ended in `|| true`, and the f3-cortex patch had no check, so a dependency update that moved a patched line skipped the patch without an error. Each patch now greps for its line first, and the build stops if it is missing.
+
 ### `/setup` "Wormholes" import 500 (duplicate `type_attribute`)
 
 - `Universe/TypeModel::syncDogmaAttributes()` added new attribute rows through `$this->rel('attributes')`. Cortex's `rel()` returns one shared (`\Registry`) instance per relation that is never reset, so after the first insert every later "new" attribute was an UPDATE of the last saved row: it moved that row to another type/attribute, and failed with `Duplicate entry '<typeId>-<attributeId>'` when that pair already existed. Now each new row is a fresh `TypeAttributeModel` (and `DogmaAttributeModel`), and an existing `(typeId, attributeId)` row is loaded and updated instead of inserted twice.

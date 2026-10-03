@@ -11,21 +11,24 @@ RUN apk update \
 COPY pathfinder /app
 WORKDIR /app
 
+# Install exactly the versions in composer.lock, so every build ships what was
+# tested and the vendor patches below match the files they were written for.
+# To update a dependency, update composer.lock in the pathfinder repo.
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
 # PHP 8 / php-redis 6 vendor patches. Each is run as a separate command so an
-# inline comment cannot accidentally break a `&&` chain. TODOs: drop once
-# upstream fixes land in ikkez/f3-cortex dev-master and bcosca/fatfree-core.
-RUN composer update --no-dev --optimize-autoloader --no-scripts
-RUN echo "=== before cortex patch ===" && \
-    sed -n '43,47p' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
-    sed -i '/relation field cache/s/\$fieldsCache,/\$fieldsCache = [],/' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
-    echo "=== after cortex patch ===" && \
-    sed -n '43,47p' vendor/ikkez/f3-cortex/lib/db/cortex.php
+# inline comment cannot accidentally break a `&&` chain. Each one greps for the
+# line it changes first, so the build fails if a dependency update moves it.
+# TODOs: drop once upstream fixes land in ikkez/f3-cortex dev-master and
+# bcosca/fatfree-core.
+RUN grep -q '\$fieldsCache,.*relation field cache' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
+    sed -i '/relation field cache/s/\$fieldsCache,/\$fieldsCache = [],/' vendor/ikkez/f3-cortex/lib/db/cortex.php
 RUN grep -q 'list(\$rval,\$ttl)=\$tmp;' vendor/bcosca/fatfree-core/base.php && \
-        sed -i 's/list(\$rval,\$ttl)=\$tmp;/list($rval,$ttl)=$tmp; $ttl=(int)$ttl;/' vendor/bcosca/fatfree-core/base.php || true
+    sed -i 's/list(\$rval,\$ttl)=\$tmp;/list($rval,$ttl)=$tmp; $ttl=(int)$ttl;/' vendor/bcosca/fatfree-core/base.php
 RUN grep -q '\$ttl=\$cached\[1\];' vendor/bcosca/fatfree-core/base.php && \
-        sed -i 's/\$ttl=\$cached\[1\];/$ttl=(int)$cached[1];/' vendor/bcosca/fatfree-core/base.php || true
+    sed -i 's/\$ttl=\$cached\[1\];/$ttl=(int)$cached[1];/' vendor/bcosca/fatfree-core/base.php
 RUN grep -qF "\$ttl?['ex'=>\$ttl]:[]" vendor/bcosca/fatfree-core/base.php && \
-        sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php || true
+    sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php
 
 FROM trafex/php-nginx:3.6.0
 
