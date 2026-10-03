@@ -63,7 +63,7 @@ export CCP_SSO_USE_PKCE
 : "${PF_SESSION_SHARING:=0}"
 export PF_SESSION_SHARING
 
-envsubst '$DOMAIN'</etc/nginx/templateSite.conf >/etc/nginx/sites_enabled/site.conf
+envsubst '$DOMAIN $PATHFINDER_SOCKET_HOST'</etc/nginx/templateSite.conf >/etc/nginx/sites_enabled/site.conf
 envsubst '$PATHFINDER_SOCKET_HOST' </etc/nginx/templateNginx.conf >/etc/nginx/nginx.conf
 envsubst  </var/www/html/pathfinder/app/templateEnvironment.ini >/var/www/html/pathfinder/app/environment.ini
 envsubst  </var/www/html/pathfinder/app/templateConfig.ini >/var/www/html/pathfinder/app/config.ini

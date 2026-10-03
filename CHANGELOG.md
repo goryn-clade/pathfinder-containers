@@ -22,6 +22,14 @@
 - **`composer.lock`:** fatfree-core 3.9.3, php-jwt 7.2.1, matching what beta.3 shipped.
 - **Vendor patches fail loudly.** The three fatfree-core `sed` patches ended in `|| true`, and the f3-cortex patch had no check, so a dependency update that moved a patched line skipped the patch without an error. Each patch now greps for its line first, and the build stops if it is missing.
 
+### Sharing and deployment hardening
+
+- **Corp/alliance sharing flags need a right.** `Api\User::saveAccount()`: changing your corporation's "shared" flag (whether other corps may share maps with it) needs the corp's `map_share` right, the same right as sharing corp maps (default `MEMBER`, so nothing changes until a corp restricts it on `/admin`). The alliance flag needs the `CORPORATION` or `SUPER` role. Before, any member could change both for everyone. A refused change shows an error in the account dialog.
+- **Only the map owner changes sharing or type.** New `MapModel::isOwnedBy()`: the owner is the map's creator (private map) or the creator's current corporation/alliance. On a shared map, a guest corp/alliance/character can still edit map settings with `map_update`, but its sharing changes are ignored and a type change is refused, so it can no longer remove the owner's access. If the creator is gone or the owner has lost access, everyone with access counts as owner (the old behaviour), so no map is locked.
+- **Redis password off the command line.** `compose.yml` (and `compose.dev.yml`): `pf-redis` no longer passes `--requirepass` as an argument, where any user on the host could read it with `ps`. The password goes from the environment into a private `/tmp/requirepass.conf` that Valkey includes. An empty `REDIS_PASSWORD` still means no auth.
+- **nginx re-resolves `pf-socket`.** `site.conf`: `/ws/map/update` proxies to a variable with `resolver 127.0.0.11 valid=10s`, instead of the `upstream websocket` block that resolved once at start. A restart of `pf-socket` alone (new IP) no longer breaks live map updates until `pf` restarts. `entrypoint.sh` now substitutes `PATHFINDER_SOCKET_HOST` in `site.conf`.
+- **nginx `worker_rlimit_nofile` 20000 → 40000.** Each proxied WebSocket uses two file descriptors, so a worker could run out before reaching `worker_connections 19000`.
+
 ### `/setup` "Wormholes" import 500 (duplicate `type_attribute`)
 
 - `Universe/TypeModel::syncDogmaAttributes()` added new attribute rows through `$this->rel('attributes')`. Cortex's `rel()` returns one shared (`\Registry`) instance per relation that is never reset, so after the first insert every later "new" attribute was an UPDATE of the last saved row: it moved that row to another type/attribute, and failed with `Duplicate entry '<typeId>-<attributeId>'` when that pair already existed. Now each new row is a fresh `TypeAttributeModel` (and `DogmaAttributeModel`), and an existing `(typeId, attributeId)` row is loaded and updated instead of inserted twice.
