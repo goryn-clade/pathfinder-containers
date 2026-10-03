@@ -10,6 +10,12 @@
 - **Login 500 without a home clone location (A7-1).** `CharacterModel::updateCloneData()` guards the missing key; `pathfinder_esi` `Esi::getCharacterClonesRequest()` only maps `home_location` when ESI sends it (takes effect once `pathfinder_esi` is tagged and the pin is bumped).
 - **Killboard r2z2 proxy.** `Api\Killboard` now extends `AccessController` (logged-in characters only); r2z2 outbound timeout 15 s → 8 s. `static/nginx/site.conf`: `limit_req zone=api burst=120 nodelay` on `/api/Killboard/r2z2/`, which skipped the `/api/` limit.
 
+### Dependency security updates (Dependabot)
+
+- **`composer.lock`:** Guzzle 7.10.0 → 7.15.5, psr7 2.9.0 → 2.13.1 (plus promises, deprecation-contracts, polyfill-php80), php_codesniffer 3.13.5 → 3.13.6 (dev). The image already shipped these Guzzle/psr7 versions, because `pathfinder.Dockerfile` runs `composer update`; the lock now matches. `composer audit` is clean.
+- **npm (build only):** `gulp-bytediff` (unmaintained; pulled in `lodash.template` and `gulp-util`) replaced by a small `bytediff` helper in `gulpfile.js`. Lock file updated within existing ranges (postcss 8, js-yaml, immutable, brace-expansion, nanoid, browserslist, …); `overrides` lift lodash to 4.18 and jshint's minimatch to 3.1. A clean `./build-assets.sh` produces byte-identical `public/*/v3.0.1`.
+- Remaining Dependabot alerts are all in the gulp toolchain (imagemin, gulp-sourcemaps, gulp 4) and need plugin replacements; deferred.
+
 ### `/setup` "Wormholes" import 500 (duplicate `type_attribute`)
 
 - `Universe/TypeModel::syncDogmaAttributes()` added new attribute rows through `$this->rel('attributes')`. Cortex's `rel()` returns one shared (`\Registry`) instance per relation that is never reset, so after the first insert every later "new" attribute was an UPDATE of the last saved row: it moved that row to another type/attribute, and failed with `Duplicate entry '<typeId>-<attributeId>'` when that pair already existed. Now each new row is a fresh `TypeAttributeModel` (and `DogmaAttributeModel`), and an existing `(typeId, attributeId)` row is loaded and updated instead of inserted twice.
