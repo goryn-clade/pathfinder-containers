@@ -1,4 +1,4 @@
-FROM composer:2.3.10
+FROM composer:2.8.8
 COPY websocket /app
 WORKDIR /app
 
