@@ -82,7 +82,7 @@ services:
       - pf-socket
     restart: always
   traefik:
-    image: traefik:v2.3
+    image: traefik:latest
     container_name: traefik
     command:
       - "--log.level=ERROR"
