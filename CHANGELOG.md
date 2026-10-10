@@ -8,6 +8,8 @@
 - **`/setup` jump-table build 500 (A1-2, T14).** `Api/Setup.php`: `array_map([$universeDB, 'quotekey'], …)` instead of reading `quotekey` as a property.
 - **`/setup` DB variable notice (A1-3).** `Controller/Setup.php`: no more `end(reset(…))` on a temporary.
 - **Login 500 without a home clone location (A7-1).** `CharacterModel::updateCloneData()` guards the missing key; `pathfinder_esi` `Esi::getCharacterClonesRequest()` only maps `home_location` when ESI sends it (takes effect once `pathfinder_esi` is tagged and the pin is bumped).
+- **`updateUserData` 500 for characters in a corp without faction or alliance.** `CorporationModel`/`AllianceModel::loadData()`: ESI omits `faction_id`/`alliance_id` when empty; they now default to `null`, which also clears a stale alliance when a corp leaves one. Seen 3 times in a week on goryn-server.
+- **`updateUnloadData` 500 on tab close.** `navigator.sendBeacon()` sends no `X-Requested-With`, so F3 rendered `index.html` after the call and failed on `$tplPageTitle`. `Api\Map::updateUnloadData()` no longer renders a view, and skips the update without a character.
 - **Killboard r2z2 proxy.** `Api\Killboard` now extends `AccessController` (logged-in characters only); r2z2 outbound timeout 15 s → 8 s. `static/nginx/site.conf`: `limit_req zone=api burst=120 nodelay` on `/api/Killboard/r2z2/`, which skipped the `/api/` limit.
 
 ### Dependency security updates (Dependabot)
