@@ -46,6 +46,13 @@ if [ -z "${APP_PASSWORD:-}" ]; then
     exit 1
 fi
 
+# Fail-fast: pf-db uses MYSQL_PASSWORD as its root password; MariaDB refuses to start with an empty one,
+# and pf would only show DB connection errors.
+if [ -z "${MYSQL_PASSWORD:-}" ]; then
+    echo "FATAL: MYSQL_PASSWORD must be set — pf-db will not start without it. Generate with: openssl rand -hex 32" >&2
+    exit 1
+fi
+
 # Fail-fast: PF_LOGIN_WHITELIST_* were renamed to PF_LOGIN_ALLOWLIST_* in v3.0.
 # A v2 .env carried forward would leave the allowlist blank = login open to every EVE character.
 for suffix in CHAR CORP ALLIANCE; do

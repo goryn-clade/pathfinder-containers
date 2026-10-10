@@ -27,6 +27,13 @@
 
 - **`pathfinder_esi` pinned to `3.0.0-beta.2`** (`composer.json`, `composer.lock`). Brings A7-1 and A7-2 into the image.
 
+### Hardening follow-ups (PKG 1, 2, 4)
+
+- **`MYSQL_PASSWORD` boot guard.** `static/entrypoint.sh` exits FATAL when it is empty; `pf-db` would not start, and `pf` only showed DB connection errors. Empty `REDIS_PASSWORD` stays allowed (means no auth).
+- **ESI log: non-JSON error bodies.** `pathfinder_esi` `GuzzleLogMiddleware` strips tags, collapses whitespace and caps the logged text at 200 chars (proxy HTML error pages); the JSON branch no longer reads `->error` on a non-object. Ships in `pathfinder_esi` `v3.0.1-beta.1`.
+- **Session id on login.** `Api\User::loginByCharacter()` regenerates the session id before the `SESSION.*` writes, not after, so the order no longer relies on PHP-FPM's shutdown sequence.
+- **Remember-me comment.** `Controller::getCookieCharacters()` documents why a validator mismatch keeps the row (theft-signal trade-off).
+
 ### Dependency security updates (Dependabot)
 
 - **`composer.lock`:** Guzzle 7.10.0 → 7.15.5, psr7 2.9.0 → 2.13.1 (plus promises, deprecation-contracts, polyfill-php80), php_codesniffer 3.13.5 → 3.13.6 (dev). The image already shipped these Guzzle/psr7 versions, because `pathfinder.Dockerfile` runs `composer update`; the lock now matches. `composer audit` is clean.
