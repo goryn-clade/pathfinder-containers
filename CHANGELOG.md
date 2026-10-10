@@ -14,6 +14,17 @@
 - **Quieter supervisord.** `static/supervisord.conf`: `loglevel=warn` drops the `reaped unknown pid` INFO line that every cron job logged (the `/cron` dispatcher starts each job as a detached process, so supervisord as PID 1 reaps it; about 2,000 lines a day). Unexpected program exits are still logged. `user=root` removes the start-up CRIT warning.
 - **Killboard r2z2 proxy.** `Api\Killboard` now extends `AccessController` (logged-in characters only); r2z2 outbound timeout 15 s → 8 s. `static/nginx/site.conf`: `limit_req zone=api burst=120 nodelay` on `/api/Killboard/r2z2/`, which skipped the `/api/` limit.
 
+### Low audit fixes and clean-ups (A6-3, A7-2, A7-3, A9-3)
+
+- **EVE-Scout response guards (A7-3).** `AbstractEveScoutController` and `Rest/Route.php` skip Thera/Turnur entries with missing keys. Before, a change in EVE-Scout's format made every poll 500 and call EVE-Scout again.
+- **GitHub release notes cached (A6-3).** `Api\GitHub::releases()` caches the formatted releases for an hour (5 min when GitHub returns none). Each uncached call made five GitHub API calls, and the server shares GitHub's 60 per hour unauthenticated limit. Markdown is rendered with the `goryn-clade/pathfinder` context, so `#123` links point at this repo, not exodus4d.
+- **Bad JSON on a 2xx ESI response (A7-2).** `pathfinder_esi` `AbstractApi` decodes the body inside a guard and returns the usual error body, instead of a 500 in the calling page (takes effect once `pathfinder_esi` is tagged and the pin is bumped).
+- **Webhook URL kept out of the log (A9-3).** A failed Slack/Discord POST logs only the host; the URL is the webhook's secret.
+- **Login page warning text.** `Api\User::getCookieCharacter()` sets `message`, which `login.js` shows; "Character verification failed" had an empty detail line.
+- **JS cookies.** `Util.setCookie()` adds `SameSite=Lax`, and `Secure` on HTTPS (`cookie` consent flag, `old_char_id`). Needs an asset rebuild.
+- **SSO catches.** `Ccp\Sso` catches `\Throwable` around token expiry and JWT verification, so a `TypeError` is handled like other failures.
+- **nginx.** Comments on the two Gixy-Next false positives (unanchored dotfile deny, `proxy_buffering off` on the WebSocket location), so re-runs don't raise them again.
+
 ### Dependency security updates (Dependabot)
 
 - **`composer.lock`:** Guzzle 7.10.0 → 7.15.5, psr7 2.9.0 → 2.13.1 (plus promises, deprecation-contracts, polyfill-php80), php_codesniffer 3.13.5 → 3.13.6 (dev). The image already shipped these Guzzle/psr7 versions, because `pathfinder.Dockerfile` runs `composer update`; the lock now matches. `composer audit` is clean.
