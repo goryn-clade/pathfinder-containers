@@ -7,7 +7,7 @@
 - **Version 3.0.1.** `pathfinder/package.json`, `pathfinder/app/pathfinder.ini` and `static/pathfinder/pathfinder.ini`: `VERSION = v3.0.1`, so the asset build writes `public/{js,css,img}/v3.0.1/` and browsers load the new JS instead of cached v3.0.0 files. Run the asset build before building the image.
 - **`/setup` jump-table build 500 (A1-2, T14).** `Api/Setup.php`: `array_map([$universeDB, 'quotekey'], …)` instead of reading `quotekey` as a property.
 - **`/setup` DB variable notice (A1-3).** `Controller/Setup.php`: no more `end(reset(…))` on a temporary.
-- **Login 500 without a home clone location (A7-1).** `CharacterModel::updateCloneData()` guards the missing key; `pathfinder_esi` `Esi::getCharacterClonesRequest()` only maps `home_location` when ESI sends it (takes effect once `pathfinder_esi` is tagged and the pin is bumped).
+- **Login 500 without a home clone location (A7-1).** `CharacterModel::updateCloneData()` guards the missing key; `pathfinder_esi` `Esi::getCharacterClonesRequest()` only maps `home_location` when ESI sends it (`pathfinder_esi` `v3.0.0-beta.2`).
 - **`updateUserData` 500 for characters in a corp without faction or alliance.** `CorporationModel`/`AllianceModel::loadData()`: ESI omits `faction_id`/`alliance_id` when empty; they now default to `null`, which also clears a stale alliance when a corp leaves one. Seen 3 times in a week on goryn-server.
 - **`updateUnloadData` 500 on tab close.** `navigator.sendBeacon()` sends no `X-Requested-With`, so F3 rendered `index.html` after the call and failed on `$tplPageTitle`. `Api\Map::updateUnloadData()` no longer renders a view, and skips the update without a character.
 - **`updateUserData` 504s: timing log and no retries (T7).** `Api\Map::updateUserData()` times each step, and `AbstractClient` times each ESI/SSO call in web requests. A request that takes 10 s or more writes one line to `logs/slow_request.log` (new `SLOW_REQUEST` log file in `pathfinder.ini`), even when nginx has already returned a 504. ESI/SSO calls during `updateUserData` are no longer retried: the client polls again a few seconds later, and retries (up to 2 × 5 s per call) pushed requests past nginx's 40 s limit.
@@ -18,12 +18,14 @@
 
 - **EVE-Scout response guards (A7-3).** `AbstractEveScoutController` and `Rest/Route.php` skip Thera/Turnur entries with missing keys. Before, a change in EVE-Scout's format made every poll 500 and call EVE-Scout again.
 - **GitHub release notes cached (A6-3).** `Api\GitHub::releases()` caches the formatted releases for an hour (5 min when GitHub returns none). Each uncached call made five GitHub API calls, and the server shares GitHub's 60 per hour unauthenticated limit. Markdown is rendered with the `goryn-clade/pathfinder` context, so `#123` links point at this repo, not exodus4d.
-- **Bad JSON on a 2xx ESI response (A7-2).** `pathfinder_esi` `AbstractApi` decodes the body inside a guard and returns the usual error body, instead of a 500 in the calling page (takes effect once `pathfinder_esi` is tagged and the pin is bumped).
+- **Bad JSON on a 2xx ESI response (A7-2).** `pathfinder_esi` `AbstractApi` decodes the body inside a guard and returns the usual error body, instead of a 500 in the calling page (`pathfinder_esi` `v3.0.0-beta.2`).
 - **Webhook URL kept out of the log (A9-3).** A failed Slack/Discord POST logs only the host; the URL is the webhook's secret.
 - **Login page warning text.** `Api\User::getCookieCharacter()` sets `message`, which `login.js` shows; "Character verification failed" had an empty detail line.
 - **JS cookies.** `Util.setCookie()` adds `SameSite=Lax`, and `Secure` on HTTPS (`cookie` consent flag, `old_char_id`). Needs an asset rebuild.
 - **SSO catches.** `Ccp\Sso` catches `\Throwable` around token expiry and JWT verification, so a `TypeError` is handled like other failures.
 - **nginx.** Comments on the two Gixy-Next false positives (unanchored dotfile deny, `proxy_buffering off` on the WebSocket location), so re-runs don't raise them again.
+
+- **`pathfinder_esi` pinned to `3.0.0-beta.2`** (`composer.json`, `composer.lock`). Brings A7-1 and A7-2 into the image.
 
 ### Dependency security updates (Dependabot)
 
