@@ -2,6 +2,14 @@
 
 ## v3.0.1
 
+### Wormhole data refreshed from ESI
+
+- **J244 statics showed blank on the map.** CCP has two types named "Wormhole J244" (30667, 73748). The seed had no attributes for 73748, and `initData` keys wormholes by name, so the empty one won. Affects all 112 systems with a J244 static.
+- **Wrong wormhole attributes in the seed.** 45 of 130 wormhole types in `export/sql/eve_universe.sql` differed from ESI: target class, lifetime, mass or signature strength. Some sets belonged to other wormholes (seed Z971 was lowsec, 24 h, 3.3B kg; ESI: C1, 16 h, 100M kg). ESI now wins for all of them, including the April manual edits (I078/L687/O546 lifetimes, J377/J492 signature strength, C729/F216 class codes).
+- **New types R327 and O753** (97881, 97882) added.
+- **`export/tools/refresh_wormhole_types.php`** (new): fetches ESI group 988 and rewrites the wormhole `type` rows, all `type_attribute` rows and any missing `dogma_attribute` rows in the seed. Scan strength (1908) still comes from `export/csv/wormhole.csv`. Run it again when CCP changes wormholes; usage is in the file header. `eve_universe.sql.zip` rebuilt.
+- Existing installs keep their old `eve_universe` data until it is reimported from the seed. The `/setup` Wormholes import does not fix it yet (it writes attributes onto the wrong types; separate fix).
+
 ### Small fixes and version bump
 
 - **Version 3.0.1.** `pathfinder/package.json`, `pathfinder/app/pathfinder.ini` and `static/pathfinder/pathfinder.ini`: `VERSION = v3.0.1`, so the asset build writes `public/{js,css,img}/v3.0.1/` and browsers load the new JS instead of cached v3.0.0 files. Run the asset build before building the image.
