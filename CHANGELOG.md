@@ -8,7 +8,9 @@
 - **Wrong wormhole attributes in the seed.** 45 of 130 wormhole types in `export/sql/eve_universe.sql` differed from ESI: target class, lifetime, mass or signature strength. Some sets belonged to other wormholes (seed Z971 was lowsec, 24 h, 3.3B kg; ESI: C1, 16 h, 100M kg). ESI now wins for all of them, including the April manual edits (I078/L687/O546 lifetimes, J377/J492 signature strength, C729/F216 class codes).
 - **New types R327 and O753** (97881, 97882) added.
 - **`export/tools/refresh_wormhole_types.php`** (new): fetches ESI group 988 and rewrites the wormhole `type` rows, all `type_attribute` rows and any missing `dogma_attribute` rows in the seed. Scan strength (1908) still comes from `export/csv/wormhole.csv`. Run it again when CCP changes wormholes; usage is in the file header. `eve_universe.sql.zip` rebuilt.
-- Existing installs keep their old `eve_universe` data until it is reimported from the seed. The `/setup` Wormholes import does not fix it yet (it writes attributes onto the wrong types; separate fix).
+- **`/setup` Wormholes import wrote attributes onto the wrong types.** `GroupModel::loadTypesData()` reuses one `TypeModel` (Cortex `rel()` returns a shared instance). `TypeModel::reset()` overrode Cortex's `reset()` without calling the parent, so the relation cache was never cleared and `$this->attributes` still held the previous refreshed type's rows. `syncDogmaAttributes()` then wrote the current type's ESI values onto them, and left the current type's own rows unchanged. `reset()` now calls `parent::reset()`.
+- **`/setup` Wormholes import always refetches from ESI.** It used to skip types refreshed in the last 60 days (`isOutdated()`), so a second run after a partial one changed nothing. `loadById()` takes a `forceRefresh` option (applies to that row only); `setupGroup()`/`loadTypesData()` pass it for the Wormholes button.
+- Existing installs: run the `/setup` Wormholes import once to pull ESI's current data, or reimport `eve_universe` from the seed.
 
 ### Small fixes and version bump
 
