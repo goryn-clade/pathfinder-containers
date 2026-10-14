@@ -19,6 +19,7 @@
 - **Statics updated:** 34 added, 4 removed (3,772 → 3,802 in 2,605 systems). Turnur gets B449, N944, S199; the five drifter systems get N062, O477, R474, Y683, Z647; K346 for J011355, J011824, J012773, J010366; Y790 for J005663; J015092 J244 → N110; J011824 U210 removed; J011790 D792 removed; J000487 C008 removed. Our old list matched anoik.is exactly; Tripwire has these later corrections.
 - **`/setup` statics import removes statics that are no longer in the CSV.** It only inserted/updated by id, so removed statics stayed forever. On the first request it now deletes rows whose id is not in the CSV, or whose id holds another (system, type) pair (`Api\Setup::deleteSystemStaticsNotInCSV()`).
 - **`/setup` statics row counts the CSV** instead of a hard-coded 3772. The tooltip says to rebuild the systems index afterwards: statics are also cached in it.
+- **`/setup` neighbour index target 5201 → 5202** (`app/requirements.ini`). The Zarzakh rows merged into the seed added one row, so the page showed 5202/5201.
 - `export/tools/seed_sql.php` (new): SQL dump helpers shared by both tools. Reads data sections that mysqldump split into several INSERT statements (`planet`, `stargate`, `station`, `system`).
 
 ### Small fixes and version bump
