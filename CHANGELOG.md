@@ -13,6 +13,14 @@
 - **`/setup` Wormholes, Ships and Structures imports always refetch from ESI.** They used to skip rows refreshed in the last 60 days (`isOutdated()`), so a rerun did not pick up CCP's changes, and a second run after a partial one changed nothing. `loadById()` takes a `forceRefresh` option (applies to that row only); `setupGroup()`, `setupCategory()`, `CategoryModel::loadGroupsData()` and `GroupModel::loadTypesData()` pass it, for the category and group rows too. Ships now imports 1 group per request (was 2): the largest group (85 types) takes about 35 s of the 120 s `/api/Setup/` timeout.
 - Existing installs: run the `/setup` Wormholes import once to pull ESI's current data, or reimport `eve_universe` from the seed.
 
+### Wormhole statics from Tripwire
+
+- **`export/tools/build_system_static.php`** (new): rebuilds `export/csv/system_static.csv` and the seed's `system_static` rows from [Tripwire's `statics.json`](https://bitbucket.org/daimian/tripwire/src/production/tools/statics.json) (MIT). CCP publishes no statics (not in ESI or the SDE); Tripwire's list is maintained from player reports with a commit per change. Names and wormhole codes map to ids through the seed. Unchanged (system, wormhole) pairs keep their id; new pairs get new ids. Prints the statics added and removed. Sources are listed in `export/csv/README.md`.
+- **Statics updated:** 34 added, 4 removed (3,772 → 3,802 in 2,605 systems). Turnur gets B449, N944, S199; the five drifter systems get N062, O477, R474, Y683, Z647; K346 for J011355, J011824, J012773, J010366; Y790 for J005663; J015092 J244 → N110; J011824 U210 removed; J011790 D792 removed; J000487 C008 removed. Our old list matched anoik.is exactly; Tripwire has these later corrections.
+- **`/setup` statics import removes statics that are no longer in the CSV.** It only inserted/updated by id, so removed statics stayed forever. On the first request it now deletes rows whose id is not in the CSV, or whose id holds another (system, type) pair (`Api\Setup::deleteSystemStaticsNotInCSV()`).
+- **`/setup` statics row counts the CSV** instead of a hard-coded 3772. The tooltip says to rebuild the systems index afterwards: statics are also cached in it.
+- `export/tools/seed_sql.php` (new): SQL dump helpers shared by both tools. Reads data sections that mysqldump split into several INSERT statements (`planet`, `stargate`, `station`, `system`).
+
 ### Small fixes and version bump
 
 - **Version 3.0.1.** `pathfinder/package.json`, `pathfinder/app/pathfinder.ini` and `static/pathfinder/pathfinder.ini`: `VERSION = v3.0.1`, so the asset build writes `public/{js,css,img}/v3.0.1/` and browsers load the new JS instead of cached v3.0.0 files. Run the asset build before building the image.
