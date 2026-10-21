@@ -75,6 +75,6 @@ envsubst '$PATHFINDER_SOCKET_HOST' </etc/nginx/templateNginx.conf >/etc/nginx/ng
 envsubst  </var/www/html/pathfinder/app/templateEnvironment.ini >/var/www/html/pathfinder/app/environment.ini
 envsubst  </var/www/html/pathfinder/app/templateConfig.ini >/var/www/html/pathfinder/app/config.ini
 envsubst  </var/www/html/pathfinder/app/templatePathfinder.ini >/var/www/html/pathfinder/app/pathfinder.ini
-envsubst  </etc/zzz_custom.ini >/etc/php83/conf.d/zzz_custom.ini
+envsubst  </etc/zzz_custom.ini >"$PHP_INI_DIR/conf.d/zzz_custom.ini"
 htpasswd   -c -b -B  /etc/nginx/.setup_pass pf "$APP_PASSWORD"
 exec "$@"

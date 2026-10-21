@@ -1,12 +1,28 @@
-FROM php:8.3-fpm-alpine AS build
+# PHP release the image runs. Pin the patch version so a rebuild cannot change it
+# silently. 8.3.36 fixes CVE-2026-109618 and CVE-2026-109619; Alpine's php83
+# packages (and so trafex/php-nginx) did not have the fix yet.
+ARG PHP_VERSION=8.3.36
 
-RUN apk update \
-    && apk add --no-cache libpng-dev git \
-    $PHPIZE_DEPS \
-    && docker-php-ext-install gd && docker-php-ext-install pdo_mysql && \
-    pecl channel-update pecl.php.net && \
-    pecl install redis && docker-php-ext-enable redis && \
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Official PHP image plus the extensions Pathfinder needs. The build and runtime
+# stages both start from it, so composer runs on the same PHP that serves requests.
+# igbinary: F3 serializes its cache with it when it is loaded. The Alpine images had
+# it (pulled in by php83-pecl-redis), so existing Redis caches need it to be read.
+FROM php:${PHP_VERSION}-fpm-alpine AS base
+
+RUN apk add --no-cache libpng icu-libs \
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS libpng-dev icu-dev \
+    && docker-php-ext-install gd intl pdo_mysql \
+    && (php -m | grep -q '^Zend OPcache$' || docker-php-ext-install opcache) \
+    && pecl channel-update pecl.php.net \
+    && pecl install redis && docker-php-ext-enable redis \
+    && pecl install igbinary && docker-php-ext-enable igbinary \
+    && apk del .build-deps \
+    && rm -rf /tmp/pear
+
+FROM base AS build
+
+RUN apk add --no-cache git \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 COPY pathfinder /app
 WORKDIR /app
@@ -30,24 +46,30 @@ RUN grep -q '\$ttl=\$cached\[1\];' vendor/bcosca/fatfree-core/base.php && \
 RUN grep -qF "\$ttl?['ex'=>\$ttl]:[]" vendor/bcosca/fatfree-core/base.php && \
     sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php
 
-FROM trafex/php-nginx:3.6.0
-
-USER root
+FROM base
 
 RUN apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache \
+        nginx supervisor \
         busybox-suid sudo shadow gettext bash apache2-utils logrotate ca-certificates \
-        php83-redis php83-pdo php83-pdo_mysql php83-fileinfo php83-pecl-event php83-sodium \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+    && ln -sf /dev/stderr /var/log/nginx/error.log \
+    && chown -R nobody:nobody /var/lib/nginx /run/nginx
+
+# Production php.ini defaults (display_errors off etc.), as the Alpine packages had.
+# The official image's docker.conf logs every FPM request to stderr; drop that so
+# docker logs keeps showing only errors.
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && grep -q '^access.log' /usr/local/etc/php-fpm.d/docker.conf \
+    && sed -i '/^access.log/d' /usr/local/etc/php-fpm.d/docker.conf
 
 COPY static/logrotate/pathfinder /etc/logrotate.d/pathfinder
 COPY static/nginx/nginx.conf /etc/nginx/templateNginx.conf
 RUN mkdir -p /etc/nginx/sites_enabled/
 COPY static/nginx/site.conf  /etc/nginx/templateSite.conf
 
-COPY static/php/fpm-pool.conf /etc/php83/php-fpm.d/zzz_custom.conf
+COPY static/php/fpm-pool.conf /usr/local/etc/php-fpm.d/zzz_custom.conf
 COPY static/php/php.ini /etc/zzz_custom.ini
 COPY static/crontab.txt /var/crontab.txt
 COPY static/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

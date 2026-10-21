@@ -2,6 +2,13 @@
 
 ## v3.0.1
 
+### PHP runtime on the official PHP image (CVE-2026-109618, CVE-2026-109619)
+
+- **PHP 8.3.15 → 8.3.36.** Fixes two critical remote code execution bugs in PHP itself (out-of-memory handling and stale state between requests). The runtime used to come from `trafex/php-nginx:3.6.0`, whose Alpine 3.20 packages are stuck on 8.3.15, so a rebuild could not pick up fixes.
+- The runtime stage now builds from `php:${PHP_VERSION}-fpm-alpine` with nginx and supervisord added. `PHP_VERSION` is a build argument (default `8.3.36`), so other releases can be tested with `--build-arg`. 8.4 and 8.5 are not supported yet: they need dependency upgrades (Monolog, ReactPHP). composer runs on the same image.
+- Extensions match the old image where Pathfinder uses them: gd, intl, pdo_mysql, redis, sodium, opcache, and igbinary. F3 serializes its Redis cache with igbinary when it is loaded, so without it an upgraded install cannot read its existing cache (`/setup` and cron fail with `unserialize()` errors). Dropped unused `event`, `sockets`, `msgpack` and `mysqli`.
+- `php.ini`: `session.upload_progress.enabled = 0` (unused; the confirmed PHP-FPM route for CVE-2026-109619) and `expose_php = Off`.
+
 ### Wormhole data refreshed from ESI
 
 - **J244 statics showed blank on the map.** CCP has two types named "Wormhole J244" (30667, 73748). The seed had no attributes for 73748, and `initData` keys wormholes by name, so the empty one won. Affects all 112 systems with a J244 static.
