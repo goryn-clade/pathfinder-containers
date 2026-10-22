@@ -12,6 +12,7 @@
 - **pathfinder_esi `v3.0.1`** (pinned `3.0.*`): explicit nullables in `CacheEntry` and `PrivateCacheStrategy` (the 8.5 500 on `/` and `getEveServerStatus`), and `GuzzleLogMiddleware` logs a failed request with no response as `NULL 0` instead of a NOTICE that 500'd `/api/rest/SystemThera` and `SystemTurnur` (T67).
 - **WebSocket server (`pathfinder_websocket`).** react/promise 2.11 → 3.3 (`RejectedPromise` → `Promise\reject()`, error handlers take `\Throwable`). `pf-websocket.Dockerfile` installs with `composer:2` and runs on `php:${PHP_VERSION}-cli-alpine` (8.5.12), so PHP no longer follows `composer:2`. guzzlehttp/psr7 2.9 → 2.13, symfony/http-foundation and symfony/routing 6.4.35/37 → 6.4.48/47 (8 advisories). `MapUpdate`: no warning when access data names a map with no subscribers.
 - **Map groups marked beta.** The map settings checkbox reads "Enable Groups (beta)".
+- **phpcs composer hooks removed.** `post-install-cmd`/`post-update-cmd` ran `vendor/bin/phpcs`, a dev dependency, so `composer install --no-dev` failed (exit 127) without `--no-scripts`. `composer phpcs` sets `installed_paths` itself.
 
 ### PHP runtime on the official PHP image (CVE-2026-109618, CVE-2026-109619)
 
