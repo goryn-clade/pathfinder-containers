@@ -18,7 +18,7 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 
 **v3.0 is a major release.** The PHP runtime, MariaDB image, cache image, reverse proxy, service names, compose file layout, several env variables, and the database schema all change.
 
-**Read the full upgrade guide before you start:** [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v2-to-v3.md).
+**Read the full upgrade guide before you start:** [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md).
 
 ### Breaking changes at a glance
 
