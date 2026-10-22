@@ -2,7 +2,7 @@
 
 This guide walks operators of an existing Pathfinder deployment (the
 `goryn-clade/pathfinder-containers:master` v2.x stack) through upgrading to
-v3.0 (the `release/v3.0` branch).
+v3.0.1 (the `v3.0.1` tag).
 
 v3.0 is a major release. The PHP runtime, MariaDB image, Redis image,
 service names, compose file layout, env variables, and several DB tables
@@ -15,9 +15,9 @@ For the rationale behind individual changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Breaking changes at a glance
 
-| Area | v2.x (master) | v3.0 (release/v3.0) |
+| Area | v2.x (master) | v3.0.1 |
 |---|---|---|
-| PHP runtime | 7.2 | 8.3 |
+| PHP runtime | 7.2 | 8.5 |
 | MariaDB image | `bianjp/mariadb-alpine:latest` (abandoned) | `mariadb:10.11` (official, LTS) |
 | Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
 | Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
@@ -29,7 +29,7 @@ For the rationale behind individual changes, see [CHANGELOG.md](CHANGELOG.md).
 | Email/SMTP | supported | **removed** |
 | `pathfinder.ini` | bind-mounted, hand-edited | baked into image, driven by `.env` |
 | `config.ini` | bind-mounted | baked into image |
-| `redis.conf` | not used | shared `config/redis/redis.conf` (see [MIGRATION-config-static-cleanup.md](MIGRATION-config-static-cleanup.md)) |
+| `redis.conf` | not used | shared `config/redis/redis.conf` |
 | pathfinder DB schema | v2 schema | adds `system.groupId`, `system.securityClass`, `connection.nominalLifespan`, `map.allowUnknownSystems`, `map.granularK162`, `map.allowGroups`, `character.affiliationUpdated`, new `map_group` table |
 
 If you are happy with the defaults, the upgrade is essentially:
@@ -119,7 +119,7 @@ Do **not** delete the `db_data` or `redis_data` volumes. v3 uses them.
 
 ```bash
 git fetch origin
-git checkout release/v3.0
+git checkout v3.0.1
 git submodule update --init --recursive
 ```
 
@@ -214,9 +214,7 @@ restricted logins with `PF_LOGIN_WHITELIST_*`, move those IDs to the
 deployment-specific value flows from `.env` through `envsubst` at container
 start. If you previously hand-edited those files, your edits will be lost;
 port them into the relevant `PF_*` env var or, for values not yet exposed,
-edit `static/pathfinder/pathfinder.ini` and rebuild the image. See
-[MIGRATION-config-static-cleanup.md](MIGRATION-config-static-cleanup.md)
-for the layout-cleanup details.
+edit `static/pathfinder/pathfinder.ini` and rebuild the image.
 
 `plugin.ini` is the only ini file still bind-mounted at runtime.
 
@@ -373,7 +371,7 @@ and review:
 |---|---|---|
 | **Allow Unknown systems** | off | Adds an "Unknown" checkbox to the add-system dialog and a security-class picker; lets you place `???` placeholder nodes for unscanned destinations before jumping. |
 | **Granular K162** | off | Replaces the grouped K162 incoming-WH labels (C1/2/3, C4/5, C6, …) with per-class options (C1, C2, …, C6, H, L, 0.0, Thera, Pochven, drifter holes C14–C18). |
-| **Allow Groups** | **on** | Enables right-click "Add group" on the map and per-system "Add to group" actions. Disable if you want to hide the feature for a given map. |
+| **Enable Groups (beta)** | **on** | Enables right-click "Add group" on the map and per-system "Add to group" actions. Disable if you want to hide the feature for a given map. |
 
 Also worth re-checking on each map after upgrade:
 - **Track Abyssal jumps** — unchanged behaviour, just verify the value
@@ -393,7 +391,7 @@ docker exec pathfinder cat /var/www/html/pathfinder/app/pathfinder.ini \
   | grep -E '^NAME|^STATUS|^CHARACTER\.0\.ID'
 
 # Valkey is loading the shared conf and AUTH is on
-docker exec $(docker compose ps -q pf-redis) valkey-cli -a "$REDIS_PASSWORD" CONFIG GET maxmemory
+docker compose exec -T pf-redis sh -c 'valkey-cli --no-auth-warning -a "$REDIS_PASSWORD" CONFIG GET maxmemory'
 # → maxmemory / 67108864    (default 0 means redis.conf was not loaded)
 
 # WebSocket server started cleanly
@@ -541,7 +539,8 @@ If `FLUSHALL` doesn't fix it, the deprecation is firing on a *fresh* serializati
 
 Once MariaDB 10.11 has upgraded the volume (step 4), the v2 database
 server can no longer open it. Rolling back therefore means a fresh volume
-plus the dump from step 1.
+plus the dump from step 1. Anything users changed after the upgrade
+(new maps, signatures, connections) is lost.
 
 ```bash
 docker compose down
@@ -555,13 +554,22 @@ mv .env.v2.bak .env
 docker volume rm pathfinder_db_data
 
 docker compose up -d pfdb   # if Compose rejects the file, see the note in step 1a
-# wait ~10 s for the new, empty database to start, then
+
+# wait for the new database. On an empty volume the image starts MariaDB
+# twice (set-up, then the real server); only the real one listens on TCP
+until docker compose exec -T pfdb sh -c 'mysqladmin --protocol=tcp -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" ping' >/dev/null 2>&1; do sleep 2; done
+
 docker compose exec -T pfdb sh -c \
   "mysql -u root -p\$MYSQL_ROOT_PASSWORD" < pathfinder-backup-YYYYMMDD.sql
 docker compose up -d
 ```
 
 Restore the Redis snapshot the same way if you need it.
+
+**Docker 29 or later:** v2's `traefik:v2.3` cannot talk to the Docker API
+(`client version 1.24 is too old`), so it routes nothing and the site stays
+down. If `docker version` shows 29 or later, change `traefik:v2.3` to
+`traefik:v2.11` in `docker-compose.yml` before the last `docker compose up -d`.
 
 ---
 
@@ -579,8 +587,7 @@ add it to both projects.
 **Q: My existing `pathfinder.ini` has values not exposed as `PF_*` env vars.**
 A: Edit `static/pathfinder/pathfinder.ini` directly and rebuild the image
 (`docker compose build pf`). The bind-mount-override pattern was removed
-to keep dev/test/prod consistent — see
-[MIGRATION-config-static-cleanup.md](MIGRATION-config-static-cleanup.md).
+to keep dev/test/prod consistent.
 If a value is broadly useful, open an issue to expose it as an env var.
 
 **Q: Do I need to clear caches?**

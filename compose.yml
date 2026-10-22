@@ -32,7 +32,7 @@ services:
     restart: always
 
   pf-socket:
-    image: ghcr.io/goryn-clade/pf-websocket:beta
+    image: ghcr.io/goryn-clade/pf-websocket:latest
     command: ["--tcpHost", "0.0.0.0"]
     env_file:
       - .env
@@ -44,7 +44,7 @@ services:
 
   pf:
     container_name: pathfinder
-    image: ghcr.io/goryn-clade/pathfinder:beta
+    image: ghcr.io/goryn-clade/pathfinder:latest
     env_file:
       - .env
     labels:
