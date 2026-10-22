@@ -176,6 +176,14 @@ docker compose -f compose.dev.yml build --no-cache pf && docker compose -f compo
 ```
 ---
 
+## Support
+
+For help with installing, upgrading or running Pathfinder, join the Discord server: <https://discord.gg/zG733etVbj>
+
+Report bugs in the [issue tracker](https://github.com/goryn-clade/pathfinder/issues).
+
+---
+
 ## Acknowledgments
 
 - [exodus4d](https://github.com/exodus4d/) for creating Pathfinder
