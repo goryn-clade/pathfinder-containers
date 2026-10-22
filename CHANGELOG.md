@@ -2,10 +2,21 @@
 
 ## v3.0.1
 
+### PHP 8.5
+
+- **PHP 8.3.36 → 8.5.12** (default `PHP_VERSION`). Done with real fixes, not by hiding deprecations (F3 turns them into 500s).
+- **react/promise 2.11 → 3.3, react/socket 1.9 → 1.17, react/promise-stream 1.3 → 1.7, clue/ndjson-react 1.2 → 1.3.** Promise 2 has implicit nullables and a `case …;` that is a fatal error on 8.5. Promise 3 only rejects with `Throwable` and moved `FulfilledPromise`/`RejectedPromise` to an internal namespace, so `AbstractSocket::write()` now never rejects: errors resolve with a `['task' => 'error', 'load' => <message>]` payload. `NullSocket` does the same. `Api\Map::getAccessData` and the `/setup` socket check read that payload. A rejection nobody handled would otherwise be logged on every request when the socket is down.
+- **Monolog 2.9.2 → 2.11.1.** 2.9.2 `Logger::addRecord()` has an implicit nullable: the first log write 500s on 8.4+.
+- App: `fgetcsv()` passes `$escape`; `?float`/`?\Closure` on `AbstractCron::isExecutionTimeLeft()` and `FileHandler::readFileReverse()`; `(double)` → `(float)` in `SystemModel`.
+- PHP 8.5 runtime deprecations (not visible to `php -l`): `\PDO::MYSQL_ATTR_*` → `\Pdo\Mysql::ATTR_*` on 8.4+ in `Config`; `SplObjectStorage::contains()/attach()` → `offsetExists()/offsetSet()` in `LogCollection`; `AbstractIterator` turns `\stdClass` ESI data into an array before `ArrayIterator`; dropped a no-op `curl_close()` in `AbstractWebhookHandler`; Dockerfile removes Cortex's `setAccessible()` calls.
+- **pathfinder_esi `v3.0.1`** (pinned `3.0.*`): explicit nullables in `CacheEntry` and `PrivateCacheStrategy` (the 8.5 500 on `/` and `getEveServerStatus`), and `GuzzleLogMiddleware` logs a failed request with no response as `NULL 0` instead of a NOTICE that 500'd `/api/rest/SystemThera` and `SystemTurnur` (T67).
+- **WebSocket server (`pathfinder_websocket`).** react/promise 2.11 → 3.3 (`RejectedPromise` → `Promise\reject()`, error handlers take `\Throwable`). `pf-websocket.Dockerfile` installs with `composer:2` and runs on `php:${PHP_VERSION}-cli-alpine` (8.5.12), so PHP no longer follows `composer:2`. guzzlehttp/psr7 2.9 → 2.13, symfony/http-foundation and symfony/routing 6.4.35/37 → 6.4.48/47 (8 advisories). `MapUpdate`: no warning when access data names a map with no subscribers.
+- **Map groups marked beta.** The map settings checkbox reads "Enable Groups (beta)".
+
 ### PHP runtime on the official PHP image (CVE-2026-109618, CVE-2026-109619)
 
-- **PHP 8.3.15 → 8.3.36.** Fixes two critical remote code execution bugs in PHP itself (out-of-memory handling and stale state between requests). The runtime used to come from `trafex/php-nginx:3.6.0`, whose Alpine 3.20 packages are stuck on 8.3.15, so a rebuild could not pick up fixes.
-- The runtime stage now builds from `php:${PHP_VERSION}-fpm-alpine` with nginx and supervisord added. `PHP_VERSION` is a build argument (default `8.3.36`), so other releases can be tested with `--build-arg`. 8.4 and 8.5 are not supported yet: they need dependency upgrades (Monolog, ReactPHP). composer runs on the same image.
+- **PHP 8.3.15 → 8.3.36** (later 8.5.12, see above). Fixes two critical remote code execution bugs in PHP itself (out-of-memory handling and stale state between requests). The runtime used to come from `trafex/php-nginx:3.6.0`, whose Alpine 3.20 packages are stuck on 8.3.15, so a rebuild could not pick up fixes.
+- The runtime stage now builds from `php:${PHP_VERSION}-fpm-alpine` with nginx and supervisord added. `PHP_VERSION` is a build argument, so other releases can be tested with `--build-arg`. composer runs on the same image.
 - Extensions match the old image where Pathfinder uses them: gd, intl, pdo_mysql, redis, sodium, opcache, and igbinary. F3 serializes its Redis cache with igbinary when it is loaded, so without it an upgraded install cannot read its existing cache (`/setup` and cron fail with `unserialize()` errors). Dropped unused `event`, `sockets`, `msgpack` and `mysqli`.
 - `php.ini`: `session.upload_progress.enabled = 0` (unused; the confirmed PHP-FPM route for CVE-2026-109619) and `expose_php = Off`.
 

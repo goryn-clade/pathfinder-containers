@@ -1,7 +1,6 @@
 # PHP release the image runs. Pin the patch version so a rebuild cannot change it
-# silently. 8.3.36 fixes CVE-2026-109618 and CVE-2026-109619; Alpine's php83
-# packages (and so trafex/php-nginx) did not have the fix yet.
-ARG PHP_VERSION=8.3.36
+# silently. 8.5.12 includes the CVE-2026-109618 and CVE-2026-109619 fixes.
+ARG PHP_VERSION=8.5.12
 
 # Official PHP image plus the extensions Pathfinder needs. The build and runtime
 # stages both start from it, so composer runs on the same PHP that serves requests.
@@ -39,6 +38,9 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # bcosca/fatfree-core.
 RUN grep -q '\$fieldsCache,.*relation field cache' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
     sed -i '/relation field cache/s/\$fieldsCache,/\$fieldsCache = [],/' vendor/ikkez/f3-cortex/lib/db/cortex.php
+# PHP 8.5: ReflectionProperty::setAccessible() is deprecated (a no-op since 8.1).
+RUN grep -q '\$m_ad_prop->setAccessible(' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
+    sed -i '/\$m_ad_prop->setAccessible(/d' vendor/ikkez/f3-cortex/lib/db/cortex.php
 RUN grep -q 'list(\$rval,\$ttl)=\$tmp;' vendor/bcosca/fatfree-core/base.php && \
     sed -i 's/list(\$rval,\$ttl)=\$tmp;/list($rval,$ttl)=$tmp; $ttl=(int)$ttl;/' vendor/bcosca/fatfree-core/base.php
 RUN grep -q '\$ttl=\$cached\[1\];' vendor/bcosca/fatfree-core/base.php && \
