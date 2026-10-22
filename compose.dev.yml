@@ -1,0 +1,66 @@
+services:
+  pf-db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./pathfinder/export/sql/eve_universe.sql.zip:/eve_universe.sql.zip
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+  pf-redis:
+    image: valkey/valkey:8-alpine
+    # password goes into a private config file, not onto a command line (visible to `ps` on the host).
+    # rm -f first: on a container restart the old file (owned by valkey) is still in /tmp, and
+    # fs.protected_regular=2 (Ubuntu default) stops root from opening it for writing.
+    entrypoint: ["tini", "--", "sh", "-c", "umask 077 && rm -f /tmp/requirepass.conf && printf 'requirepass \"%s\"\\n' \"$$REDIS_PASSWORD\" > /tmp/requirepass.conf && chown valkey /tmp/requirepass.conf && exec docker-entrypoint.sh valkey-server /etc/redis/redis.conf --include /tmp/requirepass.conf"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+      - ./config/redis/redis.conf:/etc/redis/redis.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    restart: always
+
+  pf-socket:
+    build:
+      context: .
+      dockerfile: pf-websocket.Dockerfile
+    command: ["--tcpHost", "0.0.0.0"]
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/var/www/html/pathfinder/history/map
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+  pf:
+    container_name: pathfinder
+    build:
+      context: .
+      dockerfile: pathfinder.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+    healthcheck:
+      disable: true
+    volumes:
+      - ./config/pathfinder/plugin.ini:/var/www/html/pathfinder/app/plugin.ini
+      - ./logs:/var/www/html/pathfinder/history/map
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - pf-db
+      - pf-redis
+      - pf-socket
+    restart: always
+
+volumes:
+  db_data:
+  redis_data:

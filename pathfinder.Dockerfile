@@ -1,54 +1,92 @@
-FROM php:7.2.34-fpm-alpine3.12 as build
+# PHP release the image runs. Pin the patch version so a rebuild cannot change it
+# silently. 8.5.12 includes the CVE-2026-109618 and CVE-2026-109619 fixes.
+ARG PHP_VERSION=8.5.12
 
-RUN apk update \
-    && apk add --no-cache libpng-dev  zeromq-dev git \
-    $PHPIZE_DEPS \
-    && docker-php-ext-install gd && docker-php-ext-install pdo_mysql && \
-    pecl install redis-5.3.7 && docker-php-ext-enable redis && \
-    pecl install channel://pecl.php.net/zmq-1.1.3 && docker-php-ext-enable zmq && \
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Official PHP image plus the extensions Pathfinder needs. The build and runtime
+# stages both start from it, so composer runs on the same PHP that serves requests.
+# igbinary: F3 serializes its cache with it when it is loaded. The Alpine images had
+# it (pulled in by php83-pecl-redis), so existing Redis caches need it to be read.
+FROM php:${PHP_VERSION}-fpm-alpine AS base
+
+RUN apk add --no-cache libpng icu-libs \
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS libpng-dev icu-dev \
+    && docker-php-ext-install gd intl pdo_mysql \
+    && (php -m | grep -q '^Zend OPcache$' || docker-php-ext-install opcache) \
+    && pecl channel-update pecl.php.net \
+    && pecl install redis && docker-php-ext-enable redis \
+    && pecl install igbinary && docker-php-ext-enable igbinary \
+    && apk del .build-deps \
+    && rm -rf /tmp/pear
+
+FROM base AS build
+
+RUN apk add --no-cache git \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 COPY pathfinder /app
 WORKDIR /app
 
-RUN composer self-update 2.1.8
-RUN composer install
+# Install exactly the versions in composer.lock, so every build ships what was
+# tested and the vendor patches below match the files they were written for.
+# To update a dependency, update composer.lock in the pathfinder repo.
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-FROM trafex/alpine-nginx-php7:ba1dd422
+# PHP 8 / php-redis 6 vendor patches. Each is run as a separate command so an
+# inline comment cannot accidentally break a `&&` chain. Each one greps for the
+# line it changes first, so the build fails if a dependency update moves it.
+# TODOs: drop once upstream fixes land in ikkez/f3-cortex dev-master and
+# bcosca/fatfree-core.
+RUN grep -q '\$fieldsCache,.*relation field cache' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
+    sed -i '/relation field cache/s/\$fieldsCache,/\$fieldsCache = [],/' vendor/ikkez/f3-cortex/lib/db/cortex.php
+# PHP 8.5: ReflectionProperty::setAccessible() is deprecated (a no-op since 8.1).
+RUN grep -q '\$m_ad_prop->setAccessible(' vendor/ikkez/f3-cortex/lib/db/cortex.php && \
+    sed -i '/\$m_ad_prop->setAccessible(/d' vendor/ikkez/f3-cortex/lib/db/cortex.php
+RUN grep -q 'list(\$rval,\$ttl)=\$tmp;' vendor/bcosca/fatfree-core/base.php && \
+    sed -i 's/list(\$rval,\$ttl)=\$tmp;/list($rval,$ttl)=$tmp; $ttl=(int)$ttl;/' vendor/bcosca/fatfree-core/base.php
+RUN grep -q '\$ttl=\$cached\[1\];' vendor/bcosca/fatfree-core/base.php && \
+    sed -i 's/\$ttl=\$cached\[1\];/$ttl=(int)$cached[1];/' vendor/bcosca/fatfree-core/base.php
+RUN grep -qF "\$ttl?['ex'=>\$ttl]:[]" vendor/bcosca/fatfree-core/base.php && \
+    sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php
 
-RUN apk update && apk add --no-cache busybox-suid sudo php7-redis php7-pdo php7-pdo_mysql \
-    php7-fileinfo php7-event shadow gettext bash apache2-utils logrotate ca-certificates
+FROM base
 
-# fix expired DST Cert
-RUN sed -i '/^mozilla\/DST_Root_CA_X3.crt$/ s/^/!/' /etc/ca-certificates.conf \
-    && update-ca-certificates 
+RUN apk update \
+    && apk upgrade --no-cache \
+    && apk add --no-cache \
+        nginx supervisor \
+        busybox-suid sudo shadow gettext bash apache2-utils logrotate ca-certificates \
+    && ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log \
+    && chown -R nobody:nobody /var/lib/nginx /run/nginx
 
-# symlink nginx logs to stdout/stderr for supervisord
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
- && ln -sf /dev/stderr /var/log/nginx/error.log
+# Production php.ini defaults (display_errors off etc.), as the Alpine packages had.
+# The official image's docker.conf logs every FPM request to stderr; drop that so
+# docker logs keeps showing only errors.
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && grep -q '^access.log' /usr/local/etc/php-fpm.d/docker.conf \
+    && sed -i '/^access.log/d' /usr/local/etc/php-fpm.d/docker.conf
 
 COPY static/logrotate/pathfinder /etc/logrotate.d/pathfinder
 COPY static/nginx/nginx.conf /etc/nginx/templateNginx.conf
-# we need to create sites_enabled directory in order for entrypoint.sh being able to copy file after envsubst
 RUN mkdir -p /etc/nginx/sites_enabled/
 COPY static/nginx/site.conf  /etc/nginx/templateSite.conf
 
-# Configure PHP-FPM
-COPY static/php/fpm-pool.conf /etc/php7/php-fpm.d/zzz_custom.conf
-
+COPY static/php/fpm-pool.conf /usr/local/etc/php-fpm.d/zzz_custom.conf
 COPY static/php/php.ini /etc/zzz_custom.ini
-# configure cron
 COPY static/crontab.txt /var/crontab.txt
-# Configure supervisord
 COPY static/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY static/entrypoint.sh   /
 
 WORKDIR /var/www/html
 COPY  --chown=nobody --from=build /app  pathfinder
 
-RUN chmod 0766 pathfinder/logs pathfinder/tmp/ && rm index.php && touch /etc/nginx/.setup_pass &&  chmod +x /entrypoint.sh
+RUN chmod 0755 pathfinder/logs pathfinder/tmp/ && rm -f index.php && touch /etc/nginx/.setup_pass && chmod +x /entrypoint.sh
 COPY static/pathfinder/routes.ini /var/www/html/pathfinder/app/
 COPY static/pathfinder/environment.ini /var/www/html/pathfinder/app/templateEnvironment.ini
+COPY static/pathfinder/config.ini /var/www/html/pathfinder/app/templateConfig.ini
+COPY static/pathfinder/pathfinder.ini /var/www/html/pathfinder/app/templatePathfinder.ini
+COPY static/scripts/rotate-token-key.php /usr/local/bin/rotate-token-key.php
+COPY static/scripts/migrate-tokens.php /usr/local/bin/migrate-tokens.php
 
 WORKDIR /var/www/html
 EXPOSE 80

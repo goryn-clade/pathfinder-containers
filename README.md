@@ -1,167 +1,187 @@
 # Pathfinder Containers
 
-[![Docker Image Master Branch](https://github.com/goryn-clade/pathfinder-containers/actions/workflows/docker-image.yml/badge.svg?branch=master)](https://github.com/goryn-clade/pathfinder-containers/actions/workflows/docker-image.yml)
-
-
-A fork of techfreak's [Pathfinder-container](https://gitlab.com/techfreak/pathfinder-container/) docker-compose solution for Pathfinder that is designed to work with Goryn Clade's [Pathfinder](https://github.com/goryn-clade/pathfinder/) fork, using [Traefik](https://traefik.io/) as a reverse proxy to expose the docker container.
-
-1. [Installation](#installation)
-1. [Using Traefik](#using-traefik)
-1. [Development](#development)
-
-## Installation
-
-**Prerequisites**:
-* [docker](https://docs.docker.com/)
-
-> **Note**: The Docker-compose file uses Compose v3.8, so requires Docker Engine 19.03.0+
-
-</br>
-
-
-1. **Create an API-Key**
-    * Go the [Eve Online Developer portal](https://developers.eveonline.com/)
-    * After signing in go to "MANAGE APPLICATIONS" → "CREATE NEW APPLICATION"
-    * Choose a name for your application (e.g. "Pathfinder Production")
-    * Enter a Description for this installation
-    * Change "CONNECTION TYPE" to "Authentication & API Access"
-    * Add the following "PERMISSIONS":
-      * `esi-location.read_online.v1`
-      * `esi-location.read_location.v1`
-      * `esi-location.read_ship_type.v1`
-      * `esi-ui.write_waypoint.v1`
-      * `esi-ui.open_window.v1`
-      * `esi-universe.read_structures.v1`
-      * `esi-corporations.read_corporation_membership.v1`
-      * `esi-clones.read_clones.v1`
-      * `esi-characters.read_corporation_roles.v1`
-      * `esi-search.search_structures.v1`
-    * Set your "CALLBACK URL" to `https://[YOUR_DOMAIN]/sso/callbackAuthorization`</br></br>
-  
-  
-1. **Clone the repo**
-    ```shell
-    git clone --recurse-submodules  https://github.com/goryn-clade/pathfinder-containers.git
-    ```
-
-1. **Create a *.env* file (copy .env.example) and make sure every config option has an entry.**
-    ```shell
-    PROJECT_ROOT=""       # The path of the cloned repo
-    CONTAINER_NAME="pf"   # docker container name prefix
-    DOMAIN=""             # The domain you will be using
-    APP_PASSWORD=""       # Password for /setup
-    MYSQL_HOST="mariadb"  # mysql host
-    MYSQL_PORT="3306"     # default mysql port
-    MYSQL_USER="root"     # mysql root user
-    MYSQL_PASSWORD=""     # mysql Password
-    CCP_SSO_CLIENT_ID=""  # Use the SSO tokens created in step 1
-    CCP_SSO_SECRET_KEY=""
-    CCP_ESI_SCOPES="esi-location.read_online.v1,esi-location.read_location.v1,esi-location.read_ship_type.v1,esi-ui.write_waypoint.v1,esi-ui.open_window.v1,esi-universe.read_structures.v1,esi-corporations.read_corporation_membership.v1,esi-clones.read_clones.v1,esi-characters.read_corporation_roles.v1"
-    MYSQL_PF_DB_NAME="pathfinder" # mysql pathfinder table name
-    MYSQL_UNIVERSE_DB_NAME="eve_universe"
-    MYSQL_CCP_DB_NAME="eve_lifeblood_min"
-    REDIS_HOST="redis"    # redis host
-    REDIS_PORT="6379"     # default redis port
-    PATHFINDER_SOCKET_HOST="pathfinder-socket" # domain of the websocket container, relative to the main pf container
-    PATHFINDER_SOCKET_PORT="5555"              # default tcp socket port
-    SMTP_HOST=""
-    SMTP_PORT=""
-    SMTP_SCHEME=""
-    SMTP_USER=""
-    SMTP_PASS=""
-    SMTP_FROM=""
-    SMTP_ERROR=""
-    LE_EMAIL="your-email@example.com" #Add your email address for notifications if the SSL cert renewal fails.
-> The `PROJECT_ROOT` key is the *absolute* path to the project directory, ie if you have clone it to /app/pathfinder-containers, this is the value you should enter. If you're unsure of the absolute path, you can use the command `pwd` to get the full absolute path of the current directory.
-
-1. **Edit the *config/pathfinder/pathfinder.ini*** to your liking
-
-    Recommended options to change:
-    * `[PATHFINDER]`
-        * `NAME`- the tab title when viewing your Pathfinder
-    * `[PATHFINDER.LOGIN]`
-        * `COOKIE_EXPIRE` - expire age (in days) for login cookies. [read more](https://github.com/exodus4d/pathfinder/issues/138#issuecomment-216036606)
-        * `SESSION_SHARING` - Share maps between logged in characters in the same browser session. [read more](https://github.com/goryn-clade/pathfinder/releases/tag/v2.1.1)
-        * `CHARACTER` - Character allow-list. Comma separated string of character ids. (empty = "no restriction")
-        * `CORPORATION` - Corporation allow-list. Comma separated string of corporation ids. (empty = "no restriction")
-        * `ALLIANCE` - Alliance allow-list. Comma separated string of alliance ids. (empty = "no restriction")
-    * `[PATHFINDER.MAP.PRIVATE]`, `[PATHFINDER.MAP.PRIVATE]`, `[PATHFINDER.MAP.ALLIANCE]`
-        * `LIFETIME` - expire time (in days) until a map type will be deleted (by cronjob)    
-</br></br>
-
-    
-1. **Build & Run it**
-    ```shell
-    docker network create web && docker compose up -d
-    ```
-
-1. **Open the http://< your-domain >/setup page.**
-   * Your username is `pf` and password is the password you set in `APP_PASSWORD` in the *.env* file.
-   * Find the database section of the setup page, for both "pf" and "eve_universe" databases click the **"create database"** button. 
-   * Once the page has reloaded, click the **"setup tables"**, and then **"fix columns/keys"**.
-</br></br>
-
-1. **Go back to your console and insert the eve universe dump with this command:**
-    ```shell
-    docker compose exec pfdb /bin/sh -c "unzip -p eve_universe.sql.zip | mysql -u root -p\$MYSQL_ROOT_PASSWORD eve_universe";
-
-1. **When everything works, configure Traefik correctly for production**
-    * Remove the staging CA server line  from `docker-compose.yml`from the `command` block of the traefik service definition. 
-    * Delete the `./letsencrypt/acme.json` configuration file so Let's Encrypt will get a new certificate.</br></br>
-    * If you are not the root user on your host you may need to edit file permissions. Docker-engine creates the `letsencrypt` director as root user, which means that you would need to prefix `sudo` on any future docker commands (`sudo docker compose up` etc). To avoid doing this you can take ownership of the letsencrypt directory by running `sudo chown -R $USER ./letsencrypt`.
-
-
-> Hint: If you need to make changes, perform your edits first, then do `docker compose down` to bring down the project, and then `docker compose up --build -d` to rebuild the containers and run them again.
-
-</br>
-
----
-</br>
-
-### Using Traefik
-
-To keep things simple, the structure of this project assumes that you will use Traefik to provide access to your Pathfinder docker container and nothing else. As such, Traefik containers start and stop with the Pathfinder containers. 
-
-If you want to run other services in docker on the same host that also need to be exposed to the web, you should strongly consider splitting Traefik into a separate project with its own docker-compose file. This will allow you to take pathfinder project offline for maintenance without affecting other containers that rely on Traefik.
-
-</br>
+A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/goryn-clade/pathfinder/) fork, using [Traefik](https://traefik.io/) as a reverse proxy with automatic TLS via Let's Encrypt.
 
 ---
 
-</br>
+## Upgrading from v2.x
+
+**v3.0 is a major release.** The PHP runtime, MariaDB image, cache image, reverse proxy, service names, compose file layout, several env variables, and the database schema all change.
+
+**Read the full upgrade guide before you start:** [.claude/MIGRATION-v2-to-v3.md](.claude/MIGRATION-v2-to-v3.md).
+
+### Breaking changes at a glance
+
+| Area | v2.x | v3.0 |
+|---|---|---|
+| PHP runtime | 7.2 | 8.3 |
+| MariaDB image | `bianjp/mariadb-alpine` (abandoned) | `mariadb:10.11` (official, LTS) |
+| Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
+| Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
+| Compose file | `docker-compose.yml` | `compose.yml` |
+| DB service | `pfdb` | `pf-db` |
+| Cache service | `redis` | `pf-redis` |
+| Socket service | `pathfinder-socket` | `pf-socket` |
+| External `web` network | required | not required |
+| Email / SMTP | supported | **removed** — use Slack or Discord webhooks |
+| `pathfinder.ini` / `config.ini` | bind-mounted, hand-edited | baked into image, driven by `.env` |
+| `plugin.ini` | bind-mounted | bind-mounted (unchanged — only ini file still mounted) |
+| DB schema | v2 | adds columns to `system`, `connection`, `map`, `character`; new `map_group` table |
+| ESI tokens at rest | plaintext | encrypted (libsodium `crypto_secretbox`) |
+
+### New env variables in v3
+
+`.env.example` documents each. The first group are genuinely new (no v2 equivalent); the second group existed in v2's bind-mounted `pathfinder.ini` / `environment.ini` and are now driven through `.env`.
+
+**Net-new (no v2 equivalent):**
+
+- `SERVER_NAME` — unique-per-install identifier (cache key seed, ESI User-Agent)
+- `WS_TOKEN_SECRET` — HMAC secret binding WebSocket tokens to PHP sessions. `pf-socket` refuses to start without it.
+- `WS_ALLOWED_ORIGINS` — comma-separated hostnames allowed to open WebSocket connections. `pf-socket` refuses to start in production if empty.
+- `TOKEN_ENCRYPTION_KEY` — 32-byte hex key for ESI token encryption at rest. Blank fails closed.
+- `REDIS_PASSWORD` — enables Valkey AUTH
+- `SESSION_COOKIE_SECURE` — set to `1` on HTTPS deployments
+- `APP_ENV` — set to `production` to activate startup guards
+- `PF_SETUP_ENABLED` — gates the `/setup` route; set to `1` only during bootstrap, then back to `0`
+- `CCP_SSO_USE_PKCE` — optional kill-switch (default on); set to `0` if CCP changes break the PKCE flow
+
+**Moved from `pathfinder.ini` / `environment.ini` (now driven via `.env`):**
+
+- `PF_DEBUG` — F3 debug/error detail level (was `[ENVIRONMENT]/DEBUG`)
+- `PF_INSTALL_NAME` — display name shown in UI (was `[PATHFINDER]/NAME`)
+- `PF_REGISTRATION_STATUS` — `1` = open, `0` = locked (was `[PATHFINDER.REGISTRATION]/STATUS`)
+- `PF_SUPER_ADMIN_ID` — CCP character ID of the super admin
+- `PF_SESSION_SHARING` — `1` = characters in the same session share map access, `0` = off (was `[PATHFINDER]/SESSION_SHARING`)
+- `PF_LOGIN_ALLOWLIST_CHAR` / `_CORP` / `_ALLIANCE` — login restriction lists (was `[PATHFINDER.LOGIN]/CHARACTER` / `/CORPORATION` / `/ALLIANCE`; renamed from "whitelist")
+
+Generate the random secrets with `openssl rand -hex 32`.
+
+If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) — it covers backup, `.env` rewrite, MariaDB restore, schema migration, and optional bulk encryption of legacy ESI tokens.
+
+---
+
+## Installation (fresh install)
+
+### Prerequisites
+
+- [Docker Engine](https://docs.docker.com/engine/install/) 24+
+- [Docker Compose plugin](https://docs.docker.com/compose/install/) v2 (`docker compose`, not `docker-compose`)
+- A public domain name pointed at your server
+- Ports 80 and 443 open on your server
+
+### Steps
+
+1. **Create a CCP SSO application**
+   - Go to the [EVE Online Developer Portal](https://developers.eveonline.com/)
+   - Sign in → "MANAGE APPLICATIONS" → "CREATE NEW APPLICATION"
+   - Set "CONNECTION TYPE" to "Authentication & API Access"
+   - Add the following permissions:
+     - `esi-location.read_online.v1`
+     - `esi-location.read_location.v1`
+     - `esi-location.read_ship_type.v1`
+     - `esi-ui.write_waypoint.v1`
+     - `esi-ui.open_window.v1`
+     - `esi-universe.read_structures.v1`
+     - `esi-corporations.read_corporation_membership.v1`
+     - `esi-clones.read_clones.v1`
+     - `esi-characters.read_corporation_roles.v1`
+     - `esi-search.search_structures.v1`
+   - Set "CALLBACK URL" to `https://[YOUR_DOMAIN]/sso/callbackAuthorization`
+
+2. **Clone the repository**
+   ```shell
+   git clone --recurse-submodules https://github.com/goryn-clade/pathfinder-containers.git
+   cd pathfinder-containers
+   ```
+
+3. **Configure your environment**
+   ```shell
+   cp .env.example .env
+   ```
+   Open `.env` and fill in every value. Each variable is documented with a comment in `.env.example`. The minimum set:
+
+   *Identity & TLS:*
+   - `DOMAIN` — your public domain name
+   - `SERVER_NAME` — unique identifier for this install (used in cache keys and ESI User-Agent)
+   - `LE_EMAIL` — email for Let's Encrypt certificate expiry notifications
+
+   *Secrets (generate each with `openssl rand -hex 32`):*
+   - `MYSQL_PASSWORD` — MariaDB root password
+   - `APP_PASSWORD` — password for the `/setup` page (HTTP Basic Auth, user: `pf`)
+   - `REDIS_PASSWORD` — enables Valkey AUTH
+   - `WS_TOKEN_SECRET` — HMAC secret for WebSocket tokens
+   - `TOKEN_ENCRYPTION_KEY` — encrypts ESI tokens at rest
+
+   *CCP SSO (from step 1):*
+   - `CCP_SSO_CLIENT_ID` / `CCP_SSO_SECRET_KEY`
+
+   *Bootstrap & runtime flags:*
+   - `PF_SETUP_ENABLED=1` — **required for first boot** so the `/setup` wizard renders; set back to `0` after step 5
+   - `APP_ENV=production`
+   - `SESSION_COOKIE_SECURE=1`
+   - `PF_DEBUG=0`
+   - `WS_ALLOWED_ORIGINS` — your `DOMAIN` (comma-separated if multiple)
+
+   *Access control:*
+   - `PF_SUPER_ADMIN_ID` — your CCP character ID (grants full admin access)
+   - `PF_LOGIN_ALLOWLIST_CORP` / `PF_LOGIN_ALLOWLIST_ALLIANCE` — optional; restrict who can log in
+
+4. **Start the stack**
+   ```shell
+   docker compose up -d
+   ```
+
+5. **Run the setup wizard**
+   - Browse to `https://[YOUR_DOMAIN]/setup`
+   - Log in with username `pf` and the `APP_PASSWORD` you set
+   - In the Database section, click **"Create database"** for both `pathfinder` and `eve_universe`
+   - Once the page reloads, click **"Setup tables"** then **"Fix columns/keys"**
+
+6. **Import the EVE universe data**
+   ```shell
+   docker compose exec -T pf-db sh -c 'mariadb -u root -p"$MYSQL_ROOT_PASSWORD" eve_universe' < pathfinder/export/sql/eve_universe.sql
+   ```
+
+7. **Lock down the install.** Set `PF_SETUP_ENABLED=0` in `.env`, confirm `PF_DEBUG=0` and `APP_ENV=production`, then recreate the app container:
+   ```shell
+   docker compose up -d --force-recreate pf
+   ```
+
+---
+
+## Using Traefik
+
+Traefik is included in the compose stack and handles TLS termination via Let's Encrypt. It starts and stops with the rest of the stack.
+
+If you run other Docker services on the same host that also need HTTPS, consider splitting Traefik into a separate compose project so you can take Pathfinder offline without affecting other containers.
+
+---
 
 ## Development
 
-Some Development configurations that have worked well for me have been saved in the `development/` directory, including step debugging for VsCode using [xdebug](https://xdebug.org/)
+Use `compose.dev.yml` for local development — it builds from source, skips Traefik, and exposes the app directly on port 80:
 
-Development configs and docker files can be quickly restored using: 
+```shell
+cp .env.example .env
+# fill in CCP SSO credentials, set DOMAIN=localhost
 
+docker compose -f compose.dev.yml build --no-cache pf
+docker compose -f compose.dev.yml up -d
 
- ```shell
-chmod +x ./development/development.sh && ./development/development.sh
+# Watch logs
+docker logs -f pathfinder
+
+# Rebuild after code changes
+docker compose -f compose.dev.yml build --no-cache pf && docker compose -f compose.dev.yml up -d --force-recreate pf
 ```
-
-This creates a partial `.env` file, but you will need to add your CCP SSO client and keys manually, if you want to copy development files without overwriting your .env file add the flag `--noenv` when running the script.
-
-It's best to create a new SSO application for development work, so that you can set the callback url to `https://localhost/sso/callbackAuthorization`.
-
-</br>
-
 ---
 
-</br>
-
 ## Acknowledgments
-*  [exodus4d](https://github.com/exodus4d/) for pathfinder
-* [techfreak](https://gitlab.com/techfreak/pathfinder-container) for the original Pathfinder-container project
-* [johnschultz](https://gitlab.com/johnschultz/pathfinder-container/) for improvements to the traefik config
-* [tyrheimdaleve](https://github.com/TyrHeimdalEVE/pathfinder_esi) for maintaining the pathfinder_esi dependency
 
-## Authors
-* techfreak
-* johnschultz
-* samoneilll
+- [exodus4d](https://github.com/exodus4d/) for creating Pathfinder
+- [techfreak](https://gitlab.com/techfreak/pathfinder-container) for the original container project
+- [tyrheimdaleve](https://github.com/TyrHeimdalEVE/pathfinder_esi) for maintaining the `pathfinder_esi` dependency
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
+MIT — see [LICENSE.md](LICENSE.md)
