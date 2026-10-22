@@ -44,6 +44,7 @@
 ### Small fixes and version bump
 
 - **Version 3.0.1.** `pathfinder/package.json`, `pathfinder/app/pathfinder.ini` and `static/pathfinder/pathfinder.ini`: `VERSION = v3.0.1`, so the asset build writes `public/{js,css,img}/v3.0.1/` and browsers load the new JS instead of cached v3.0.0 files. Run the asset build before building the image.
+- **Every `/admin` action returned 404.** The image copies `static/pathfinder/routes.ini` over the app's `routes.ini`, and that copy still had `GET @admin` after the admin CSRF fix (A8-1) made the actions POST-only. Saving rights, kick, ban and map activate/deactivate/delete all 404'd. The copy now has `GET|POST @admin` and matches `pathfinder/app/routes.ini` again (T29).
 - **`/setup` jump-table build 500 (A1-2, T14).** `Api/Setup.php`: `array_map([$universeDB, 'quotekey'], …)` instead of reading `quotekey` as a property.
 - **`/setup` DB variable notice (A1-3).** `Controller/Setup.php`: no more `end(reset(…))` on a temporary.
 - **Login 500 without a home clone location (A7-1).** `CharacterModel::updateCloneData()` guards the missing key; `pathfinder_esi` `Esi::getCharacterClonesRequest()` only maps `home_location` when ESI sends it (`pathfinder_esi` `v3.0.0-beta.2`).
