@@ -1,5 +1,15 @@
 # Pathfinder Containers
 
+[![Release](https://img.shields.io/github/v/release/goryn-clade/pathfinder-containers?style=flat-square&label=release)](https://github.com/goryn-clade/pathfinder-containers/releases/latest)
+[![Images](https://img.shields.io/github/actions/workflow/status/goryn-clade/pathfinder-containers/publish-docker.yaml?style=flat-square&label=images)](https://github.com/goryn-clade/pathfinder-containers/actions/workflows/publish-docker.yaml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE.md)
+[![Discord](https://img.shields.io/badge/discord-join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/zG733etVbj)
+
+[![PHP 8.5.12](https://img.shields.io/badge/php-8.5.12-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net/)
+[![MariaDB 10.11](https://img.shields.io/badge/mariadb-10.11-003545?style=flat-square&logo=mariadb&logoColor=white)](https://mariadb.org/)
+[![Valkey 8](https://img.shields.io/badge/valkey-8-6983FF?style=flat-square)](https://valkey.io/)
+[![Traefik 3.6.1](https://img.shields.io/badge/traefik-3.6.1-24A1C1?style=flat-square&logo=traefikproxy&logoColor=white)](https://traefik.io/)
+
 A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/goryn-clade/pathfinder/) fork, using [Traefik](https://traefik.io/) as a reverse proxy with automatic TLS via Let's Encrypt.
 
 ---
