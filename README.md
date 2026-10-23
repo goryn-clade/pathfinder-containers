@@ -24,7 +24,7 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 
 | Area | v2.x | v3.0 |
 |---|---|---|
-| PHP runtime | 7.2 | 8.3 |
+| PHP runtime | 7.2 | 8.5 |
 | MariaDB image | `bianjp/mariadb-alpine` (abandoned) | `mariadb:10.11` (official, LTS) |
 | Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
 | Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
@@ -33,9 +33,9 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 | Cache service | `redis` | `pf-redis` |
 | Socket service | `pathfinder-socket` | `pf-socket` |
 | External `web` network | required | not required |
-| Email / SMTP | supported | **removed** — use Slack or Discord webhooks |
+| Email / SMTP | supported | **removed** - use Slack or Discord webhooks |
 | `pathfinder.ini` / `config.ini` | bind-mounted, hand-edited | baked into image, driven by `.env` |
-| `plugin.ini` | bind-mounted | bind-mounted (unchanged — only ini file still mounted) |
+| `plugin.ini` | bind-mounted | bind-mounted (unchanged - only ini file still mounted) |
 | DB schema | v2 | adds columns to `system`, `connection`, `map`, `character`; new `map_group` table |
 | ESI tokens at rest | plaintext | encrypted (libsodium `crypto_secretbox`) |
 
@@ -45,28 +45,28 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 
 **Net-new (no v2 equivalent):**
 
-- `SERVER_NAME` — unique-per-install identifier (cache key seed, ESI User-Agent)
-- `WS_TOKEN_SECRET` — HMAC secret binding WebSocket tokens to PHP sessions. `pf-socket` refuses to start without it.
-- `WS_ALLOWED_ORIGINS` — comma-separated hostnames allowed to open WebSocket connections. `pf-socket` refuses to start in production if empty.
-- `TOKEN_ENCRYPTION_KEY` — 32-byte hex key for ESI token encryption at rest. Blank fails closed.
-- `REDIS_PASSWORD` — enables Valkey AUTH
-- `SESSION_COOKIE_SECURE` — set to `1` on HTTPS deployments
-- `APP_ENV` — set to `production` to activate startup guards
-- `PF_SETUP_ENABLED` — gates the `/setup` route; set to `1` only during bootstrap, then back to `0`
-- `CCP_SSO_USE_PKCE` — optional kill-switch (default on); set to `0` if CCP changes break the PKCE flow
+- `SERVER_NAME` - unique-per-install identifier (cache key seed, ESI User-Agent)
+- `WS_TOKEN_SECRET` - HMAC secret binding WebSocket tokens to PHP sessions. `pf-socket` refuses to start without it.
+- `WS_ALLOWED_ORIGINS` - comma-separated hostnames allowed to open WebSocket connections. `pf-socket` refuses to start in production if empty.
+- `TOKEN_ENCRYPTION_KEY` - 32-byte hex key for ESI token encryption at rest. Blank fails closed.
+- `REDIS_PASSWORD` - enables Valkey AUTH
+- `SESSION_COOKIE_SECURE` - set to `1` on HTTPS deployments
+- `APP_ENV` - set to `production` to activate startup guards
+- `PF_SETUP_ENABLED` - gates the `/setup` route; set to `1` only during bootstrap, then back to `0`
+- `CCP_SSO_USE_PKCE` - optional kill-switch (default on); set to `0` if CCP changes break the PKCE flow
 
 **Moved from `pathfinder.ini` / `environment.ini` (now driven via `.env`):**
 
-- `PF_DEBUG` — F3 debug/error detail level (was `[ENVIRONMENT]/DEBUG`)
-- `PF_INSTALL_NAME` — display name shown in UI (was `[PATHFINDER]/NAME`)
-- `PF_REGISTRATION_STATUS` — `1` = open, `0` = locked (was `[PATHFINDER.REGISTRATION]/STATUS`)
-- `PF_SUPER_ADMIN_ID` — CCP character ID of the super admin
-- `PF_SESSION_SHARING` — `1` = characters in the same session share map access, `0` = off (was `[PATHFINDER]/SESSION_SHARING`)
-- `PF_LOGIN_ALLOWLIST_CHAR` / `_CORP` / `_ALLIANCE` — login restriction lists (was `[PATHFINDER.LOGIN]/CHARACTER` / `/CORPORATION` / `/ALLIANCE`; renamed from "whitelist")
+- `PF_DEBUG` - F3 debug/error detail level (was `[ENVIRONMENT]/DEBUG`)
+- `PF_INSTALL_NAME` - display name shown in UI (was `[PATHFINDER]/NAME`)
+- `PF_REGISTRATION_STATUS` - `1` = open, `0` = locked (was `[PATHFINDER.REGISTRATION]/STATUS`)
+- `PF_SUPER_ADMIN_ID` - CCP character ID of the super admin
+- `PF_SESSION_SHARING` - `1` = characters in the same session share map access, `0` = off (was `[PATHFINDER]/SESSION_SHARING`)
+- `PF_LOGIN_ALLOWLIST_CHAR` / `_CORP` / `_ALLIANCE` - login restriction lists (was `[PATHFINDER.LOGIN]/CHARACTER` / `/CORPORATION` / `/ALLIANCE`; renamed from "whitelist")
 
 Generate the random secrets with `openssl rand -hex 32`.
 
-If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) — it covers backup, `.env` rewrite, MariaDB restore, schema migration, and optional bulk encryption of legacy ESI tokens.
+If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) - it covers backup, `.env` rewrite, MariaDB restore, schema migration, and optional bulk encryption of legacy ESI tokens.
 
 ---
 
@@ -111,30 +111,30 @@ If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) — 
    Open `.env` and fill in every value. Each variable is documented with a comment in `.env.example`. The minimum set:
 
    *Identity & TLS:*
-   - `DOMAIN` — your public domain name
-   - `SERVER_NAME` — unique identifier for this install (used in cache keys and ESI User-Agent)
-   - `LE_EMAIL` — email for Let's Encrypt certificate expiry notifications
+   - `DOMAIN` - your public domain name
+   - `SERVER_NAME` - unique identifier for this install (used in cache keys and ESI User-Agent)
+   - `LE_EMAIL` - email for Let's Encrypt certificate expiry notifications
 
    *Secrets (generate each with `openssl rand -hex 32`):*
-   - `MYSQL_PASSWORD` — MariaDB root password
-   - `APP_PASSWORD` — password for the `/setup` page (HTTP Basic Auth, user: `pf`)
-   - `REDIS_PASSWORD` — enables Valkey AUTH
-   - `WS_TOKEN_SECRET` — HMAC secret for WebSocket tokens
-   - `TOKEN_ENCRYPTION_KEY` — encrypts ESI tokens at rest
+   - `MYSQL_PASSWORD` - MariaDB root password
+   - `APP_PASSWORD` - password for the `/setup` page (HTTP Basic Auth, user: `pf`)
+   - `REDIS_PASSWORD` - enables Valkey AUTH
+   - `WS_TOKEN_SECRET` - HMAC secret for WebSocket tokens
+   - `TOKEN_ENCRYPTION_KEY` - encrypts ESI tokens at rest
 
    *CCP SSO (from step 1):*
    - `CCP_SSO_CLIENT_ID` / `CCP_SSO_SECRET_KEY`
 
    *Bootstrap & runtime flags:*
-   - `PF_SETUP_ENABLED=1` — **required for first boot** so the `/setup` wizard renders; set back to `0` after step 5
+   - `PF_SETUP_ENABLED=1` - **required for first boot** so the `/setup` wizard renders; set back to `0` after step 5
    - `APP_ENV=production`
    - `SESSION_COOKIE_SECURE=1`
    - `PF_DEBUG=0`
-   - `WS_ALLOWED_ORIGINS` — your `DOMAIN` (comma-separated if multiple)
+   - `WS_ALLOWED_ORIGINS` - your `DOMAIN` (comma-separated if multiple)
 
    *Access control:*
-   - `PF_SUPER_ADMIN_ID` — your CCP character ID (grants full admin access)
-   - `PF_LOGIN_ALLOWLIST_CORP` / `PF_LOGIN_ALLOWLIST_ALLIANCE` — optional; restrict who can log in
+   - `PF_SUPER_ADMIN_ID` - your CCP character ID (grants full admin access)
+   - `PF_LOGIN_ALLOWLIST_CORP` / `PF_LOGIN_ALLOWLIST_ALLIANCE` - optional; restrict who can log in
 
 4. **Start the stack**
    ```shell
@@ -169,7 +169,7 @@ If you run other Docker services on the same host that also need HTTPS, consider
 
 ## Development
 
-Use `compose.dev.yml` for local development — it builds from source, skips Traefik, and exposes the app directly on port 80:
+Use `compose.dev.yml` for local development - it builds from source, skips Traefik, and exposes the app directly on port 80:
 
 ```shell
 cp .env.example .env
@@ -202,4 +202,4 @@ Report bugs in the [issue tracker](https://github.com/goryn-clade/pathfinder/iss
 
 ## License
 
-MIT — see [LICENSE.md](LICENSE.md)
+MIT - see [LICENSE.md](LICENSE.md)

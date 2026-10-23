@@ -1,4 +1,4 @@
-# Migration guide — v2.x → v3.0 (Goryn Clade fork)
+# Migration guide - v2.x → v3.0 (Goryn Clade fork)
 
 This guide walks operators of an existing Pathfinder deployment (the
 `goryn-clade/pathfinder-containers:master` v2.x stack) through upgrading to
@@ -167,7 +167,7 @@ SMTP_HOST  SMTP_PORT  SMTP_SCHEME  SMTP_USER  SMTP_PASS  SMTP_FROM  SMTP_ERROR
 
 Email notifications (rally pokes, error mail, account mail) have been
 removed entirely along with the abandoned Swiftmailer dependency. Use the
-Slack or Discord webhook integrations instead — they cover the same
+Slack or Discord webhook integrations instead - they cover the same
 notification flows.
 
 ### Renamed defaults
@@ -179,7 +179,7 @@ notification flows.
 | `PATHFINDER_SOCKET_HOST="pathfinder-socket"` | `PATHFINDER_SOCKET_HOST="pf-socket"` | Match the new service name |
 
 Starting from `.env.example` gives you the new values. If you edited your
-old file instead, update these — there is no compose alias fallback in v3.
+old file instead, update these - there is no compose alias fallback in v3.
 
 ### Login allowlist
 
@@ -200,17 +200,17 @@ restricted logins with `PF_LOGIN_WHITELIST_*`, move those IDs to the
 | `WS_ALLOWED_ORIGINS` | Comma-separated hostnames that browsers are allowed to open WebSocket connections from (matched against the HTTP `Origin` header). Example: `pathfinder.example.com,maps.example.com`. **`pf-socket` refuses to start if this is empty when `APP_ENV=production`**. In non-production environments `localhost` and `127.0.0.1` are always auto-allowed regardless. | your app's public hostname(s) |
 | `TOKEN_ENCRYPTION_KEY` | 32-byte hex key (64 chars) used to encrypt ESI access/refresh tokens at rest with libsodium `crypto_secretbox`. Required: blank fails closed (all token reads return empty, users forced through SSO). See [Key rotation](#key-rotation-token_encryption_key) below before changing this value on a running deployment. | `openssl rand -hex 32` |
 | `APP_ENV` | Set to `production` to activate startup guards: `pf-socket` refuses to start if `WS_ALLOWED_ORIGINS` is empty; `pf` warns loudly if `PF_DEBUG > 0`. | `production` for prod |
-| `PF_DEBUG` | F3 debug/error level. **Must be `0`** on internet-facing deployments — higher values expose stack traces, and the SQL-injection redaction in `Controller::showError` is gated on `DEBUG < 1`. | `0` for prod |
-| `PF_INSTALL_NAME` | Display name in UI/title bar. Replaces hand-editing `[PATHFINDER] NAME` in `pathfinder.ini`. | e.g. `Pathfinder — Goryn Clade` |
+| `PF_DEBUG` | F3 debug/error level. **Must be `0`** on internet-facing deployments - higher values expose stack traces, and the SQL-injection redaction in `Controller::showError` is gated on `DEBUG < 1`. | `0` for prod |
+| `PF_INSTALL_NAME` | Display name in UI/title bar. Replaces hand-editing `[PATHFINDER] NAME` in `pathfinder.ini`. | e.g. `Pathfinder - Goryn Clade` |
 | `PF_REGISTRATION_STATUS` | `1` open registration, `0` locked. Replaces hand-editing `[PATHFINDER.REGISTRATION] STATUS`. | per your policy |
 | `PF_SUPER_ADMIN_ID` | CCP character ID granted SUPER admin. Replaces `[PATHFINDER.ROLES] CHARACTER.0.ID`. | your character ID |
 | `PF_SESSION_SHARING` | `1` lets characters in the same browser session open each other's maps, `0` off (default). Replaces hand-editing `[PATHFINDER] SESSION_SHARING`. | `0` unless you used it in v2 |
-| `PF_LOGIN_ALLOWLIST_CHAR` | Comma-separated CCP character IDs (blank = no restriction). **Renamed from `PF_LOGIN_WHITELIST_CHAR`** — update your `.env` if you carried this from v2. **`pf` refuses to start** if an old `PF_LOGIN_WHITELIST_*` is set and its `PF_LOGIN_ALLOWLIST_*` is blank. | per your policy |
+| `PF_LOGIN_ALLOWLIST_CHAR` | Comma-separated CCP character IDs (blank = no restriction). **Renamed from `PF_LOGIN_WHITELIST_CHAR`** - update your `.env` if you carried this from v2. **`pf` refuses to start** if an old `PF_LOGIN_WHITELIST_*` is set and its `PF_LOGIN_ALLOWLIST_*` is blank. | per your policy |
 | `PF_LOGIN_ALLOWLIST_CORP` | Comma-separated CCP corp IDs. **Renamed from `PF_LOGIN_WHITELIST_CORP`**. | per your policy |
 | `PF_LOGIN_ALLOWLIST_ALLIANCE` | Comma-separated CCP alliance IDs. **Renamed from `PF_LOGIN_WHITELIST_ALLIANCE`**. | per your policy |
 | `CCP_SSO_USE_PKCE` | Kill-switch for PKCE on the CCP SSO authorization flow. Enabled by default; set to `0` only if upstream CCP changes break the PKCE handshake. | `1` (default) |
 
-`pathfinder.ini` and `config.ini` are no longer bind-mounted — every
+`pathfinder.ini` and `config.ini` are no longer bind-mounted - every
 deployment-specific value flows from `.env` through `envsubst` at container
 start. If you previously hand-edited those files, your edits will be lost;
 port them into the relevant `PF_*` env var or, for values not yet exposed,
@@ -224,7 +224,7 @@ v3 ships a substantial set of SSO, session, and WebSocket hardening changes. Non
 
 - **CCP SSO**: PKCE (RFC 7636) on the authorization flow, JWT `iss`/`aud` verified on every callback, per-tab SSO state map (previous v2 single-slot state could collide across tabs), JWKS cached in F3 for 1h with `kid`-miss invalidation, `random_bytes` CSPRNG everywhere, refresh tokens persisted after refresh, secret/code redaction in SSO error logs.
 - **Sessions / cookies**: remember-me cookie is rotated on each use, selector widened from 12 → 16 bytes, session is destroyed and the remember-me cookie cleared on logout.
-- **ESI tokens at rest**: encrypted with libsodium `crypto_secretbox`. Requires the `sodium` PHP extension (declared in `composer.json` as `ext-sodium`; bundled in the v3 image — only relevant if you build your own runtime).
+- **ESI tokens at rest**: encrypted with libsodium `crypto_secretbox`. Requires the `sodium` PHP extension (declared in `composer.json` as `ext-sodium`; bundled in the v3 image - only relevant if you build your own runtime).
 - **WebSocket server**: origin allow-list (`WS_ALLOWED_ORIGINS`), HMAC-bound tokens (`WS_TOKEN_SECRET`), concurrent connection cap of 5000, WS frames over 64 KB rejected, outbound frames have `characterIds` stripped before broadcast, log file paths locked to an allowed root.
 
 ---
@@ -293,7 +293,7 @@ docker compose logs -f pf
 | `pf-socket` | `FATAL: WS_ALLOWED_ORIGINS must not be empty in production` | Your public hostname(s) |
 
 Also watch for:
-- `WARNING: PF_DEBUG=… is set with APP_ENV=production` — set `PF_DEBUG=0`.
+- `WARNING: PF_DEBUG=… is set with APP_ENV=production` - set `PF_DEBUG=0`.
 - Redis AUTH errors on `pf` startup (mismatched `REDIS_PASSWORD`).
 
 ---
@@ -326,12 +326,12 @@ Steps:
    green ticks for `system`, `connection`, `map`, `character`, and
    `map_group`.
 3. If `map_group` is missing from the schema list, hard-reload the setup
-   page — the schema list is built from `Setup.php`, which now includes
+   page - the schema list is built from `Setup.php`, which now includes
    `MapGroupModel`.
 4. When the token step below is done, set `PF_SETUP_ENABLED="0"` in `.env`
    and run `docker compose up -d --force-recreate pf`.
 
-No data migration scripts are needed beyond this — every new column has a
+No data migration scripts are needed beyond this - every new column has a
 safe default, and old `wh_eol` rows are translated on read by
 `ConnectionModel::getData()`.
 
@@ -340,7 +340,7 @@ safe default, and old `wh_eol` rows are translated on read by
 v3 encrypts ESI access/refresh tokens at rest. Brand-new logins after
 deploy land encrypted automatically. Pre-existing rows from your v2
 database still hold plaintext tokens until the relevant character next
-hits the token-refresh path — which, for inactive characters, may never
+hits the token-refresh path - which, for inactive characters, may never
 happen on its own.
 
 To encrypt every legacy row in one pass:
@@ -353,7 +353,7 @@ docker compose run --rm pf php /usr/local/bin/migrate-tokens.php
 The key comes from `.env`, like the running container.
 
 The script reports `total / migrated / already_encrypted / empty`. It is
-idempotent — already-encrypted rows (`v1:` prefix) are skipped, so it can
+idempotent - already-encrypted rows (`v1:` prefix) are skipped, so it can
 be re-run safely.
 
 ---
@@ -374,9 +374,9 @@ and review:
 | **Enable Groups (beta)** | **on** | Enables right-click "Add group" on the map and per-system "Add to group" actions. Disable if you want to hide the feature for a given map. |
 
 Also worth re-checking on each map after upgrade:
-- **Track Abyssal jumps** — unchanged behaviour, just verify the value
+- **Track Abyssal jumps** - unchanged behaviour, just verify the value
   survived the upgrade.
-- **Slack / Discord webhooks** — Discord webhooks now use native embed
+- **Slack / Discord webhooks** - Discord webhooks now use native embed
   format. URLs ending in `/slack` are no longer needed; the app strips the
   suffix automatically, but a freshly entered Discord webhook URL should
   point at the bare webhook (`https://discord.com/api/webhooks/.../...`).
@@ -398,7 +398,7 @@ docker compose exec -T pf-redis sh -c 'valkey-cli --no-auth-warning -a "$REDIS_P
 docker compose logs pf-socket | grep -E "start (WebSocket|Socket) server"
 # → two lines: "start WebSocket server…" and "start Socket server…"
 
-# PHP version (should be 8.3) and sodium extension loaded
+# PHP version (should be 8.5) and sodium extension loaded
 docker exec pathfinder php -v
 docker exec pathfinder php -m | grep -i sodium   # → sodium
 ```
@@ -414,7 +414,7 @@ Ph.3`) where applicable. Confirm `docker logs pathfinder` is clean of 500s.
 v3 encrypts ESI access and refresh tokens at rest with libsodium
 `crypto_secretbox`. The key lives in `TOKEN_ENCRYPTION_KEY`. The first time
 a token is read after deploy, any legacy plaintext row decrypts as a
-passthrough and is re-stored encrypted on the next refresh — no operator
+passthrough and is re-stored encrypted on the next refresh - no operator
 action required.
 
 Replacing `TOKEN_ENCRYPTION_KEY` on a running deployment **without** first
@@ -449,7 +449,7 @@ docker compose up -d --force-recreate pf
 The script reports `total / rotated / skipped / failed`. A non-zero
 `failed` count means some rows couldn't be decrypted with the old key
 (corrupt blob, or the row was already encrypted with the new key from a
-prior partial run) — those users will be sent through SSO on next access.
+prior partial run) - those users will be sent through SSO on next access.
 The script source lives at `static/scripts/rotate-token-key.php`.
 
 ---
@@ -468,7 +468,7 @@ echo "new WS_TOKEN_SECRET: $NEW_WS"
 # 2. Update .env
 sed -i.bak "s|^WS_TOKEN_SECRET=.*|WS_TOKEN_SECRET=\"$NEW_WS\"|" .env
 
-# 3. Restart BOTH pf and pf-socket — they must share the same key
+# 3. Restart BOTH pf and pf-socket - they must share the same key
 docker compose up -d --force-recreate pf pf-socket
 ```
 
@@ -490,7 +490,7 @@ Steps:
    docker compose up -d --force-recreate pf
    ```
 
-Effect: any SSO login in progress at the moment of the restart will fail with `invalid_client` at CCP's token endpoint; the user retries. Stored ESI refresh tokens are **not** affected — they are issued by CCP's auth server separately and remain valid until revoked or expired.
+Effect: any SSO login in progress at the moment of the restart will fail with `invalid_client` at CCP's token endpoint; the user retries. Stored ESI refresh tokens are **not** affected - they are issued by CCP's auth server separately and remain valid until revoked or expired.
 
 ---
 
@@ -514,7 +514,7 @@ This is most likely after:
 - a PHP version bump.
 - a vendor patch landing in `pathfinder.Dockerfile`.
 
-**Fix — flush Valkey:**
+**Fix - flush Valkey:**
 
 ```bash
 # from the repo root
@@ -529,7 +529,7 @@ For a production stack, drop the `-f compose.dev.yml`:
 docker compose exec -T pf-redis valkey-cli -a "$REDIS_PASSWORD" FLUSHALL
 ```
 
-After the flush, the next page load repopulates the cache with objects serialized against the current vendor tree, and the 500s clear immediately. Side effects: any cached ESI responses are gone — the next few ESI-backed page loads will be slower while the cache warms.
+After the flush, the next page load repopulates the cache with objects serialized against the current vendor tree, and the 500s clear immediately. Side effects: any cached ESI responses are gone - the next few ESI-backed page loads will be slower while the cache warms.
 
 If `FLUSHALL` doesn't fix it, the deprecation is firing on a *fresh* serialization rather than a stale one, which means a vendor class needs `#[\AllowDynamicProperties]` or an explicit property declaration. Add the patch to `pathfinder.Dockerfile` alongside the existing cortex / fatfree-core `sed` patches.
 
@@ -579,7 +579,7 @@ down. If `docker version` shows 29 or later, change `traefik:v2.3` to
 A: Yes. Valkey 8 reads Redis 6/7 RDB and AOF files. No conversion needed.
 
 **Q: I had a `web` external Docker network for Traefik. Do I still need it?**
-A: No. v3's `compose.yml` does not declare a `web` network — Traefik runs
+A: No. v3's `compose.yml` does not declare a `web` network - Traefik runs
 inside the project network. If you split Traefik into its own compose
 project (recommended for multi-app hosts), recreate a shared network and
 add it to both projects.
@@ -593,11 +593,11 @@ If a value is broadly useful, open an issue to expose it as an env var.
 **Q: Do I need to clear caches?**
 A: Compiled F3 templates in `pathfinder/tmp/` are inside the image, so
 they're already fresh after `docker compose pull` / `build`. The Valkey
-cache normally survives upgrades — keys are namespaced by `SERVER_NAME`'s
+cache normally survives upgrades - keys are namespaced by `SERVER_NAME`'s
 md5 so stale entries are ignored, and Valkey's first-run AOF replay is
 transparent. The one exception is when a vendor library's property shape
 shifts under PHP 8.2's stricter dynamic-property handling and the cache
-holds serialized instances of that class — see
+holds serialized instances of that class - see
 [Break-fix scenarios → Stack returns 500 after a rebuild](#stack-returns-500-after-a-rebuild-with-php-dynamic-property-notices-in-the-logs).
 
 **Q: What happened to email rally pokes?**
