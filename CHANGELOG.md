@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Asset build dependencies
+
+- **gulp 4 → 5, gulp-imagemin 7 → 9 (with svgo), sass 1.62 → 1.106** (Dependabot #246, #247, #254). gulp 5 reads files as UTF-8 unless told otherwise: the image tasks and `task:renameJsDest` now pass `encoding: false`, or image resizing hangs and the `.js.gz`/`.js.br` copies are corrupt. gulp-imagemin 9 is ESM-only and is loaded with `import()`. `ini`, `lodash.merge` and `minimist` are now declared (the gulpfile used them through other packages).
+- **Asset builds on Node 24** (`gulp.Dockerfile`, `build-assets.sh`; was Node 18). sass 1.105+ needs Node ≥ 20.19. Output is unchanged apart from sass writing some colours in a different notation.
+
 ## v3.0.1
 
 ### PHP 8.5
