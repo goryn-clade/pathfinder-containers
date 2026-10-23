@@ -98,11 +98,12 @@ If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) - it
      - `esi-search.search_structures.v1`
    - Set "CALLBACK URL" to `https://[YOUR_DOMAIN]/sso/callbackAuthorization`
 
-2. **Clone the repository**
+2. **Clone the latest release**
    ```shell
-   git clone --recurse-submodules https://github.com/goryn-clade/pathfinder-containers.git
+   git clone --branch v3.0.1 --recurse-submodules https://github.com/goryn-clade/pathfinder-containers.git
    cd pathfinder-containers
    ```
+   `master` holds work for the next release and can be ahead of the published `:latest` images. Clone a release tag so the config matches the images.
 
 3. **Configure your environment**
    ```shell
