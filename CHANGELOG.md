@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Static analysis tooling (dev only)
+
+- **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. The websocket server is not analysed any more.
+- pathfinder_esi (#6): `phpVersion: 80500`, deprecation rules, PHPStan 2.3, Rector 2.7, new baseline.
+
 ## v3.0.1
 
 ### PHP 8.5

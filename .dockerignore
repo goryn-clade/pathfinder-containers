@@ -24,5 +24,3 @@ websocket/vendor/
 # must remain for the build-stage chmod)
 logs/
 
-# IDE stubs
-stubs/
