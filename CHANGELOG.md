@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Browsers pick up new JS and CSS after a deploy
+
+- **JS and CSS are revalidated on every page load** (`static/nginx/site.conf`). They were cached for 5 days, but their URL (`public/js/v<VERSION>/...`) only changes with `VERSION`, so after a beta or a redeploy browsers kept running the old code until the cache expired or a hard refresh. nginx now sends `Cache-Control: no-cache`: browsers keep their copy and get a `304` while it is unchanged, so only changed files are downloaded again. Images keep the 5-day cache.
+
 ### Static analysis tooling (dev only)
 
 - **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. The websocket server is not analysed any more.
