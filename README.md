@@ -78,6 +78,7 @@ If you are upgrading, follow [MIGRATION-v2-to-v3.md](MIGRATION-v2-to-v3.md) - it
 - [Docker Compose plugin](https://docs.docker.com/compose/install/) v2 (`docker compose`, not `docker-compose`)
 - A public domain name pointed at your server
 - Ports 80 and 443 open on your server
+- An x86-64 (amd64) or ARM64 host, such as a Raspberry Pi 4/5 or an ARM VPS. The steps are the same: Docker pulls the right images for your machine
 
 ### Steps
 
