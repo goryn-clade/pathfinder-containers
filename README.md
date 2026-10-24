@@ -168,6 +168,96 @@ If you run other Docker services on the same host that also need HTTPS, consider
 
 ---
 
+## Running behind your own reverse proxy
+
+If you already run nginx, Caddy, Apache or another reverse proxy, you can use it instead of the bundled Traefik. Make these changes in `compose.yml`:
+
+1. Delete the whole `traefik` service.
+2. In the `pf` service, delete the `labels:` block (the `traefik.*` lines).
+3. In the `pf` service, publish port 80 on a local address only:
+   ```yaml
+   ports:
+     - "127.0.0.1:8000:80"
+   ```
+4. Point your proxy at `http://127.0.0.1:8000`. It must:
+   - allow WebSocket upgrades. Live map updates use `/ws/map/update`.
+   - send the `Host`, `X-Forwarded-For` and `X-Forwarded-Proto` headers
+   - serve HTTPS. Keep `SESSION_COOKIE_SECURE=1` in `.env`.
+   - use the same public hostname as `DOMAIN` and `WS_ALLOWED_ORIGINS` in `.env`. Pathfinder builds its links and the SSO callback from `X-Forwarded-Proto` and this hostname.
+5. Start the stack with `docker compose up -d`. If the old `traefik` container is still running, add `--remove-orphans`.
+
+`127.0.0.1:8000` works when your proxy runs directly on the host. If your proxy runs in a Docker container, `127.0.0.1` is that container itself. Skip step 3. Instead, add `pf` to the proxy's Docker network and point the proxy at `http://pathfinder:80`.
+
+An nginx example. The `map` block goes in the `http` context:
+
+```nginx
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+location / {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 8h;
+}
+```
+
+`LE_EMAIL` is not used without Traefik. Your proxy handles certificates.
+
+These are edits to a file from the release. When you upgrade to a new release, make them again.
+
+---
+
+## Changing PHP settings
+
+You can change PHP settings such as `memory_limit` without rebuilding the image. Mount your own ini file into the `pf` container. PHP reads it after the built-in `zzz_custom.ini`, so your values win.
+
+1. Create `config/php/zzzz-local.ini` with the settings you want to change:
+   ```shell
+   mkdir -p config/php
+   echo 'memory_limit = 512M' > config/php/zzzz-local.ini
+   ```
+2. In `compose.yml`, add this line under `volumes:` in the `pf` service:
+   ```yaml
+   - ./config/php/zzzz-local.ini:/usr/local/etc/php/conf.d/zzzz-local.ini:ro
+   ```
+3. Recreate the container:
+   ```shell
+   docker compose up -d --force-recreate pf
+   ```
+4. Check the value that PHP-FPM (the PHP process that serves Pathfinder) uses:
+   ```shell
+   docker exec pathfinder php-fpm -i | grep memory_limit
+   ```
+   The result shows `memory_limit => 512M => 512M`.
+
+Create the file before step 3. If it does not exist, Docker creates an empty folder in its place.
+
+After later edits to the file, run `docker compose restart pf`.
+
+---
+
+## Passwords that contain `$`
+
+Docker Compose treats `$` in `.env` as the start of a variable name. `MYSQL_PASSWORD="ab$cd"` becomes `ab`, and Compose warns that the `cd` variable is not set. This applies to every value in `.env`, not only `MYSQL_PASSWORD`.
+
+Use one of these:
+
+- Put the value in single quotes. Compose keeps it exactly as written: `MYSQL_PASSWORD='ab$cd'`
+- Or write each `$` as `$$`, with or without double quotes: `MYSQL_PASSWORD="ab$$cd"`
+
+Do not combine them. In single quotes, `$$` stays as two characters.
+
+Passwords made with `openssl rand -hex 32` contain only `0-9` and `a-f`, so they avoid the problem. Use them where you can. Quoting fixes `$` only: the container also writes the passwords into config files and connection strings, where characters such as `,` `"` `;` `:` `@` `&` and `#` can break them.
+
+---
+
 ## Development
 
 Use `compose.dev.yml` for local development - it builds from source, skips Traefik, and exposes the app directly on port 80:
