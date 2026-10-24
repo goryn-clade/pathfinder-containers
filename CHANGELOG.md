@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### arm64 images
+
+- **The `pathfinder` and `pf-websocket` images are published for `linux/amd64` and `linux/arm64`** (#99), so the stack runs on a Raspberry Pi 4/5 or an ARM VPS. All base images (`php`, `composer`, `mariadb`, `valkey`, `traefik`) are official multi-arch images now, so the Dockerfiles are unchanged. The publish workflow builds each platform on a native GitHub runner (`ubuntu-latest`, `ubuntu-24.04-arm`) and joins them into one multi-arch tag. Under QEMU emulation the arm64 build took 37 minutes, mostly compiling `intl`. Each image and platform has its own build cache.
+- **Manual workflow runs no longer tag images.** Tags come only from a `v*` tag. Before, running the workflow by hand on `master` would have published `:latest`. A manual run on a branch now builds both platforms and does a dry-run merge, which tests the workflow without touching any tag.
+
 ### Static analysis tooling (dev only)
 
 - **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. The websocket server is not analysed any more.
