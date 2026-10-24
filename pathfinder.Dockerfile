@@ -8,13 +8,19 @@ ARG PHP_VERSION=8.5.12
 # it (pulled in by php83-pecl-redis), so existing Redis caches need it to be read.
 FROM php:${PHP_VERSION}-fpm-alpine AS base
 
+# Pin both PECL extensions so a rebuild cannot pick up a different version.
+# igbinary 3.2.17RC1: 3.2.16, the newest release without an RC suffix, does not
+# build on PHP 8.5.
+ARG PECL_REDIS_VERSION=6.3.0
+ARG PECL_IGBINARY_VERSION=3.2.17RC1
+
 RUN apk add --no-cache libpng icu-libs \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS libpng-dev icu-dev \
     && docker-php-ext-install gd intl pdo_mysql \
     && (php -m | grep -q '^Zend OPcache$' || docker-php-ext-install opcache) \
     && pecl channel-update pecl.php.net \
-    && pecl install redis && docker-php-ext-enable redis \
-    && pecl install igbinary && docker-php-ext-enable igbinary \
+    && pecl install redis-${PECL_REDIS_VERSION} && docker-php-ext-enable redis \
+    && pecl install igbinary-${PECL_IGBINARY_VERSION} && docker-php-ext-enable igbinary \
     && apk del .build-deps \
     && rm -rf /tmp/pear
 
