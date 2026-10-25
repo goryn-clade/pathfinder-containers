@@ -2,14 +2,6 @@
 
 ## Unreleased
 
-### WebSocket server runs as non-root
-
-- **Upgrade note: on the host, `./logs` and its files are now owned by UID 65534.**
-- **`pf-socket` runs as `nobody` (UID 65534), not root.** `nobody` is also the pf container's php-fpm user.
-- A new entrypoint, `static/websocket/entrypoint.sh`, starts as root. It gives the map history log directory (`./logs`) to `nobody`, then starts the server as `nobody` with `su-exec`.
-- Root-owned log files from older versions are handed over on the next start. No manual step.
-- Ports 8020 and 5555 are unchanged.
-
 ### Static analysis tooling (dev only)
 
 - **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. The websocket server is not analysed any more.
