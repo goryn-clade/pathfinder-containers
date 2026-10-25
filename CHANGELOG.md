@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-### Documentation
-
-- **README: three new sections** for questions users often ask. "Running behind your own reverse proxy" (drop Traefik, publish `pf` on `127.0.0.1:8000`, nginx example with WebSocket upgrade). "Changing PHP settings" (mount `config/php/zzzz-local.ini`, read after `zzz_custom.ini`, no rebuild). "Passwords that contain `$`" (Compose expands `$` in `.env` unless the value is in single quotes or written as `$$`).
-
 ### Static analysis tooling (dev only)
 
 - **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. The websocket server is not analysed any more.
