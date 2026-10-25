@@ -4,7 +4,7 @@
 
 ### Rally point pokes
 
-- **Rally poke limit settings.** `static/pathfinder/pathfinder.ini` gets `RALLY_POKE_LIMIT = 5` and `RALLY_POKE_PERIOD = 300` in `[PATHFINDER.NOTIFICATION]`, for the per-character rally poke limit in pathfinder. `0` turns the limit off.
+- **Rally poke limit settings.** `static/pathfinder/pathfinder.ini` gets `RALLY_POKE_LIMIT = 5` and `RALLY_POKE_PERIOD = 300` in `[PATHFINDER.NOTIFICATION]`, for the per-account rally poke limit in pathfinder. `0` turns the limit off.
 
 ### Static analysis tooling (dev only)
 
