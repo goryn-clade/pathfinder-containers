@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### arm64 images
+
+- **The `pathfinder` and `pf-websocket` images are published for `linux/amd64` and `linux/arm64`** (#99), so the stack runs on a Raspberry Pi 4/5 or an ARM VPS. All base images (`php`, `composer`, `mariadb`, `valkey`, `traefik`) are official multi-arch images now, so the Dockerfiles are unchanged. The publish workflow builds each platform on a native GitHub runner (`ubuntu-latest`, `ubuntu-24.04-arm`) and joins them into one multi-arch tag. Under QEMU emulation the arm64 build took 37 minutes, mostly compiling `intl`. Each image and platform has its own build cache.
+- **Manual workflow runs no longer tag images.** Tags come only from a `v*` tag. Before, running the workflow by hand on `master` would have published `:latest`. A manual run on a branch now builds both platforms and does a dry-run merge, which tests the workflow without touching any tag.
+
 ### Browsers pick up new JS and CSS after a deploy
 
 - **JS and CSS are revalidated on every page load** (`static/nginx/site.conf`). They were cached for 5 days, but their URL (`public/js/v<VERSION>/...`) only changes with `VERSION`, so after a beta or a redeploy browsers kept running the old code until the cache expired or a hard refresh. nginx now sends `Cache-Control: no-cache`: browsers keep their copy and get a `304` while it is unchanged, so only changed files are downloaded again. Images keep the 5-day cache.
