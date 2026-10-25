@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-### Setup
-
-- **`/setup` accepts POST.** The static `routes.ini` now has `GET|POST @setup`, matching pathfinder. Setup actions (create DB, setup tables, fix columns, flush Redis, delete files, clear cookies) are POST forms with the setup token in the body, so the token no longer appears in URLs or in the nginx logs. After an action the page redirects back to its section, so a refresh does not repeat it. A GET with `?action=…` returns 405.
-
 ### Static analysis tooling (dev only)
 
 - **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. The websocket server is not analysed any more.
