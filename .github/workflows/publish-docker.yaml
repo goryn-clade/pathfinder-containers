@@ -25,7 +25,7 @@ jobs:
           - image_name: pf-websocket
             dockerfile: ./pf-websocket.Dockerfile
           - arch: amd64
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
           - arch: arm64
             runner: ubuntu-24.04-arm
     permissions:
@@ -81,7 +81,7 @@ jobs:
 
   # Joins the per-platform digests of each image into one multi-arch image and tags it.
   merge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     strategy:
       fail-fast: false
