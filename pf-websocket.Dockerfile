@@ -11,6 +11,10 @@ RUN composer install --no-dev --optimize-autoloader
 
 FROM php:${PHP_VERSION}-cli-alpine
 COPY --from=build /app /app
+COPY static/websocket/entrypoint.sh /entrypoint.sh
+# su-exec lets the entrypoint drop from root to nobody after fixing log ownership.
+RUN apk add --no-cache su-exec && chmod 0755 /entrypoint.sh
 WORKDIR /app
 
-ENTRYPOINT ["/usr/local/bin/php", "cmd.php"]
+# The server runs as nobody, not root. See static/websocket/entrypoint.sh.
+ENTRYPOINT ["/entrypoint.sh"]
