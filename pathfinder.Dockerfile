@@ -54,7 +54,7 @@ RUN grep -q '\$ttl=\$cached\[1\];' vendor/bcosca/fatfree-core/base.php && \
 RUN grep -qF "\$ttl?['ex'=>\$ttl]:[]" vendor/bcosca/fatfree-core/base.php && \
     sed -i "s/\\\$ttl?\['ex'=>\\\$ttl\]:\[\]/(int)\$ttl>0?['ex'=>(int)\$ttl]:[]/" vendor/bcosca/fatfree-core/base.php
 
-FROM base
+FROM base AS final
 
 RUN apk update \
     && apk upgrade --no-cache \

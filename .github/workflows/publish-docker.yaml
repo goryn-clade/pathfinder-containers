@@ -64,6 +64,9 @@ jobs:
           outputs: type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image_name }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=${{ matrix.image_name }}-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image_name }}-${{ matrix.arch }}
+          # On tag builds the final stage skips the cache, so its apk upgrade always
+          # runs and a release never ships stale Alpine packages. Earlier stages stay cached.
+          no-cache-filters: ${{ startsWith(github.ref, 'refs/tags/') && 'final' || '' }}
 
       - name: Export digest
         run: |
