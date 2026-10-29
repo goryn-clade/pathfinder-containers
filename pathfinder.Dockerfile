@@ -26,7 +26,7 @@ RUN apk add --no-cache libpng icu-libs \
 
 FROM base AS build
 
-RUN apk add --no-cache git \
+RUN apk add --no-cache git brotli \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 COPY pathfinder /app
@@ -36,6 +36,21 @@ WORKDIR /app
 # tested and the vendor patches below match the files they were written for.
 # To update a dependency, update composer.lock in the pathfinder repo.
 RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# nginx brotli_static and gzip_static (static/nginx/site.conf) send <file>.br or
+# <file>.gz in place of <file>. gulp picks which files get a copy (those with a
+# committed .br), but the copies here are made fresh from the files themselves:
+# pathfinder git-ignores .gz, and a local or committed copy can be older than its
+# file and would serve old JS. A .br whose file is gone is removed.
+RUN find public -name '*.gz' -delete \
+    && find public -name '*.br' | while read -r br; do \
+        src="${br%.br}"; \
+        if [ -f "$src" ]; then \
+            gzip -9 -k -f "$src" && brotli -q 11 -f -o "$br" "$src" || exit 1; \
+        else \
+            rm "$br"; \
+        fi; \
+    done
 
 # PHP 8 / php-redis 6 vendor patches. Each is run as a separate command so an
 # inline comment cannot accidentally break a `&&` chain. Each one greps for the
@@ -59,7 +74,7 @@ FROM base AS final
 RUN apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache \
-        nginx supervisor \
+        nginx nginx-mod-http-brotli supervisor \
         busybox-suid sudo shadow gettext bash apache2-utils logrotate ca-certificates \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
