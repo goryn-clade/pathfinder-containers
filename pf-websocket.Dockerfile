@@ -12,8 +12,12 @@ RUN composer install --no-dev --optimize-autoloader
 FROM php:${PHP_VERSION}-cli-alpine
 COPY --from=build /app /app
 COPY static/websocket/entrypoint.sh /entrypoint.sh
+# Upgrade the base image's packages for security fixes; pathfinder.Dockerfile does too.
+# --no-cache fetches fresh indexes, so no separate apk update is needed.
 # su-exec lets the entrypoint drop from root to nobody after fixing log ownership.
-RUN apk add --no-cache su-exec && chmod 0755 /entrypoint.sh
+RUN apk upgrade --no-cache \
+    && apk add --no-cache su-exec \
+    && chmod 0755 /entrypoint.sh
 WORKDIR /app
 
 # The server runs as nobody, not root. See static/websocket/entrypoint.sh.
