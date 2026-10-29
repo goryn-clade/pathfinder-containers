@@ -9,7 +9,7 @@ WORKDIR /app
 # Install exactly the versions in composer.lock.
 RUN composer install --no-dev --optimize-autoloader
 
-FROM php:${PHP_VERSION}-cli-alpine
+FROM php:${PHP_VERSION}-cli-alpine AS final
 COPY --from=build /app /app
 COPY static/websocket/entrypoint.sh /entrypoint.sh
 # Upgrade the base image's packages for security fixes; pathfinder.Dockerfile does too.
