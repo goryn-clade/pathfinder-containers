@@ -2,19 +2,114 @@
 
 ## Unreleased
 
+### Upgrade notes
+
+- **On the host, `./logs` and its files are now owned by UID 65534.** The WebSocket server runs as `nobody` (containers #131). Root-owned files from older versions are handed over on the next start. No manual step.
+- **Users behind one shared IP share the new nginx rate limits** (containers #135). Tune them in `static/nginx/nginx.conf` and `site.conf` if needed.
+- **K162 signatures saved before this update show no type** until you set it again (pathfinder #261).
+- **The first login after the upgrade logs one JWKS warning** in the SSO log, for the key cache written by the old version (pathfinder #286).
+- **Outside containers, set `URL` in `environment.ini`.** The default no longer names the original author's site (pathfinder #318). Container deployments already set it.
+- **Existing databases lack the 8 Trailblazer stargate rows.** Import `eve_universe.sql` again, or insert the rows by hand, before you press "Build system neighbours" in `/setup` (pathfinder #270).
+- **Forks with their own Sass** need namespaces on variables, for example `colors.$gray` (pathfinder #285).
+
+### Security
+
+- **Character switches need a CSRF token** (pathfinder #280, #309, containers #130, #138).
+  - Login page: the switch to a character saved in a login cookie was a `GET /sso/login?cookie=` link, so a link on another site could switch a logged-in user to another of their own characters. It is now a POST with a CSRF token. A GET goes back to the login page without switching. The admin panel and the switch share one session token, which is renewed at login.
+  - Map page: `GET /sso/requestAuthorization?characterId=N` switched characters without a CSRF check. The "switch" and "new tab" buttons now send a POST with the session token. A GET switches only when the browser marks it as a same-origin navigation (Fetch Metadata), so "Open link in new tab" and middle-click still work. Any other GET only redirects to EVE SSO. A POST with a missing or stale token returns to the map with "Character switch failed (request expired)".
+  - `static/pathfinder/routes.ini` adds `POST /sso/login` and the map page POST route. The static routes file replaces pathfinder's own, so without them the switch returns 404.
+- **Logout revokes the ESI refresh token at CCP** (pathfinder #281). Before, Logout ended only the Pathfinder session, and the refresh token stayed valid at CCP. This is best effort: if CCP does not answer within 3 seconds or returns an error, Pathfinder writes one line to the SSO log and the logout completes as before. A character logged in on another device keeps working until its access token expires, then needs a new SSO login.
+- **The cached CCP JWKS is signed** (pathfinder #286). Pathfinder caches CCP's SSO public keys in Redis for an hour. The cache entry now carries an HMAC made with a key derived from `TOKEN_ENCRYPTION_KEY`, so a key swapped in through Redis is rejected: Pathfinder logs a warning and fetches the keys from CCP again. No new setting.
+- **Account calls check the full login** (pathfinder #287). `saveAccount`, `deleteAccount` and `openIngameWindow` only checked that the session had a character. They now run the same checks as the other API calls: the login timer, ban, kick and the allowlist.
+- **Generic API route takes only plain controller names** (pathfinder #288, #310). `/api/<controller>/<action>` could reach the REST controllers through an encoded backslash (`/api/Rest%5CSignature/delete`). The controller name must now be letters only and name an existing API controller, or the request gets a 404. An unknown controller, or an abstract one under `/api/rest/`, also gets a 404 instead of a 500.
+- **Corporation admins cannot kick or ban other admins** (pathfinder #293). A corp admin (manager) could kick or ban any character in their corporation, including admins and other managers. They may now act only on characters without an admin role. The admin page disables those buttons, and the server refuses such a request and logs it in `admin.log`.
+- **Map rights are checked for the map type that is saved** (pathfinder #295). A map create or edit request with both `type` and `typeId` was checked against one type and saved as the other. A character with no alliance could create an alliance map with no access, and a type change could skip the map delete right. The server now keeps one map type per request.
+- **A character with no alliance cannot create or import alliance maps** (pathfinder #275). The map was saved without alliance access, so nobody could see it. Creating, importing or switching to an alliance map now needs an alliance.
+- **The setup token stays out of URLs and logs** (pathfinder #292, containers #134). Setup actions (create DB, setup tables, fix columns, flush Redis, delete files, clear authentication data) put the token in the query string, so nginx wrote it into `docker logs`. They are now POST forms with the token in the body, and the page redirects back to the action's section afterwards, so a refresh does not repeat it. A GET with `?action=…` returns 405. The static `routes.ini` now has `GET|POST @setup`.
+- **The setup API stops when setup is off** (pathfinder #276). With `SETUP_ENABLED` off, `/setup` returned 404, but a browser that had loaded it earlier could still pause and run cron jobs and build indexes through `/api/Setup/*`. The setup API now returns 404 whenever setup is off.
+- **Pages escape values they printed as raw HTML.** `/setup` escapes directory paths, environment values and WebSocket server values (pathfinder #296). The error page at `DEBUG = 3` escapes the debug trace, which can hold request data (pathfinder #277). Select2 dropdowns escape option text, and the custom dropdown templates escape each name and label (pathfinder #290).
+- **Field allowlists on the last two model `copyfrom()` calls** (pathfinder #282). The ESI type import (`TypeModel`) and the login cookie insert now name the fields they set, like every other model.
+- **A system can join only a group on its own map** (pathfinder #272). The system update took any `groupId` from the request, so a user who could edit a system could attach it to a group on a map they had no access to, and see that group's label and position. Any other `groupId` is now ignored, and the rest of the update still applies.
+- **Connection scope and endpoint types are allowlisted** (pathfinder #273). The scope must be `wh`, `stargate`, `jumpbridge` or `abyssal`; any other value is ignored. Endpoint types keep only `bubble`. Existing connections are not changed.
+- **Map limits apply when maps are created or imported** (pathfinder #274). The per-owner limit (`max_count`: by default 3 private, 5 corporation, 4 alliance) only decided which maps the list showed. Creation and import now refuse a new map once the limit is reached, with a message to delete a map first.
+- **Rally pokes are limited per account** (pathfinder #291, containers #133). One member could send any number of rally point pokes to the map's Slack or Discord channel. Each account may now send 5 pokes in 5 minutes, across all its characters, systems and maps. `RALLY_POKE_LIMIT` and `RALLY_POKE_PERIOD` (seconds) in `[PATHFINDER.NOTIFICATION]` of `pathfinder.ini` set the limit; `0` turns it off. The limit needs Redis as the cache. A poke over the limit sends nothing and shows a warning.
+- **PHP logs the real client IP** (containers #132). nginx passes PHP an empty `Client-IP` and sets `X-Forwarded-For` to the address it trusts after `real_ip`, so clients cannot fake the IP in map history logs.
+- **nginx rate-limits pages, SSO and setup, and caps WebSocket connections** (containers #135). A new `pages` zone allows 10 requests a second per client IP, with a burst of 20, on pages, `/sso/` callbacks and `/setup`. Static files and `/api/` are not in it; the `api` zone is unchanged. `/ws/map/update` allows 10 open connections per client IP. Over a limit, nginx answers 429.
+
+### Fixes
+
+- **Login 500 when the SSO token has one scope or none** (pathfinder #260, goryn-clade/pathfinder#257). CCP sends the token's `scp` claim as a string for one scope and leaves it out for none. `scp` is now always read as an array, and the checks also handle rows already saved as a string or `NULL`.
+- **Switching to another of your characters could log other map tabs out with a 403** (pathfinder #312). The session id was replaced on every switch; it is now replaced only when a different user logs in.
+- **K162 signature types saved as the wrong type** (pathfinder #261). Each K162 option in the signature type list got a running number as its value, and that number changed between openings of the list. A saved K162 could show the wrong label or none after reload, and the mass sync sent the number to ESI as a type ID (404). K162 options now have fixed values, and the mass sync only uses wormhole types from the local database.
+- **Signature type dropdown needed two clicks in Firefox** (pathfinder #269, goryn-clade/pathfinder#267). A guard against an accidental pick on the opening click also cancelled the user's first real click. It now ignores only a mouse selection that did not start on an option. Keyboard selection is never blocked.
+- **Route panel found no route to Jita until route settings were saved** (pathfinder #268, goryn-clade/pathfinder#266). The panel now starts from the same defaults as the settings dialog (every option on). Saving route settings now recalculates all routes in the panel.
+- **Thera and Turnur panels** (pathfinder #313, #321). The type column showed "undefined" for wormholes whose security label has a suffix, such as `C1/2/3 (unknown)`. The panels also showed one row per pair of systems, so two connections between the same systems shared one row and a refresh reported a change that did not happen. Each EVE Scout connection and each mapped connection now has its own row.
+- **Map import is all-or-nothing per map** (pathfinder #289). Each imported map is saved in one database transaction. Bad data (a connection that names a system not in the file, a string `status`) used to give a 500 and leave a map behind with no access rows. Now nothing from that map is saved, and the import form shows "Map not imported: ..." with the reason.
+- **Map import file info failed in Firefox** (pathfinder #311). Choosing a file threw an error and the file info line did not show. It now uses the standard `File.lastModified`.
+- **A new map's tab no longer disappears after creation** (pathfinder #298). A map update that started before the map was created returned without it, so the tab vanished with a "Map removed" warning. A map created on this client now stays until an update lists it, or 10 seconds pass.
+- **Creating a map showed two success notices** (pathfinder #316). The creating client now shows only "Map settings"; other clients still see "Map added".
+- **Saves that change nothing no longer update the map** (pathfinder #294, #315, #319). A value the server refuses (such as a connection `scope` sent by hand) set a new `updated` time, wrote a log entry and broadcast the map. `updated` is now set only when a stored value really changes. Saving a connection or system with no change (for example dropping a system at the same spot) no longer sends the whole map to every connected client.
+- **Table redraw during a row flash** (pathfinder #320). A redraw while a row was still flashing, for example after changing a connection's EOL status, logged "Invalid status: undefined" in the console and restarted the flash.
+- **Firefox logged "initMouseEvent() is deprecated"** on the map page (pathfinder #314). The bundled jsPlumb now uses the `MouseEvent` constructor.
+- **Setup cron Pause and Execute returned 500 without a job name** (pathfinder #283). They now return an empty result, the same as for an unknown job.
+- **The error page broke on Pathfinder's own exceptions** with "Array to string conversion" (pathfinder #277). Their traces now show as lines.
+- **Trailblazer stargates are back in `eve_universe.sql`** (pathfinder #270). The 8 gate rows for Ahbazon - Hykkota, Pakhshi - Irgrus, Eggheron - Kenninck and F7-ICZ - Saminer were lost when the patch SQL files were merged into the dump. Routes still worked, but "Build system neighbours" in `/setup` would drop the 4 connections. Values come from ESI.
+- **Static data import with no row ids built invalid SQL** (pathfinder #271). `importStaticData()` now skips its delete step when no imported row has an id. Only built-in seed data uses this method, so no user saw it.
+- **ESI client crash on invalid UTF-8 in an error message** (esi #8), for example cURL error text. The fallback error response now replaces the bad bytes instead of throwing.
+
+### Changes
+
+- **Links point at goryn-clade** (pathfinder #308, #322, containers #137). The default `REPO` and `CONTACT` in `pathfinder.ini` (login page, `/setup`, the page's JSON-LD) and the Composer and npm package metadata name goryn-clade. The original author credit stays. Wiki links still point at the exodus4d wiki, where the pages exist; the gulp help links to `Gulp.Js`.
+- **No original site URL in the defaults** (pathfinder #318). The default production `URL` in `environment.ini` is now built from the request scheme and server name. The Sass banner in the built CSS names goryn-clade/pathfinder.
+- **`.htaccess_HTTP` no longer sets a PHP error log path** (pathfinder #308). Its `php_value error_log` line pointed at the original author's server. Apache users who relied on it should set their own path.
+- **`composer-dev.json` is removed** (pathfinder #308). It no longer worked. The pathfinder_esi README now describes a Composer `path` repository instead (esi #9).
+- **Less console noise in the map client** (pathfinder #284). Info lines that traced normal use no longer appear in the browser console. Warnings and unusual conditions are still logged.
+- **`SLOW_REQUEST` removed** from the static `pathfinder.ini` (containers #139). The app dropped the slow request log, so the key did nothing.
+
+### PHP 8.5 and dependencies
+
+- **pathfinder_esi `v3.0.2-beta.2`** (pathfinder #279, #324; pinned exactly, moves to the final esi tag at release). Guzzle's deprecated `Utils::jsonDecode()` and `jsonEncode()` are replaced by `json_decode()` and `json_encode()` (esi #7), and the UTF-8 fix above (esi #8).
+- **monolog/monolog 2 → 3** (pathfinder #317). Log output (files, WebSocket, Slack and Discord webhooks) is unchanged.
+- **ReactPHP deprecations.** The app's socket client uses `Loop::get()` instead of `EventLoop\Factory` (pathfinder #262). The WebSocket server does the same, uses `Socket\SocketServer`, and stops using `SplObjectStorage` methods and null array keys that PHP 8.5 deprecates (websocket #4).
+- **league/html-to-markdown 5.0.2 → 5.2.3** (pathfinder #299). Includes two fixes for slow conversion of crafted HTML (GHSA-4xjf-2r66-5r28, GHSA-h3wg-gqjr-jjmw). Pathfinder uses it for rally point webhook messages.
+- **xfra35/f3-cron 1.2.1 → 1.3.0** (pathfinder #300). Fixes an uncaught exception in cron expression parsing on PHP 8.3.
+
+### Images
+
+- **PECL extensions pinned:** redis 6.3.0 and igbinary 3.2.17RC1 (containers #127; `PECL_REDIS_VERSION`, `PECL_IGBINARY_VERSION` in `pathfinder.Dockerfile`). Before, a rebuild could pick up a newer version without notice. v3.0.1 already ships these versions. igbinary stays on 3.2.17RC1 (PECL lists it as stable) because 3.2.16 does not build on PHP 8.5.
+- **`pf-websocket` upgrades its Alpine packages** (containers #136). It kept the packages of its `php:*-cli-alpine` base, including `brotli-libs` 1.2.0-r1 (CVE-2026-111497); it now ships 1.2.1-r0. The WebSocket server could not reach the bug, but scanners flagged the image.
+- **Tag builds rebuild the final stage without cache** (containers #140). Published images could carry old Alpine packages because the build cache reused the `apk upgrade` layer.
+- **`pf-socket` runs as `nobody` (UID 65534), not root** (containers #131). A new entrypoint, `static/websocket/entrypoint.sh`, starts as root, gives `./logs` to `nobody`, then starts the server with `su-exec`. Ports 8020 and 5555 are unchanged.
+
 ### arm64 images
 
-- **The `pathfinder` and `pf-websocket` images are published for `linux/amd64` and `linux/arm64`** (#99), so the stack runs on a Raspberry Pi 4/5 or an ARM VPS. All base images (`php`, `composer`, `mariadb`, `valkey`, `traefik`) are official multi-arch images now, so the Dockerfiles are unchanged. The publish workflow builds each platform on a native GitHub runner (`ubuntu-latest`, `ubuntu-24.04-arm`) and joins them into one multi-arch tag. Under QEMU emulation the arm64 build took 37 minutes, mostly compiling `intl`. Each image and platform has its own build cache.
+- **The `pathfinder` and `pf-websocket` images are published for `linux/amd64` and `linux/arm64`** (#99), so the stack runs on a Raspberry Pi 4/5 or an ARM VPS. All base images (`php`, `composer`, `mariadb`, `valkey`, `traefik`) are official multi-arch images now, so the Dockerfiles are unchanged. The publish workflow builds each platform on a native GitHub runner (`ubuntu-24.04`, `ubuntu-24.04-arm`) and joins them into one multi-arch tag. Under QEMU emulation the arm64 build took 37 minutes, mostly compiling `intl`. Each image and platform has its own build cache.
 - **Manual workflow runs no longer tag images.** Tags come only from a `v*` tag. Before, running the workflow by hand on `master` would have published `:latest`. A manual run on a branch now builds both platforms and does a dry-run merge, which tests the workflow without touching any tag.
 
-### Browsers pick up new JS and CSS after a deploy
+### nginx and browser caching
 
+- **Pre-compressed JS and CSS** (containers #128). nginx sends a Brotli (`.br`) or gzip (`.gz`) copy of the built JS and CSS instead of compressing them on every request. The image build makes the copies fresh; Brotli comes from Alpine's `nginx-mod-http-brotli`. Other responses are still gzipped on the fly.
 - **JS and CSS are revalidated on every page load** (`static/nginx/site.conf`). They were cached for 5 days, but their URL (`public/js/v<VERSION>/...`) only changes with `VERSION`, so after a beta or a redeploy browsers kept running the old code until the cache expired or a hard refresh. nginx now sends `Cache-Control: no-cache`: browsers keep their copy and get a `304` while it is unchanged, so only changed files are downloaded again. Images keep the 5-day cache.
+
+### Documentation
+
+- **README: three new sections** (containers #129). "Running behind your own reverse proxy" (drop Traefik, publish `pf` on `127.0.0.1:8000`, nginx example with WebSocket upgrade). "Changing PHP settings" (mount `config/php/zzzz-local.ini`, no rebuild). "Passwords that contain `$`" (Compose expands `$` in `.env` unless the value is in single quotes or written as `$$`).
+
+### Asset build dependencies (build only)
+
+- **gulp 4 → 5, gulp-imagemin 7 → 9 (with svgo), sass 1.62 → 1.106** (pathfinder #258). gulp 5 reads files as UTF-8 unless told otherwise: the image tasks and `task:renameJsDest` now pass `encoding: false`, or image resizing hangs and the `.js.gz`/`.js.br` copies are corrupt. `ini`, `lodash.merge` and `minimist` are now declared.
+- **Assets build on Node 24** (`gulp.Dockerfile`, `build-assets.sh`; was Node 18). Builds need Node 22 or later.
+- **WebP images built with sharp instead of imagemin** (pathfinder #263), with the same quality settings. This removes the imagemin download chain behind most Dependabot alerts, including `decompress` (critical). The WebP output is byte-identical.
+- **gulp-sourcemaps replaced by a small helper in `gulpfile.js`** (pathfinder #264). gulp-sourcemaps 3 is unmaintained. A production build is byte-identical.
+- **Unused build packages removed** (pathfinder #265): `babel` 6, `gulp-uglify`, `slash` and `node-notifier`. The build now logs "JS build done" / "CSS build done" instead of desktop notifications.
+- **Sass on the module system and the modern Sass API** (pathfinder #285). gulp-sass 5 → 6 and fancy-log 1 → 2. The `sass/` sources use `@use` instead of `@import`. The built CSS is unchanged apart from colour notation and one duplicated block of gallery rules.
+- **ini 1 → 7, gulp-filter 7 → 10, gulp-autoprefixer 8 → 10, pretty-bytes 5 → 7** (pathfinder #305, #307). The last three are ESM-only. Build output is byte-identical.
 
 ### Static analysis tooling (dev only)
 
-- **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. The websocket server is not analysed any more.
+- **PHPStan, PHPCS and Rector work again, for PHP 8.5** (pathfinder #259). Their configs used to sit here and were deleted in May, which broke pathfinder's `composer phpstan|phpcs|rector` scripts. They now live in the pathfinder repo, with the F3 stubs, so the unused `stubs/` folder is removed here. PHPStan level 8 with `phpVersion: 80500` and deprecation rules, PHPCompatibility 10 with `testVersion` 8.5-, Rector's PHP 8.5 set (dry run). Tools: PHPStan 2.3, Rector 2.7, PHP_CodeSniffer 4, PHPCompatibility 10.0.0-alpha2 (9.3 had no checks past PHP 7.4). Production packages are unchanged. `composer phpstan` passes again after #260 (pathfinder #278).
 - pathfinder_esi (#6): `phpVersion: 80500`, deprecation rules, PHPStan 2.3, Rector 2.7, new baseline.
+- WebSocket server (websocket #3): its own PHPStan 2.3 (level 8, `phpVersion: 80500`, deprecation rules) and Rector 2.7 setup. Dev dependencies only.
 
 ## v3.0.1
 
