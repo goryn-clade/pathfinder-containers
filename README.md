@@ -8,7 +8,7 @@
 [![PHP 8.5.12](https://img.shields.io/badge/php-8.5.12-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net/)
 [![MariaDB 10.11](https://img.shields.io/badge/mariadb-10.11-003545?style=flat-square&logo=mariadb&logoColor=white)](https://mariadb.org/)
 [![Valkey 8](https://img.shields.io/badge/valkey-8-6983FF?style=flat-square)](https://valkey.io/)
-[![Traefik 3.6.1](https://img.shields.io/badge/traefik-3.6.1-24A1C1?style=flat-square&logo=traefikproxy&logoColor=white)](https://traefik.io/)
+[![Traefik 3.7.17](https://img.shields.io/badge/traefik-3.7.17-24A1C1?style=flat-square&logo=traefikproxy&logoColor=white)](https://traefik.io/)
 
 A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/goryn-clade/pathfinder/) fork, using [Traefik](https://traefik.io/) as a reverse proxy with automatic TLS via Let's Encrypt.
 
@@ -27,7 +27,7 @@ A Docker Compose deployment for Goryn Clade's [Pathfinder](https://github.com/go
 | PHP runtime | 7.2 | 8.5 |
 | MariaDB image | `bianjp/mariadb-alpine` (abandoned) | `mariadb:10.11` (official, LTS) |
 | Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
-| Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
+| Reverse proxy | Traefik v2.3 | Traefik v3.7.17 |
 | Compose file | `docker-compose.yml` | `compose.yml` |
 | DB service | `pfdb` | `pf-db` |
 | Cache service | `redis` | `pf-redis` |
