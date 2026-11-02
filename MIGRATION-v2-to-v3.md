@@ -20,7 +20,7 @@ For the rationale behind individual changes, see [CHANGELOG.md](CHANGELOG.md).
 | PHP runtime | 7.2 | 8.5 |
 | MariaDB image | `bianjp/mariadb-alpine:latest` (abandoned) | `mariadb:10.11` (official, LTS) |
 | Cache | `redis:6.2.5-alpine3.14` | `valkey/valkey:8-alpine` |
-| Reverse proxy | Traefik v2.3 | Traefik v3.6.1 |
+| Reverse proxy | Traefik v2.3 | Traefik v3.7.17 |
 | Compose file | `docker-compose.yml` | `compose.yml` (+ `compose.dev.yml` for local development) |
 | DB service name | `pfdb` | `pf-db` |
 | Redis service name | `redis` (container `redis`) | `pf-redis` |

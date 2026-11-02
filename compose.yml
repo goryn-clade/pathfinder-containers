@@ -68,10 +68,11 @@ services:
     restart: always
 
   traefik:
-    image: traefik:v3.6.1
+    image: traefik:v3.7.17
     container_name: traefik
     command:
       - "--log.level=INFO"
+      - "--global.aliasHeadersStrategy=delete"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
