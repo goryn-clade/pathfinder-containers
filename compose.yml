@@ -68,7 +68,7 @@ services:
     restart: always
 
   traefik:
-    image: traefik:v3.6.1
+    image: traefik:v3.6.25
     container_name: traefik
     command:
       - "--log.level=INFO"
